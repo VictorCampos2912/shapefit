@@ -1,0 +1,45 @@
+{
+  "nome": "Treino A - Peito/Tríceps",
+  "exercicios": [
+    {
+      "id": "supino-reto",
+      "nome": "Supino reto (barra)",
+      "series": 4,
+      "reps_alvo": "8-10",
+      "carga_sugerida_kg": 40,
+      "descanso_seg": 90
+    },
+    {
+      "id": "supino-inclinado-halteres",
+      "nome": "Supino inclinado com halteres",
+      "series": 3,
+      "reps_alvo": "10-12",
+      "carga_sugerida_kg": 16,
+      "descanso_seg": 75
+    },
+    {
+      "id": "crucifixo-maquina",
+      "nome": "Crucifixo na máquina",
+      "series": 3,
+      "reps_alvo": "12-15",
+      "carga_sugerida_kg": 25,
+      "descanso_seg": 60
+    },
+    {
+      "id": "triceps-corda",
+      "nome": "Tríceps corda (polia)",
+      "series": 4,
+      "reps_alvo": "10-12",
+      "carga_sugerida_kg": 20,
+      "descanso_seg": 60
+    },
+    {
+      "id": "triceps-frances",
+      "nome": "Tríceps francês (halter)",
+      "series": 3,
+      "reps_alvo": "10-12",
+      "carga_sugerida_kg": 10,
+      "descanso_seg": 60
+    }
+  ]
+}

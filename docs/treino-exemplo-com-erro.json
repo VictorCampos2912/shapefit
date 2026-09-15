@@ -1,0 +1,29 @@
+{
+  "nome": "Treino B - Costas/Bíceps (com erro proposital)",
+  "exercicios": [
+    {
+      "id": "remada-curvada",
+      "nome": "Remada curvada (barra)",
+      "series": 4,
+      "reps_alvo": "8-10",
+      "carga_sugerida_kg": 50,
+      "descanso_seg": 90
+    },
+    {
+      "id": "puxada-frente",
+      "nome": "Puxada frente (polia alta)",
+      "series": "quatro",
+      "reps_alvo": "10-12",
+      "carga_sugerida_kg": 45,
+      "descanso_seg": 75
+    },
+    {
+      "id": "rosca-direta",
+      "nome": "Rosca direta (barra)",
+      "series": 3,
+      "reps_alvo": "10-12",
+      "carga_sugerida_kg": 20,
+      "descanso_seg": 60
+    }
+  ]
+}
