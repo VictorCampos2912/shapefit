@@ -1,5 +1,6 @@
 import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import { router } from 'expo-router';
+import { Platform, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AnimatedIcon } from '@/components/animated-icon';
@@ -8,6 +9,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { WebBadge } from '@/components/web-badge';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
 
 function getDevMenuHint() {
   if (Platform.OS === 'web') {
@@ -29,6 +31,8 @@ function getDevMenuHint() {
 }
 
 export default function HomeScreen() {
+  const { perfilAtivo } = usePerfilAtivo();
+
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
@@ -38,6 +42,12 @@ export default function HomeScreen() {
             Welcome to&nbsp;Expo
           </ThemedText>
         </ThemedView>
+
+        <Pressable onPress={() => router.push('/perfil/selecionar')}>
+          <ThemedText type="link">
+            Perfil ativo: {perfilAtivo?.nome ?? '—'} (trocar)
+          </ThemedText>
+        </Pressable>
 
         <ThemedText type="code" style={styles.code}>
           get started
