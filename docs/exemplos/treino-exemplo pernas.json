@@ -1,0 +1,45 @@
+{
+  "nome": "Treino B - Pernas",
+  "exercicios": [
+    {
+      "id": "agachamento-sumo",
+      "nome": "agachamento sumo  (barra)",
+      "series": 4,
+      "reps_alvo": "8-10",
+      "carga_sugerida_kg": 40,
+      "descanso_seg": 90
+    },
+    {
+      "id": "afundo-unilateral-halteres",
+      "nome": "afundo unilateral com halteres",
+      "series": 3,
+      "reps_alvo": "10-12",
+      "carga_sugerida_kg": 16,
+      "descanso_seg": 75
+    },
+    {
+      "id": "mesa-extensora",
+      "nome": "Mesa Extensora",
+      "series": 3,
+      "reps_alvo": "12-15",
+      "carga_sugerida_kg": 25,
+      "descanso_seg": 60
+    },
+    {
+      "id": "abdutores",
+      "nome": "Cadeira Abdurora",
+      "series": 4,
+      "reps_alvo": "10-12",
+      "carga_sugerida_kg": 20,
+      "descanso_seg": 60
+    },
+    {
+      "id": "flexão-panturrilha",
+      "nome": "Flexão de Panturrilhas",
+      "series": 3,
+      "reps_alvo": "10-12",
+      "carga_sugerida_kg": 10,
+      "descanso_seg": 60
+    }
+  ]
+}

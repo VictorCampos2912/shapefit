@@ -16,6 +16,9 @@ iPhone 16 Plus), via Expo Go.
 - Perfis são locais, sem senha ou autenticação (apenas seleção)
 - Campos do perfil: nome, peso (kg), altura (cm), idade, sexo, objetivo de treino —
   **todos obrigatórios** na criação
+- Campo "sexo": opções fixas **Masculino / Feminino**
+- Campo "objetivo de treino": opções fixas **Hipertrofia / Emagrecimento /
+  Condicionamento / Manutenção**
 - Suporta múltiplos perfis no mesmo aparelho (ex: você + 1-2 familiares)
 - Troca de perfil ativo é **bloqueada** enquanto houver uma sessão de treino em andamento
 
@@ -69,6 +72,14 @@ iPhone 16 Plus), via Expo Go.
       corrompido), o app exibe mensagem de erro clara e não importa nada
 - [ ] O arquivo de exemplo pré-carregado no app importa sem erros, servindo como
       referência de teste
+- [ ] Se o campo `nome` do treino (nível raiz) estiver ausente, ou a lista `exercicios`
+      estiver ausente/vazia, o arquivo é tratado como inválido (mesmo tratamento de um
+      JSON malformado) — a importação inteira é rejeitada, sem criar treino algum
+- [ ] Se, após a validação individual de cada exercício, nenhum exercício válido restar,
+      o app não cria um treino vazio — trata como falha de importação e informa que
+      nenhum exercício válido foi encontrado
+- [ ] Se o usuário cancelar a seleção de arquivo no seletor do sistema, nenhuma ação
+      ocorre — sem mensagem de erro, sem alteração na lista de treinos
 
 ---
 
@@ -78,6 +89,10 @@ iPhone 16 Plus), via Expo Go.
 - Múltiplos treinos podem ficar salvos ao mesmo tempo (ex: Treino A, B, C de uma rotina)
 - O usuário escolhe qual treino executar a cada sessão
 - **Novo (v1.1):** a lista exibida é sempre filtrada pelo perfil ativo
+- **Nota da especificação do RF01:** como o RF01 foi implementado antes do RF02, foi
+  criado um botão provisório "Importar treino" na tela inicial (`(tabs)/index.tsx`) só
+  para tornar a importação testável. Ao especificar o RF02, revisar/remover esse ponto de
+  entrada temporário e integrá-lo à tela de lista de treinos definitiva
 
 **Critérios de aceite:**
 - [ ] A lista exibida contém apenas os treinos vinculados ao perfil ativo no momento
@@ -92,6 +107,12 @@ iPhone 16 Plus), via Expo Go.
       a data/hora de importação junto ao nome para diferenciá-los
 - [ ] A lista persiste entre sessões do app (fechar e reabrir o app não apaga os treinos
       importados)
+- [ ] Se o perfil ativo ainda não importou nenhum treino, a tela exibe uma indicação clara
+      disso (não uma lista vazia sem explicação), com a ação de importar visível e
+      acessível a partir desse estado
+- [ ] A ação de importar treino fica disponível **somente** a partir desta tela — não
+      existe mais em nenhuma outra tela do app (substitui o ponto de entrada provisório
+      criado no RF01)
 
 ---
 

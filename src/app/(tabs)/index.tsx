@@ -1,47 +1,119 @@
-import * as Device from 'expo-device';
 import { router } from 'expo-router';
-import { Platform, Pressable, StyleSheet } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Alert, FlatList, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { TreinoListItem } from '@/components/treino/treino-list-item';
+import { Spacing } from '@/constants/theme';
 import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
+import { importarTreino, importarTreinoExemplo, listarTreinos } from '@/services/treino-storage';
+import type { ResultadoImportacao, Treino } from '@/types/treino';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
+function calcularNomesDuplicados(treinos: Treino[]): Set<string> {
+  const contagem = new Map<string, number>();
+  for (const treino of treinos) {
+    contagem.set(treino.nome, (contagem.get(treino.nome) ?? 0) + 1);
   }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
+  const duplicados = new Set<string>();
+  for (const [nome, quantidade] of contagem) {
+    if (quantidade > 1) {
+      duplicados.add(nome);
+    }
   }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
+  return duplicados;
 }
 
-export default function HomeScreen() {
+function exibirResultadoImportacao(resultado: ResultadoImportacao | null) {
+  if (resultado === null) {
+    return;
+  }
+
+  if (resultado.erro) {
+    Alert.alert('Não foi possível importar o treino', resultado.erro);
+    return;
+  }
+
+  if (resultado.exerciciosIgnorados.length > 0) {
+    const motivos = resultado.exerciciosIgnorados.map((item) => `• ${item.motivo}`).join('\n');
+    Alert.alert(
+      'Treino importado de forma incompleta',
+      `O treino "${resultado.treino?.nome}" foi importado, mas os seguintes exercícios foram ignorados:\n\n${motivos}`,
+    );
+    return;
+  }
+
+  Alert.alert('Treino importado', `O treino "${resultado.treino?.nome}" foi importado com sucesso.`);
+}
+
+export default function TreinosScreen() {
   const { perfilAtivo } = usePerfilAtivo();
+  const [treinos, setTreinos] = useState<Treino[]>([]);
+  const [carregando, setCarregando] = useState(true);
+  const [importando, setImportando] = useState(false);
+
+  async function recarregarTreinos() {
+    if (!perfilAtivo) return;
+    const lista = await listarTreinos(perfilAtivo.id);
+    setTreinos(lista);
+  }
+
+  useEffect(() => {
+    if (!perfilAtivo) return;
+    let ativo = true;
+    (async () => {
+      setCarregando(true);
+      const lista = await listarTreinos(perfilAtivo.id);
+      if (ativo) {
+        setTreinos(lista);
+        setCarregando(false);
+      }
+    })();
+    return () => {
+      ativo = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reload deve depender só do id do perfil ativo (research.md, Decisão 2), não do objeto perfilAtivo inteiro
+  }, [perfilAtivo?.id]);
+
+  async function handleImportarTreino() {
+    if (!perfilAtivo) return;
+    setImportando(true);
+    try {
+      const resultado = await importarTreino(perfilAtivo.id);
+      exibirResultadoImportacao(resultado);
+      if (resultado?.treino) {
+        await recarregarTreinos();
+      }
+    } finally {
+      setImportando(false);
+    }
+  }
+
+  async function handleImportarTreinoExemplo() {
+    if (!perfilAtivo) return;
+    setImportando(true);
+    try {
+      const resultado = await importarTreinoExemplo(perfilAtivo.id);
+      exibirResultadoImportacao(resultado);
+      if (resultado.treino) {
+        await recarregarTreinos();
+      }
+    } finally {
+      setImportando(false);
+    }
+  }
+
+  function handleSelecionarTreino(treino: Treino) {
+    Alert.alert('Treino selecionado', treino.nome);
+  }
+
+  const nomesDuplicados = calcularNomesDuplicados(treinos);
 
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+        <ThemedText type="subtitle">Meus treinos</ThemedText>
 
         <Pressable onPress={() => router.push('/perfil/selecionar')}>
           <ThemedText type="link">
@@ -49,23 +121,37 @@ export default function HomeScreen() {
           </ThemedText>
         </Pressable>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+        <ThemedView style={styles.acoes}>
+          <Pressable onPress={handleImportarTreino} disabled={importando}>
+            <ThemedText type="link">Importar treino</ThemedText>
+          </Pressable>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
+          <Pressable onPress={handleImportarTreinoExemplo} disabled={importando}>
+            <ThemedText type="link">Importar treino de exemplo</ThemedText>
+          </Pressable>
         </ThemedView>
 
-        {Platform.OS === 'web' && <WebBadge />}
+        {!carregando && treinos.length === 0 && (
+          <ThemedView type="backgroundElement" style={styles.estadoVazio}>
+            <ThemedText type="smallBold">Nenhum treino importado ainda</ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              Use a ação &ldquo;Importar treino&rdquo; acima para trazer um treino para este perfil.
+            </ThemedText>
+          </ThemedView>
+        )}
+
+        <FlatList
+          data={treinos}
+          keyExtractor={(treino) => treino.id}
+          contentContainerStyle={styles.lista}
+          renderItem={({ item }) => (
+            <TreinoListItem
+              treino={item}
+              nomeDuplicado={nomesDuplicados.has(item.nome)}
+              onPress={() => handleSelecionarTreino(item)}
+            />
+          )}
+        />
       </SafeAreaView>
     </ThemedView>
   );
@@ -74,35 +160,22 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
   },
   safeArea: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
+    padding: Spacing.four,
     gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+  acoes: {
+    gap: Spacing.two,
   },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
+  estadoVazio: {
+    borderRadius: Spacing.two,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+    gap: Spacing.one,
+  },
+  lista: {
+    gap: Spacing.two,
   },
 });

@@ -115,7 +115,7 @@ Projeto único mobile (Expo Router), conforme plan.md:
 
 - [X] T021 [P] Revisar mensagens de erro/validação do `PerfilForm` (`src/components/perfil/perfil-form.tsx`) e do aviso de bloqueio de troca (`src/app/perfil/selecionar.tsx`) para garantir textos claros e consistentes em português, conforme tom do restante do app
 - [X] T022 Executar manualmente todos os cenários de `quickstart.md` no Redmi Note 12 (Android 12+) via Expo Go. Resultado: Cenários 1, 2 e 3 (parte sem sessão em andamento) PASS. Cenário 3b (bloqueio de troca com sessão em andamento) permanece não validado nesta rodada por depender de RF07 (sessão de treino), ainda não implementado.
-- [X] T023 Executar manualmente todos os cenários de `quickstart.md` no iPhone 16 Plus (iOS 17+) via Expo Go. Resultado: Cenário 1 (formulário exibido primeiro, validação de campos obrigatórios, criação de perfil) PASS; Cenário 3 (troca de perfil ativo) PASS.
+- [X] T023 Executar manualmente todos os cenários de `quickstart.md` no iPhone 16 Plus (iOS 17+) via Expo Go. Resultado: Cenário 1 (formulário exibido primeiro, validação de campos obrigatórios, criação de perfil) PASS; Cenário 2 (segundo perfil criado e listado corretamente na tela de seleção) PASS; Cenário 3 (troca de perfil ativo) PASS.
 - [X] T024 Revisar todo o código desta feature confirmando ausência de `any` implícito e type-check limpo (`npx tsc --noEmit`), conforme Princípio I da Constituição
 - [X] T025 Confirmar, por inspeção de código, que nenhuma chave AsyncStorage de dado dependente de perfil introduzida nesta feature (`sessoes:<perfil_id>`, referenciada em T008) viola o padrão `<dominio>:<perfil_id>` exigido pelo Princípio V da Constituição
 
