@@ -136,6 +136,13 @@ iPhone 16 Plus), via Expo Go.
 - [ ] O campo de carga é pré-preenchido com o valor de `carga_sugerida_kg` do JSON, editável
       pelo usuário
 - [ ] O app indica visualmente qual série está em andamento (ex: "Série 2 de 4")
+- [ ] O campo de repetições feitas aceita apenas números inteiros não negativos (diferente
+      do campo de carga, que aceita decimal)
+- [ ] Se `carga_sugerida_kg` estiver ausente ou zero no JSON do exercício, o campo de
+      carga é exibido vazio (não trava a tela), permanecendo editável normalmente
+- [ ] O campo de repetições feitas não é restringido ao intervalo de `reps_alvo` — aceita
+      qualquer valor informado pelo usuário, já que `reps_alvo` é apenas uma meta
+      planejada, não um limite de validação
 
 ---
 

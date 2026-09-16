@@ -156,6 +156,14 @@ enquanto a sessão está em andamento, preenchido no momento em que é finalizad
 esse campo para decidir se a troca de perfil ativo deve ser bloqueada (bloqueada quando
 existe ao menos uma sessão do perfil ativo com `finalizadaEm === null`).
 
+**Nota do RF03 a reconferir quando o RF07 existir:** a tela de execução (RF03) assume que
+não pode haver troca de perfil ativo "debaixo dela" porque o RF10 bloqueia essa troca
+durante sessão em andamento. Isso só se torna uma garantia real quando o RF07 passar a
+persistir sessões (hoje, sem RF07, `existeSessaoEmAndamento` sempre retorna `false`, então
+o bloqueio nunca é de fato acionado). Ao especificar o RF07, revalidar que trocar de perfil
+durante uma execução ativa do RF03/RF04 é corretamente bloqueado na prática, não apenas na
+teoria do contrato.
+
 ## 9. Stack técnica
 
 - React Native + Expo (SDK gerenciado)

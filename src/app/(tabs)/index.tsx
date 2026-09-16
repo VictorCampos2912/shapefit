@@ -105,7 +105,7 @@ export default function TreinosScreen() {
   }
 
   function handleSelecionarTreino(treino: Treino) {
-    Alert.alert('Treino selecionado', treino.nome);
+    router.push({ pathname: '/treino/[treinoId]', params: { treinoId: treino.id } });
   }
 
   const nomesDuplicados = calcularNomesDuplicados(treinos);
