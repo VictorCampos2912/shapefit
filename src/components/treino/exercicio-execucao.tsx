@@ -4,13 +4,17 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import type { EstadoExecucaoExercicio } from '@/types/execucao-treino';
+import type { EstadoExecucaoExercicio, SerieRealizada } from '@/types/execucao-treino';
 import type { ExercicioPlanejado } from '@/types/treino';
 
 type ExercicioExecucaoProps = {
   exercicio: ExercicioPlanejado;
   estado: EstadoExecucaoExercicio;
   onAtualizarEstado: (novoEstado: EstadoExecucaoExercicio) => void;
+  onConcluirSerie: (serie: SerieRealizada) => void;
+  onConcluirExercicio: () => void;
+  onIniciarDescanso?: () => void;
+  jaEstavaConcluidoAoAbrir?: boolean;
 };
 
 function sanitizarCarga(valor: string): string {
@@ -29,7 +33,15 @@ function sanitizarReps(valor: string): string {
   return valor.replace(/[^0-9]/g, '');
 }
 
-export function ExercicioExecucao({ exercicio, estado, onAtualizarEstado }: ExercicioExecucaoProps) {
+export function ExercicioExecucao({
+  exercicio,
+  estado,
+  onAtualizarEstado,
+  onConcluirSerie,
+  onConcluirExercicio,
+  onIniciarDescanso,
+  jaEstavaConcluidoAoAbrir = false,
+}: ExercicioExecucaoProps) {
   const theme = useTheme();
 
   function handleIniciarExercicio() {
@@ -50,6 +62,15 @@ export function ExercicioExecucao({ exercicio, estado, onAtualizarEstado }: Exer
     onAtualizarEstado({ ...estado, repsFeitas: sanitizarReps(valor) });
   }
 
+  function handleConcluirSerie() {
+    const cargaKg = Number(estado.cargaKg);
+    const reps = Number(estado.repsFeitas);
+    onConcluirSerie({ serie: estado.serieAtual, cargaKg, reps });
+    onIniciarDescanso?.();
+  }
+
+  const podeConcluirSerie = estado.cargaKg.trim().length > 0 && estado.repsFeitas.trim().length > 0;
+
   return (
     <ThemedView style={styles.container}>
       <ThemedText type="subtitle">{exercicio.nome}</ThemedText>
@@ -69,7 +90,7 @@ export function ExercicioExecucao({ exercicio, estado, onAtualizarEstado }: Exer
         </Pressable>
       )}
 
-      {estado.iniciado && (
+      {estado.iniciado && !estado.concluido && (
         <ThemedView
           type="backgroundSelected"
           style={[styles.areaSerieAtual, { borderWidth: 2, borderColor: theme.text }]}
@@ -113,6 +134,49 @@ export function ExercicioExecucao({ exercicio, estado, onAtualizarEstado }: Exer
               placeholderTextColor={theme.textSecondary}
             />
           </ThemedView>
+
+          <Pressable
+            onPress={handleConcluirSerie}
+            disabled={!podeConcluirSerie}
+            style={[
+              styles.botaoIniciar,
+              { backgroundColor: podeConcluirSerie ? theme.text : theme.textSecondary },
+            ]}
+          >
+            <ThemedText type="smallBold" themeColor="background">
+              Concluir série
+            </ThemedText>
+          </Pressable>
+        </ThemedView>
+      )}
+
+      {estado.concluido && jaEstavaConcluidoAoAbrir && (
+        <ThemedView type="successBackground" style={[styles.areaConcluido, { borderColor: theme.success }]}>
+          <ThemedText type="title" themeColor="success" style={styles.iconeConcluido}>
+            ✓
+          </ThemedText>
+          <ThemedText type="subtitle" themeColor="success" style={styles.textoCentralizado}>
+            Este já foi feito, volte no próximo treino
+          </ThemedText>
+        </ThemedView>
+      )}
+
+      {estado.concluido && !jaEstavaConcluidoAoAbrir && (
+        <ThemedView type="successBackground" style={[styles.areaConcluido, { borderColor: theme.success }]}>
+          <ThemedText type="title" themeColor="success" style={styles.iconeConcluido}>
+            ✓
+          </ThemedText>
+          <ThemedText type="subtitle" themeColor="success" style={styles.textoCentralizado}>
+            Todas as séries concluídas!
+          </ThemedText>
+          <Pressable
+            onPress={onConcluirExercicio}
+            style={[styles.botaoConcluirExercicio, { backgroundColor: theme.success }]}
+          >
+            <ThemedText type="smallBold" themeColor="background">
+              Concluir exercício
+            </ThemedText>
+          </Pressable>
         </ThemedView>
       )}
     </ThemedView>
@@ -144,5 +208,23 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.two,
     fontSize: 16,
     fontWeight: '600',
+  },
+  areaConcluido: {
+    borderWidth: 2,
+    borderRadius: Spacing.two,
+    padding: Spacing.four,
+    gap: Spacing.three,
+    alignItems: 'center',
+  },
+  iconeConcluido: {
+    fontSize: 48,
+  },
+  textoCentralizado: {
+    textAlign: 'center',
+  },
+  botaoConcluirExercicio: {
+    borderRadius: Spacing.two,
+    paddingHorizontal: Spacing.five,
+    paddingVertical: Spacing.three,
   },
 });

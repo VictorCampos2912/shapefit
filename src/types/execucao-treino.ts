@@ -1,3 +1,4 @@
+import type { SessaoRegistro } from '@/types/perfil';
 import type { Treino } from '@/types/treino';
 
 export type EstadoExecucaoExercicio = {
@@ -6,6 +7,8 @@ export type EstadoExecucaoExercicio = {
   serieAtual: number;
   cargaKg: string;
   repsFeitas: string;
+  seriesConcluidas: SerieRealizada[];
+  concluido: boolean;
 };
 
 export type EstadoTelaExecucao = {
@@ -21,5 +24,25 @@ export function criarEstadoExecucaoInicial(exercicioId: string): EstadoExecucaoE
     serieAtual: 1,
     cargaKg: '',
     repsFeitas: '',
+    seriesConcluidas: [],
+    concluido: false,
   };
+}
+
+export type SerieRealizada = {
+  serie: number;
+  cargaKg: number;
+  reps: number;
+};
+
+export type ExecucaoExercicio = {
+  exercicioId: string;
+  seriesRealizadas: SerieRealizada[];
+  status: 'em_andamento' | 'concluido';
+};
+
+export interface SessaoTreino extends SessaoRegistro {
+  treinoId: string;
+  iniciadaEm: string;
+  execucoes: ExecucaoExercicio[];
 }

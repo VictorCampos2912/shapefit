@@ -1,18 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
 
-import type { DefinirPerfilAtivoResultado, Perfil, PerfisState } from '@/types/perfil';
+import type { DefinirPerfilAtivoResultado, Perfil, PerfisState, SessaoRegistro } from '@/types/perfil';
 
 const PERFIS_KEY = 'perfis';
 
 const CAMPOS_OBRIGATORIOS = ['nome', 'pesoKg', 'alturaCm', 'idade', 'sexo', 'objetivo'] as const;
 
 type DadosCriarPerfil = Omit<Perfil, 'id' | 'criadoEm'>;
-
-type SessaoRegistro = {
-  perfilId: string;
-  finalizadaEm: string | null;
-};
 
 async function getPerfisState(): Promise<PerfisState> {
   const raw = await AsyncStorage.getItem(PERFIS_KEY);

@@ -1,0 +1,83 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import type { SerieRealizada, SessaoTreino } from '@/types/execucao-treino';
+
+function sessoesKey(perfilId: string): string {
+  return `sessoes:${perfilId}`;
+}
+
+async function getSessoes(perfilId: string): Promise<SessaoTreino[]> {
+  const raw = await AsyncStorage.getItem(sessoesKey(perfilId));
+  if (!raw) {
+    return [];
+  }
+  return JSON.parse(raw) as SessaoTreino[];
+}
+
+async function setSessoes(perfilId: string, sessoes: SessaoTreino[]): Promise<void> {
+  await AsyncStorage.setItem(sessoesKey(perfilId), JSON.stringify(sessoes));
+}
+
+export async function obterSessao(perfilId: string, treinoId: string): Promise<SessaoTreino | null> {
+  const sessoes = await getSessoes(perfilId);
+  return sessoes.find((sessao) => sessao.treinoId === treinoId) ?? null;
+}
+
+export async function registrarSerieConcluida(params: {
+  perfilId: string;
+  treinoId: string;
+  exercicioId: string;
+  serie: SerieRealizada;
+  totalSeriesDoExercicio: number;
+}): Promise<SessaoTreino> {
+  const { perfilId, treinoId, exercicioId, serie, totalSeriesDoExercicio } = params;
+  const sessoes = await getSessoes(perfilId);
+
+  let sessao = sessoes.find((item) => item.treinoId === treinoId);
+  if (!sessao) {
+    sessao = {
+      perfilId,
+      treinoId,
+      iniciadaEm: new Date().toISOString(),
+      finalizadaEm: null,
+      execucoes: [],
+    };
+    sessoes.push(sessao);
+  }
+
+  let execucao = sessao.execucoes.find((item) => item.exercicioId === exercicioId);
+  if (!execucao) {
+    execucao = { exercicioId, seriesRealizadas: [], status: 'em_andamento' };
+    sessao.execucoes.push(execucao);
+  }
+
+  execucao.seriesRealizadas.push(serie);
+  execucao.status = execucao.seriesRealizadas.length === totalSeriesDoExercicio ? 'concluido' : 'em_andamento';
+
+  await setSessoes(perfilId, sessoes);
+  return sessao;
+}
+
+export async function marcarExercicioConcluido(params: {
+  perfilId: string;
+  treinoId: string;
+  exercicioId: string;
+}): Promise<SessaoTreino> {
+  const { perfilId, treinoId, exercicioId } = params;
+  const sessoes = await getSessoes(perfilId);
+
+  const sessao = sessoes.find((item) => item.treinoId === treinoId);
+  if (!sessao) {
+    throw new Error(`Nenhuma sessão encontrada para o treino ${treinoId} do perfil ${perfilId}`);
+  }
+
+  const execucao = sessao.execucoes.find((item) => item.exercicioId === exercicioId);
+  if (!execucao) {
+    throw new Error(`Nenhuma execução encontrada para o exercício ${exercicioId} na sessão do treino ${treinoId}`);
+  }
+
+  execucao.status = 'concluido';
+
+  await setSessoes(perfilId, sessoes);
+  return sessao;
+}

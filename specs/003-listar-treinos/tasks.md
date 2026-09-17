@@ -136,7 +136,7 @@ Projeto único mobile (Expo Router), conforme plan.md — mesma estrutura do RF1
 - [X] T016 [P] Rodar type-check (`npx tsc --noEmit`) confirmando ausência de `any` implícito em todo o código desta feature, conforme Princípio I da Constituição
 - [X] T017 [P] Confirmar, por inspeção de código, que nenhuma leitura de treino nesta feature ocorre sem passar por `listarTreinos(perfilId)` com o `perfilId` do perfil ativo — nenhuma chave AsyncStorage é lida diretamente pela tela (Princípio V da Constituição)
 - [X] T018 Executar manualmente todos os cenários de `quickstart.md` (1 a 5) no Redmi Note 12 (Android 12+) via Expo Go. Resultado: todos os cenários PASS (consultar lista do perfil ativo, isolamento/atualização por perfil, diferenciação de nomes duplicados, importar a partir da tela de treinos, seleção de treino reconhecida).
-- [ ] T019 Executar manualmente todos os cenários de `quickstart.md` (1 a 5) no iPhone 16 Plus (iOS 17+) via Expo Go
+- [X] T019 Executar manualmente todos os cenários de `quickstart.md` (1 a 5) no iPhone 16 Plus (iOS 17+) via Expo Go. Resultado: todos os cenários PASS, confirmados pelo usuário em 2026-09-16 — lista do perfil ativo, atualização da lista ao trocar de perfil, diferenciação de treinos com nome duplicado por horário, e seleção de um treino navegando de fato para a tela de execução (RF03, já implementado nesta rodada, incluindo o estado "em andamento (pausado)" ao trocar de exercício)
 
 ---
 

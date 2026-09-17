@@ -9,8 +9,14 @@ import { ExercicioExecucao } from '@/components/treino/exercicio-execucao';
 import { ExercicioListItem, type EstadoVisualExercicio } from '@/components/treino/exercicio-list-item';
 import { Spacing } from '@/constants/theme';
 import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
+import { marcarExercicioConcluido, obterSessao, registrarSerieConcluida } from '@/services/sessao-treino-storage';
 import { listarTreinos } from '@/services/treino-storage';
-import { criarEstadoExecucaoInicial, type EstadoExecucaoExercicio } from '@/types/execucao-treino';
+import {
+  criarEstadoExecucaoInicial,
+  type EstadoExecucaoExercicio,
+  type SerieRealizada,
+  type SessaoTreino,
+} from '@/types/execucao-treino';
 import type { Treino } from '@/types/treino';
 
 function estadoVisualDoExercicio(
@@ -18,7 +24,41 @@ function estadoVisualDoExercicio(
   estadosPorExercicio: Record<string, EstadoExecucaoExercicio>,
 ): EstadoVisualExercicio {
   const estado = estadosPorExercicio[exercicioId];
+  if (estado?.concluido) {
+    return 'concluido';
+  }
   return estado?.iniciado ? 'pausado' : 'naoIniciado';
+}
+
+function estadosPorExercicioDaSessao(
+  sessao: SessaoTreino | null,
+  exercicios: Treino['exercicios'],
+): Record<string, EstadoExecucaoExercicio> {
+  if (!sessao) {
+    return {};
+  }
+
+  const resultado: Record<string, EstadoExecucaoExercicio> = {};
+
+  for (const execucao of sessao.execucoes) {
+    const exercicio = exercicios.find((item) => item.id === execucao.exercicioId);
+    if (!exercicio) continue;
+
+    const concluido = execucao.status === 'concluido';
+    const ultimaSerie = execucao.seriesRealizadas[execucao.seriesRealizadas.length - 1];
+
+    resultado[execucao.exercicioId] = {
+      exercicioId: execucao.exercicioId,
+      iniciado: true,
+      serieAtual: concluido ? exercicio.series : execucao.seriesRealizadas.length + 1,
+      cargaKg: concluido ? '' : ultimaSerie ? String(ultimaSerie.cargaKg) : String(exercicio.cargaSugeridaKg),
+      repsFeitas: '',
+      seriesConcluidas: execucao.seriesRealizadas,
+      concluido,
+    };
+  }
+
+  return resultado;
 }
 
 export default function ExecucaoTreinoScreen() {
@@ -29,6 +69,7 @@ export default function ExecucaoTreinoScreen() {
   const [carregando, setCarregando] = useState(true);
   const [exercicioSelecionadoId, setExercicioSelecionadoId] = useState<string | null>(null);
   const [estadosPorExercicio, setEstadosPorExercicio] = useState<Record<string, EstadoExecucaoExercicio>>({});
+  const [reaberturaJaConcluida, setReaberturaJaConcluida] = useState(false);
 
   useEffect(() => {
     if (!perfilAtivo) return;
@@ -37,8 +78,18 @@ export default function ExecucaoTreinoScreen() {
       setCarregando(true);
       const treinos = await listarTreinos(perfilAtivo.id);
       const encontrado = treinos.find((item) => item.id === treinoId) ?? null;
+      if (!ativo) return;
+
+      setTreino(encontrado);
+
+      if (encontrado) {
+        const sessao = await obterSessao(perfilAtivo.id, encontrado.id);
+        if (ativo) {
+          setEstadosPorExercicio(estadosPorExercicioDaSessao(sessao, encontrado.exercicios));
+        }
+      }
+
       if (ativo) {
-        setTreino(encontrado);
         setCarregando(false);
       }
     })();
@@ -49,6 +100,7 @@ export default function ExecucaoTreinoScreen() {
 
   function handleSelecionarExercicio(exercicioId: string) {
     setExercicioSelecionadoId(exercicioId);
+    setReaberturaJaConcluida(estadosPorExercicio[exercicioId]?.concluido ?? false);
     setEstadosPorExercicio((atual) => {
       if (atual[exercicioId]) {
         return atual;
@@ -58,6 +110,44 @@ export default function ExecucaoTreinoScreen() {
   }
 
   function handleVoltarParaLista() {
+    setExercicioSelecionadoId(null);
+  }
+
+  async function handleConcluirSerie(exercicioId: string, serie: SerieRealizada) {
+    if (!perfilAtivo || !treino) return;
+    const exercicio = treino.exercicios.find((item) => item.id === exercicioId);
+    if (!exercicio) return;
+
+    const sessao = await registrarSerieConcluida({
+      perfilId: perfilAtivo.id,
+      treinoId: treino.id,
+      exercicioId,
+      serie,
+      totalSeriesDoExercicio: exercicio.series,
+    });
+    const execucao = sessao.execucoes.find((item) => item.exercicioId === exercicioId);
+    if (!execucao) return;
+
+    setEstadosPorExercicio((atual) => {
+      const estadoAtual = atual[exercicioId] ?? criarEstadoExecucaoInicial(exercicioId);
+      const concluido = execucao.status === 'concluido';
+      return {
+        ...atual,
+        [exercicioId]: {
+          ...estadoAtual,
+          seriesConcluidas: execucao.seriesRealizadas,
+          concluido,
+          serieAtual: concluido ? estadoAtual.serieAtual : estadoAtual.serieAtual + 1,
+          cargaKg: concluido ? estadoAtual.cargaKg : String(serie.cargaKg),
+          repsFeitas: '',
+        },
+      };
+    });
+  }
+
+  async function handleConcluirExercicio(exercicioId: string) {
+    if (!perfilAtivo || !treino) return;
+    await marcarExercicioConcluido({ perfilId: perfilAtivo.id, treinoId: treino.id, exercicioId });
     setExercicioSelecionadoId(null);
   }
 
@@ -102,6 +192,9 @@ export default function ExecucaoTreinoScreen() {
                 criarEstadoExecucaoInicial(exercicioSelecionado.id)
               }
               onAtualizarEstado={handleAtualizarEstadoExercicio}
+              onConcluirSerie={(serie) => handleConcluirSerie(exercicioSelecionado.id, serie)}
+              onConcluirExercicio={() => handleConcluirExercicio(exercicioSelecionado.id)}
+              jaEstavaConcluidoAoAbrir={reaberturaJaConcluida}
             />
           </>
         ) : (
@@ -119,6 +212,13 @@ export default function ExecucaoTreinoScreen() {
                 />
               )}
             />
+            {treino.exercicios.every((item) => estadosPorExercicio[item.id]?.concluido) && (
+              <ThemedView type="successBackground" style={styles.parabens}>
+                <ThemedText type="smallBold" themeColor="success" style={styles.textoCentralizado}>
+                  🎉 Parabéns pelo treino de hoje!
+                </ThemedText>
+              </ThemedView>
+            )}
           </>
         )}
       </SafeAreaView>
@@ -137,5 +237,12 @@ const styles = StyleSheet.create({
   },
   lista: {
     gap: Spacing.two,
+  },
+  parabens: {
+    borderRadius: Spacing.two,
+    padding: Spacing.three,
+  },
+  textoCentralizado: {
+    textAlign: 'center',
   },
 });

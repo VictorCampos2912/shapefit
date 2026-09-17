@@ -7,6 +7,16 @@ iPhone 16 Plus), via Expo Go.
 > **Ordem de implementação (atualizada na v1.1 do PRD):** o RF10 (perfil) passou a ser
 > pré-requisito funcional do RF01, RF02, RF07 e RF08, que agora operam "por perfil ativo".
 > Recomenda-se implementar o **RF10 primeiro**, antes do RF01.
+>
+> **Atualização (2026-09-16):** o RF09 foi dividido em duas partes e sua primeira parte
+> foi adiantada para logo após o RF04, para eliminar a lacuna de não haver nenhuma forma
+> de corrigir uma série recém-registrada até o fim do MVP. Nova ordem:
+> **RF10 → RF01 → RF02 → RF03 → RF04 → RF09a → RF05 → RF06 → RF07 → RF08 → RF09b**
+> - **RF09a** (adiantado): editar carga/reps de uma série da **sessão atual em andamento**,
+>   acessível a partir da própria tela de execução (RF04) — não depende do RF07/RF08
+> - **RF09b** (mantido no final): editar carga/reps de uma série de uma **sessão já
+>   finalizada no passado**, acessível a partir da tela de histórico (RF08) — depende do
+>   RF07 (finalização) e RF08 (histórico) existirem, pois é lá que esse dado fica acessível
 
 ---
 
@@ -114,6 +124,11 @@ iPhone 16 Plus), via Expo Go.
       existe mais em nenhuma outra tela do app (substitui o ponto de entrada provisório
       criado no RF01)
 
+**Observação registrada durante a spec do RF04 (revisitar depois, fora deste requisito):**
+a lista de treinos não indica visualmente quais treinos têm uma sessão em andamento (RF04).
+Um usuário que sai de um treino no meio precisa lembrar sozinho qual treino reabrir para
+continuar. Não é um requisito do MVP atual — decisão consciente de adiar, não uma omissão.
+
 ---
 
 ## RF03 — Tela de execução: exibir exercício, série, campos de carga e reps
@@ -154,6 +169,15 @@ iPhone 16 Plus), via Expo Go.
 - Ao concluir a última série planejada de um exercício, habilita "Concluir exercício"
 - Após concluir um exercício, o usuário escolhe livremente qual exercício fazer a seguir
   (sugestão padrão: o próximo da lista, mas não obrigatório)
+- **O RF04, não o RF07, cria e atualiza a estrutura de "sessão de treino em andamento"**
+  (chave `sessoes:<perfil_id>`, campo `finalizadaEm: null` enquanto em andamento) —
+  necessária para a persistência exigida por este próprio requisito. O RF07 fica
+  responsável apenas pela finalização completa (marcar `finalizadaEm`, aparecer no
+  histórico). Isso também significa que o bloqueio de troca de perfil do RF10 passa a
+  funcionar de verdade assim que o RF04 for implementado, não apenas quando o RF07 existir
+- **Múltiplos treinos em andamento simultaneamente, para o mesmo perfil, são permitidos
+  livremente, sem bloqueio** — decisão por simplicidade (Princípio II); não há validação
+  impedindo iniciar o Treino B com o Treino A ainda em andamento
 
 **Critérios de aceite:**
 - [ ] O botão "Concluir série" só fica habilitado quando os campos de carga e reps estão
@@ -168,8 +192,12 @@ iPhone 16 Plus), via Expo Go.
       próximo, não apenas o seguinte na ordem do JSON
 - [ ] Se o usuário sair da tela de execução e voltar (ou fechar e reabrir o app) antes de
       concluir o treino, o progresso das séries já registradas é mantido — retomando
-      exatamente de onde parou (isso implica persistência de sessão **em andamento**, não
-      só ao final — ver RF07)
+      exatamente de onde parou (persistência real, sobrevive ao fechamento completo do app)
+- [ ] O usuário consegue iniciar/continuar um segundo treino sem que o app bloqueie ou
+      avise sobre o primeiro treino ainda em andamento
+- [ ] Ao tentar trocar de perfil ativo (RF10) com este treino em andamento, a troca é
+      bloqueada — validar esse cenário explicitamente nos testes do RF04, já que é este
+      requisito que torna o bloqueio do RF10 funcional pela primeira vez
 
 ---
 
@@ -255,15 +283,33 @@ iPhone 16 Plus), via Expo Go.
 
 ---
 
-## RF09 — Editar registro de série já feito
+## RF09a — Editar registro de série já feito (sessão atual, adiantado para após o RF04)
 
 **Decisões:**
-- Edição vale tanto para a sessão atual (em andamento) quanto para sessões já finalizadas
-  no passado
+- Escopo desta parte: apenas séries da **sessão em andamento**, acessível a partir da
+  própria tela de execução (RF04) — não depende de RF07 nem RF08
+- Motivo do adiantamento (2026-09-16): sem isso, não haveria nenhuma forma de corrigir um
+  erro de digitação em uma série até o fim do MVP, já que o RF09 completo estava por
+  último na fila original
 
 **Critérios de aceite:**
-- [ ] O usuário consegue editar carga e/ou reps de qualquer série já registrada, seja da
-      sessão em andamento ou de uma sessão finalizada no histórico
+- [ ] O usuário consegue editar carga e/ou reps de qualquer série já concluída do
+      exercício atualmente em execução, antes de tocar em "Concluir exercício"
+- [ ] A edição não reabre nem altera o estado de conclusão do exercício — apenas o valor
+      daquela série específica é atualizado
+- [ ] O app pede confirmação antes de salvar uma edição, para evitar alteração acidental
+
+---
+
+## RF09b — Editar registro de série já feito (sessões finalizadas no passado)
+
+**Decisões:**
+- Escopo desta parte: séries de sessões **já finalizadas**, acessível a partir da tela de
+  histórico (RF08) — depende do RF07 (finalização) e RF08 (histórico) existirem
+
+**Critérios de aceite:**
+- [ ] O usuário consegue editar carga e/ou reps de qualquer série de uma sessão finalizada,
+      a partir da tela de histórico
 - [ ] A edição de uma série em uma sessão já finalizada não reabre a sessão como "em
       andamento" — ela continua finalizada, apenas com o valor daquela série atualizado
 - [ ] Após editar, o novo valor é refletido imediatamente na tela de histórico (RF08)
@@ -277,5 +323,5 @@ iPhone 16 Plus), via Expo Go.
 RF01 a RF10 concluídos. Este documento, junto com o PRD v1.1, está pronto para ser usado
 como contexto no `/speckit.specify` de cada requisito.
 
-**Ordem recomendada de implementação:** RF10 → RF01 → RF02 → RF03 → RF04 → RF05 → RF06 →
-RF07 → RF08 → RF09.
+**Ordem recomendada de implementação:** RF10 → RF01 → RF02 → RF03 → RF04 → RF09a → RF05 →
+RF06 → RF07 → RF08 → RF09b.

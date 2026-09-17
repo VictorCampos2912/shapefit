@@ -156,13 +156,16 @@ enquanto a sessão está em andamento, preenchido no momento em que é finalizad
 esse campo para decidir se a troca de perfil ativo deve ser bloqueada (bloqueada quando
 existe ao menos uma sessão do perfil ativo com `finalizadaEm === null`).
 
-**Nota do RF03 a reconferir quando o RF07 existir:** a tela de execução (RF03) assume que
+**Nota do RF03 a reconferir quando o RF04 existir:** a tela de execução (RF03) assume que
 não pode haver troca de perfil ativo "debaixo dela" porque o RF10 bloqueia essa troca
-durante sessão em andamento. Isso só se torna uma garantia real quando o RF07 passar a
-persistir sessões (hoje, sem RF07, `existeSessaoEmAndamento` sempre retorna `false`, então
-o bloqueio nunca é de fato acionado). Ao especificar o RF07, revalidar que trocar de perfil
-durante uma execução ativa do RF03/RF04 é corretamente bloqueado na prática, não apenas na
-teoria do contrato.
+durante sessão em andamento. Isso só se torna uma garantia real quando algo passar a
+persistir sessões com `finalizadaEm: null` (hoje, sem isso, `existeSessaoEmAndamento`
+sempre retorna `false`, então o bloqueio nunca é de fato acionado). **Correção:** é o
+**RF04** — não o RF07 — que passa a criar/atualizar essa estrutura de sessão (decisão
+registrada na spec do RF04), então o bloqueio do RF10 se torna funcional assim que o RF04
+for implementado. Ao testar o RF04, incluir explicitamente o cenário de tentar trocar de
+perfil com uma sessão em andamento, para validar que o bloqueio realmente dispara na
+prática, não só na teoria do contrato.
 
 ## 9. Stack técnica
 
@@ -213,6 +216,13 @@ teoria do contrato.
   RF02, RF07, RF08) — isso aumenta o escopo do MVP em relação à v1.0 do PRD. Vale reavaliar
   se RF10 (perfil) deve ser implementado **antes** dos demais requisitos, já que os outros
   dependem dele para funcionar corretamente
+- **Dívida técnica acumulada (registrada em 2026-09-15):** RF01, RF02 e RF03 foram
+  implementados e validados apenas no Android (Redmi Note 12); a validação no iPhone 16
+  Plus ficou pendente nos três, por decisão consciente do usuário de seguir com o
+  desenvolvimento antes de testar. Antes de considerar o MVP pronto para uso real, é
+  necessário validar essas três features no iOS de uma vez — atenção especial ao RF03,
+  que introduz `TextInput` com filtragem de entrada numérica/decimal, uma área com
+  histórico de comportamento divergente entre Android e iOS.
 
 ## 14. Abordagem de identidade visual
 

@@ -19,3 +19,8 @@ export type PerfisState = {
 };
 
 export type DefinirPerfilAtivoResultado = { ok: true } | { ok: false; motivo: 'sessao_em_andamento' };
+
+export type SessaoRegistro = {
+  perfilId: string;
+  finalizadaEm: string | null;
+};
