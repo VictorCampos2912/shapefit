@@ -216,13 +216,15 @@ prática, não só na teoria do contrato.
   RF02, RF07, RF08) — isso aumenta o escopo do MVP em relação à v1.0 do PRD. Vale reavaliar
   se RF10 (perfil) deve ser implementado **antes** dos demais requisitos, já que os outros
   dependem dele para funcionar corretamente
-- **Dívida técnica acumulada (registrada em 2026-09-15):** RF01, RF02 e RF03 foram
-  implementados e validados apenas no Android (Redmi Note 12); a validação no iPhone 16
-  Plus ficou pendente nos três, por decisão consciente do usuário de seguir com o
-  desenvolvimento antes de testar. Antes de considerar o MVP pronto para uso real, é
-  necessário validar essas três features no iOS de uma vez — atenção especial ao RF03,
-  que introduz `TextInput` com filtragem de entrada numérica/decimal, uma área com
-  histórico de comportamento divergente entre Android e iOS.
+- **Dívida técnica acumulada (registrada em 2026-09-15, atualizada em 2026-09-17):** RF01,
+  RF02 e RF03 já foram validados em Android (Redmi Note 12) e iPhone 16 Plus (iOS). RF04 e
+  RF09a foram implementados e validados apenas no Android até o momento; a validação no
+  iPhone 16 Plus ainda está pendente em ambos, por decisão consciente do usuário de seguir
+  com o desenvolvimento antes de testar. Antes de considerar o MVP pronto para uso real, é
+  necessário validar RF04 e RF09a no iOS — atenção especial aos campos de `TextInput` com
+  filtragem de entrada numérica/decimal (mesma área com histórico de comportamento
+  divergente entre Android e iOS já observada no RF03) e à apresentação nativa do
+  `Alert.alert` de confirmação (RF09a), que difere visualmente entre as duas plataformas.
 
 ## 14. Abordagem de identidade visual
 

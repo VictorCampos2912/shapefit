@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, TextInput } from 'react-native';
+import { useState } from 'react';
+import { Alert, Pressable, StyleSheet, TextInput } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -13,8 +14,15 @@ type ExercicioExecucaoProps = {
   onAtualizarEstado: (novoEstado: EstadoExecucaoExercicio) => void;
   onConcluirSerie: (serie: SerieRealizada) => void;
   onConcluirExercicio: () => void;
+  onEditarSerie: (serieEditada: SerieRealizada) => Promise<void>;
   onIniciarDescanso?: () => void;
   jaEstavaConcluidoAoAbrir?: boolean;
+};
+
+type EdicaoSerieEmAndamento = {
+  serie: number;
+  cargaKg: string;
+  reps: string;
 };
 
 function sanitizarCarga(valor: string): string {
@@ -39,10 +47,48 @@ export function ExercicioExecucao({
   onAtualizarEstado,
   onConcluirSerie,
   onConcluirExercicio,
+  onEditarSerie,
   onIniciarDescanso,
   jaEstavaConcluidoAoAbrir = false,
 }: ExercicioExecucaoProps) {
   const theme = useTheme();
+  const [edicaoSerie, setEdicaoSerie] = useState<EdicaoSerieEmAndamento | null>(null);
+
+  function handleIniciarEdicaoSerie(serieRealizada: SerieRealizada) {
+    setEdicaoSerie({
+      serie: serieRealizada.serie,
+      cargaKg: String(serieRealizada.cargaKg),
+      reps: String(serieRealizada.reps),
+    });
+  }
+
+  function handleCancelarEdicaoSerie() {
+    setEdicaoSerie(null);
+  }
+
+  function handleAlterarCargaEdicao(valor: string) {
+    setEdicaoSerie((atual) => (atual ? { ...atual, cargaKg: sanitizarCarga(valor) } : atual));
+  }
+
+  function handleAlterarRepsEdicao(valor: string) {
+    setEdicaoSerie((atual) => (atual ? { ...atual, reps: sanitizarReps(valor) } : atual));
+  }
+
+  function handleSalvarEdicaoSerie() {
+    if (!edicaoSerie) return;
+    const { serie, cargaKg, reps } = edicaoSerie;
+
+    Alert.alert('Confirmar alteração', `Confirma a alteração da série ${serie}?`, [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Salvar',
+        onPress: async () => {
+          await onEditarSerie({ serie, cargaKg: Number(cargaKg), reps: Number(reps) });
+          setEdicaoSerie(null);
+        },
+      },
+    ]);
+  }
 
   function handleIniciarExercicio() {
     onAtualizarEstado({
@@ -70,6 +116,100 @@ export function ExercicioExecucao({
   }
 
   const podeConcluirSerie = estado.cargaKg.trim().length > 0 && estado.repsFeitas.trim().length > 0;
+  const podeSalvarEdicao =
+    !!edicaoSerie && edicaoSerie.cargaKg.trim().length > 0 && edicaoSerie.reps.trim().length > 0;
+
+  function renderSeriesConcluidas() {
+    if (estado.seriesConcluidas.length === 0) {
+      return null;
+    }
+
+    return (
+      <ThemedView style={styles.listaSeriesConcluidas}>
+        <ThemedText type="smallBold" themeColor="textSecondary">
+          Séries concluídas
+        </ThemedText>
+        {estado.seriesConcluidas.map((serieRealizada) => {
+          const emEdicao = edicaoSerie?.serie === serieRealizada.serie;
+          return (
+            <ThemedView key={serieRealizada.serie} style={styles.itemSerieConcluida}>
+              {emEdicao ? (
+                <ThemedView style={styles.edicaoSerie}>
+                  <ThemedText type="smallBold" themeColor="text">
+                    Série {serieRealizada.serie}
+                  </ThemedText>
+                  <ThemedView style={styles.campo}>
+                    <ThemedText type="smallBold" themeColor="text">
+                      Carga (kg)
+                    </ThemedText>
+                    <TextInput
+                      value={edicaoSerie?.cargaKg}
+                      onChangeText={handleAlterarCargaEdicao}
+                      keyboardType="decimal-pad"
+                      inputMode="decimal"
+                      style={[
+                        styles.input,
+                        { color: theme.text, borderColor: theme.text, backgroundColor: theme.background },
+                      ]}
+                      placeholder="0.0"
+                      placeholderTextColor={theme.textSecondary}
+                    />
+                  </ThemedView>
+                  <ThemedView style={styles.campo}>
+                    <ThemedText type="smallBold" themeColor="text">
+                      Repetições feitas
+                    </ThemedText>
+                    <TextInput
+                      value={edicaoSerie?.reps}
+                      onChangeText={handleAlterarRepsEdicao}
+                      keyboardType="number-pad"
+                      inputMode="numeric"
+                      style={[
+                        styles.input,
+                        { color: theme.text, borderColor: theme.text, backgroundColor: theme.background },
+                      ]}
+                      placeholder="0"
+                      placeholderTextColor={theme.textSecondary}
+                    />
+                  </ThemedView>
+                  <ThemedView style={styles.botoesEdicao}>
+                    <Pressable onPress={handleCancelarEdicaoSerie} style={styles.botaoCancelarEdicao}>
+                      <ThemedText type="smallBold" themeColor="text">
+                        Cancelar
+                      </ThemedText>
+                    </Pressable>
+                    <Pressable
+                      onPress={handleSalvarEdicaoSerie}
+                      disabled={!podeSalvarEdicao}
+                      style={[
+                        styles.botaoSalvarEdicao,
+                        { backgroundColor: podeSalvarEdicao ? theme.text : theme.textSecondary },
+                      ]}
+                    >
+                      <ThemedText type="smallBold" themeColor="background">
+                        Salvar edição
+                      </ThemedText>
+                    </Pressable>
+                  </ThemedView>
+                </ThemedView>
+              ) : (
+                <Pressable
+                  onPress={() => handleIniciarEdicaoSerie(serieRealizada)}
+                  style={styles.linhaSerieConcluida}
+                >
+                  <ThemedText type="default">
+                    Série {serieRealizada.serie}: {serieRealizada.cargaKg}kg ×{' '}
+                    {serieRealizada.reps} reps
+                  </ThemedText>
+                  <ThemedText type="link">Editar</ThemedText>
+                </Pressable>
+              )}
+            </ThemedView>
+          );
+        })}
+      </ThemedView>
+    );
+  }
 
   return (
     <ThemedView style={styles.container}>
@@ -147,6 +287,8 @@ export function ExercicioExecucao({
               Concluir série
             </ThemedText>
           </Pressable>
+
+          {renderSeriesConcluidas()}
         </ThemedView>
       )}
 
@@ -158,6 +300,8 @@ export function ExercicioExecucao({
           <ThemedText type="subtitle" themeColor="success" style={styles.textoCentralizado}>
             Este já foi feito, volte no próximo treino
           </ThemedText>
+
+          {renderSeriesConcluidas()}
         </ThemedView>
       )}
 
@@ -177,6 +321,8 @@ export function ExercicioExecucao({
               Concluir exercício
             </ThemedText>
           </Pressable>
+
+          {renderSeriesConcluidas()}
         </ThemedView>
       )}
     </ThemedView>
@@ -226,5 +372,33 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.two,
     paddingHorizontal: Spacing.five,
     paddingVertical: Spacing.three,
+  },
+  listaSeriesConcluidas: {
+    gap: Spacing.two,
+  },
+  itemSerieConcluida: {
+    gap: Spacing.one,
+  },
+  linhaSerieConcluida: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  edicaoSerie: {
+    gap: Spacing.two,
+  },
+  botoesEdicao: {
+    flexDirection: 'row',
+    gap: Spacing.two,
+  },
+  botaoCancelarEdicao: {
+    borderRadius: Spacing.two,
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.two,
+  },
+  botaoSalvarEdicao: {
+    borderRadius: Spacing.two,
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.two,
   },
 });

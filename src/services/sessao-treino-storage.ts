@@ -81,3 +81,36 @@ export async function marcarExercicioConcluido(params: {
   await setSessoes(perfilId, sessoes);
   return sessao;
 }
+
+export async function atualizarSerieRealizada(params: {
+  perfilId: string;
+  treinoId: string;
+  exercicioId: string;
+  serie: number;
+  novaCargaKg: number;
+  novosReps: number;
+}): Promise<SessaoTreino> {
+  const { perfilId, treinoId, exercicioId, serie, novaCargaKg, novosReps } = params;
+  const sessoes = await getSessoes(perfilId);
+
+  const sessao = sessoes.find((item) => item.treinoId === treinoId);
+  if (!sessao) {
+    throw new Error(`Nenhuma sessão encontrada para o treino ${treinoId} do perfil ${perfilId}`);
+  }
+
+  const execucao = sessao.execucoes.find((item) => item.exercicioId === exercicioId);
+  if (!execucao) {
+    throw new Error(`Nenhuma execução encontrada para o exercício ${exercicioId} na sessão do treino ${treinoId}`);
+  }
+
+  const serieRealizada = execucao.seriesRealizadas.find((item) => item.serie === serie);
+  if (!serieRealizada) {
+    throw new Error(`Nenhuma série ${serie} encontrada na execução do exercício ${exercicioId}`);
+  }
+
+  serieRealizada.cargaKg = novaCargaKg;
+  serieRealizada.reps = novosReps;
+
+  await setSessoes(perfilId, sessoes);
+  return sessao;
+}

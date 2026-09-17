@@ -9,7 +9,12 @@ import { ExercicioExecucao } from '@/components/treino/exercicio-execucao';
 import { ExercicioListItem, type EstadoVisualExercicio } from '@/components/treino/exercicio-list-item';
 import { Spacing } from '@/constants/theme';
 import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
-import { marcarExercicioConcluido, obterSessao, registrarSerieConcluida } from '@/services/sessao-treino-storage';
+import {
+  atualizarSerieRealizada,
+  marcarExercicioConcluido,
+  obterSessao,
+  registrarSerieConcluida,
+} from '@/services/sessao-treino-storage';
 import { listarTreinos } from '@/services/treino-storage';
 import {
   criarEstadoExecucaoInicial,
@@ -145,6 +150,32 @@ export default function ExecucaoTreinoScreen() {
     });
   }
 
+  async function handleEditarSerie(exercicioId: string, serieEditada: SerieRealizada) {
+    if (!perfilAtivo || !treino) return;
+
+    const sessao = await atualizarSerieRealizada({
+      perfilId: perfilAtivo.id,
+      treinoId: treino.id,
+      exercicioId,
+      serie: serieEditada.serie,
+      novaCargaKg: serieEditada.cargaKg,
+      novosReps: serieEditada.reps,
+    });
+    const execucao = sessao.execucoes.find((item) => item.exercicioId === exercicioId);
+    if (!execucao) return;
+
+    setEstadosPorExercicio((atual) => {
+      const estadoAtual = atual[exercicioId] ?? criarEstadoExecucaoInicial(exercicioId);
+      return {
+        ...atual,
+        [exercicioId]: {
+          ...estadoAtual,
+          seriesConcluidas: execucao.seriesRealizadas,
+        },
+      };
+    });
+  }
+
   async function handleConcluirExercicio(exercicioId: string) {
     if (!perfilAtivo || !treino) return;
     await marcarExercicioConcluido({ perfilId: perfilAtivo.id, treinoId: treino.id, exercicioId });
@@ -194,6 +225,7 @@ export default function ExecucaoTreinoScreen() {
               onAtualizarEstado={handleAtualizarEstadoExercicio}
               onConcluirSerie={(serie) => handleConcluirSerie(exercicioSelecionado.id, serie)}
               onConcluirExercicio={() => handleConcluirExercicio(exercicioSelecionado.id)}
+              onEditarSerie={(serie) => handleEditarSerie(exercicioSelecionado.id, serie)}
               jaEstavaConcluidoAoAbrir={reaberturaJaConcluida}
             />
           </>

@@ -293,11 +293,14 @@ continuar. Não é um requisito do MVP atual — decisão consciente de adiar, n
   último na fila original
 
 **Critérios de aceite:**
-- [ ] O usuário consegue editar carga e/ou reps de qualquer série já concluída do
+- [x] O usuário consegue editar carga e/ou reps de qualquer série já concluída do
       exercício atualmente em execução, antes de tocar em "Concluir exercício"
-- [ ] A edição não reabre nem altera o estado de conclusão do exercício — apenas o valor
+- [x] A edição não reabre nem altera o estado de conclusão do exercício — apenas o valor
       daquela série específica é atualizado
-- [ ] O app pede confirmação antes de salvar uma edição, para evitar alteração acidental
+- [x] O app pede confirmação antes de salvar uma edição, para evitar alteração acidental
+
+> **Status (2026-09-17):** implementado e validado apenas no Android — validação no
+> iPhone 16 Plus (iOS) ainda pendente (ver seção 13 do PRD, "Dívida técnica acumulada").
 
 ---
 
