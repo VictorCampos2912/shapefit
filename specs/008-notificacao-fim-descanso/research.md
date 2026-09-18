@@ -552,6 +552,43 @@ seção "Riscos Conhecidos"**:
   e PRD) só por causa deste requisito específico; fica registrado como uma
   possível ação de mitigação futura, não como parte do escopo deste RF06.
 
+**Mitigação aplicada (pós-migração para EAS development build, Decisão 0)**:
+uma vez que a Decisão 0 já obrigou a migração para um development build por
+outro motivo (o crash de import do `expo-notifications` no Expo Go/Android),
+a limitação acima deixa de se aplicar — o development build tem seu próprio
+manifesto nativo, permitindo declarar a permissão de fato. Foi confirmado em
+teste manual real no Redmi Note 12 que o atraso do aviso com a tela bloqueada
+era, de fato, perceptivelmente maior do que com o app em outra tela — o
+sintoma exato deste risco. Confirmado no código-fonte nativo do pacote
+(`android/.../service/delegates/ExpoSchedulingDelegate.kt`, método
+`setupAlarm`) que o comportamento é condicional:
+```kotlin
+if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()) {
+  AlarmManagerCompat.setExactAndAllowWhileIdle(...)  // alarme exato
+} else {
+  AlarmManagerCompat.setAndAllowWhileIdle(...)        // alarme sujeito a Doze mode
+}
+```
+— ou seja, sem a permissão concedida, o próprio pacote já degrada
+graciosamente para o alarme não-exato (não há crash nem erro), mas com a
+imprecisão já prevista. **Correção adicionada**: `"permissions":
+["SCHEDULE_EXACT_ALARM"]` em `app.json` (`expo.android.permissions`), que
+adiciona a entrada correspondente ao `AndroidManifest.xml` do development
+build no próximo `eas build`. Diferente de `USE_EXACT_ALARM` (concedida
+automaticamente pelo sistema, mas restrita pelas políticas da Play Store a
+categorias específicas de app como despertadores/calendários — este app não
+se encaixa nessas categorias), `SCHEDULE_EXACT_ALARM` ainda exige que o
+usuário conceda manualmente a permissão em Configurações do Android > Apps >
+[app] > Alarmes e lembretes, mas não tem essa mesma restrição de categoria da
+loja — escolha deliberada visando uma eventual futura publicação na Play
+Store, mesmo que o app não seja publicado nela hoje. Esta feature **não**
+implementa nenhum fluxo de UI para verificar/solicitar essa permissão
+especificamente (`canScheduleExactAlarms()` não tem um "request" programático
+como as permissões de notificação comuns — só um intent para abrir a tela de
+configurações do sistema) — fica registrado como possível melhoria futura,
+não incluída no escopo funcional original desta spec (que já assumia
+degradação graciosa sem esse tipo de intervenção de UI).
+
 ## Item de acompanhamento para a fase de implementação
 
 - Confirmar manualmente, antes de escrever o código, a forma exata do objeto de
