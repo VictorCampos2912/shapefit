@@ -249,13 +249,25 @@ estado próprio desde o RF03) — deve morar na rota `[treinoId].tsx`, junto de
   notificação em si)
 
 **Critérios de aceite:**
-- [ ] Ao término do descanso, o app emite um som e uma vibração simultaneamente
-- [ ] O aviso funciona mesmo se o celular estiver com a tela bloqueada, desde que o app
-      não tenha sido fechado (apenas minimizado)
-- [ ] O aviso sonoro respeita o volume de notificação do sistema (não devia tocar em modo
-      silencioso, exceto pela vibração)
-- [ ] Após o aviso, o app exibe claramente que o descanso terminou e libera o próximo
-      registro de série
+- [X] Ao término do descanso, o app emite um som e uma vibração simultaneamente —
+      validado em Android (Redmi Note 12) e iOS (iPhone 16 Plus)
+- [X] O aviso funciona mesmo se o celular estiver com a tela bloqueada, desde que o app
+      não tenha sido fechado (apenas minimizado) — validado nos dois aparelhos; no
+      Android, exige liberar manualmente a restrição de bateria/autostart do
+      MIUI/HyperOS além da permissão padrão de alarme exato (ver
+      specs/008-notificacao-fim-descanso/research.md, Decisão 9)
+- [X] O aviso sonoro respeita o volume de notificação do sistema (não devia tocar em modo
+      silencioso, exceto pela vibração) — validado nos dois aparelhos
+- [X] Após o aviso, o app exibe claramente que o descanso terminou e libera o próximo
+      registro de série — validado nos dois aparelhos
+
+**Nota de implementação (2026-09-18):** o `expo-notifications` não funciona no Expo Go
+em Android (crash de import — ver research.md, Decisão 0), exigindo migração para um
+EAS development build para validar esta feature. Também foram corrigidos dois bugs
+descobertos durante a validação manual: `sound: 'default'` inválido no canal Android
+(deveria ser omitido) e falta de `enableVibrate: true` (vibração não é ativada
+automaticamente por `vibrationPattern` sozinho). Detalhes completos em
+specs/008-notificacao-fim-descanso/research.md.
 - [ ] O aviso também dispara corretamente com o **app em primeiro plano** (não só em
       segundo plano/tela bloqueada) — atenção especial na implementação, já que o
       `expo-notifications` suprime som/alerta em primeiro plano por padrão, exigindo
