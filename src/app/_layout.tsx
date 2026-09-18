@@ -1,9 +1,11 @@
 import { DarkTheme, DefaultTheme, Redirect, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { PerfilAtivoProvider, usePerfilAtivo } from '@/hooks/use-perfil-ativo';
+import { configurarNotificacoesDescanso } from '@/services/notificacao-descanso';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -25,6 +27,11 @@ function RootNavigator() {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+
+  useEffect(() => {
+    configurarNotificacoesDescanso();
+  }, []);
+
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <PerfilAtivoProvider>

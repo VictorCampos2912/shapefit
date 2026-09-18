@@ -1,10 +1,11 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { FlatList, Pressable, StyleSheet } from 'react-native';
+import { AppState, FlatList, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { CronometroDescanso } from '@/components/treino/cronometro-descanso';
 import { ExercicioExecucao } from '@/components/treino/exercicio-execucao';
 import { ExercicioListItem, type EstadoVisualExercicio } from '@/components/treino/exercicio-list-item';
 import { Spacing } from '@/constants/theme';
@@ -15,14 +16,20 @@ import {
   obterSessao,
   registrarSerieConcluida,
 } from '@/services/sessao-treino-storage';
+import {
+  agendarNotificacaoDescanso,
+  cancelarNotificacaoDescanso,
+} from '@/services/notificacao-descanso';
 import { listarTreinos } from '@/services/treino-storage';
 import {
   criarEstadoExecucaoInicial,
+  type DescansoAtivo,
   type EstadoExecucaoExercicio,
   type SerieRealizada,
   type SessaoTreino,
 } from '@/types/execucao-treino';
 import type { Treino } from '@/types/treino';
+import { ajustarFimEm, calcularSegundosRestantes } from '@/utils/cronometro-descanso';
 
 function estadoVisualDoExercicio(
   exercicioId: string,
@@ -75,6 +82,12 @@ export default function ExecucaoTreinoScreen() {
   const [exercicioSelecionadoId, setExercicioSelecionadoId] = useState<string | null>(null);
   const [estadosPorExercicio, setEstadosPorExercicio] = useState<Record<string, EstadoExecucaoExercicio>>({});
   const [reaberturaJaConcluida, setReaberturaJaConcluida] = useState(false);
+  const [descansoAtivo, setDescansoAtivo] = useState<DescansoAtivo>(null);
+  const [notificacaoAgendada, setNotificacaoAgendada] = useState<{
+    identificador: string;
+    fimEm: number;
+  } | null>(null);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     if (!perfilAtivo) return;
@@ -102,6 +115,36 @@ export default function ExecucaoTreinoScreen() {
       ativo = false;
     };
   }, [perfilAtivo, treinoId]);
+
+  useEffect(() => {
+    if (!descansoAtivo) return;
+    const intervalId = setInterval(() => {
+      setTick((atual) => atual + 1);
+    }, 1000);
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [descansoAtivo]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (novoEstado) => {
+      if (novoEstado === 'active') {
+        setTick((atual) => atual + 1);
+      }
+    });
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  const segundosRestantes = descansoAtivo ? calcularSegundosRestantes(descansoAtivo.fimEm) : 0;
+
+  useEffect(() => {
+    if (descansoAtivo && segundosRestantes === 0) {
+      handleDescansoConcluido();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [descansoAtivo, tick]);
 
   function handleSelecionarExercicio(exercicioId: string) {
     setExercicioSelecionadoId(exercicioId);
@@ -186,6 +229,62 @@ export default function ExecucaoTreinoScreen() {
     setEstadosPorExercicio((atual) => ({ ...atual, [novoEstado.exercicioId]: novoEstado }));
   }
 
+  function handleDescansoConcluido() {
+    setDescansoAtivo(null);
+    if (notificacaoAgendada) {
+      cancelarNotificacaoDescanso(notificacaoAgendada.identificador);
+      setNotificacaoAgendada(null);
+    }
+  }
+
+  async function handleIniciarDescanso({
+    exercicioId,
+    descansoSeg,
+  }: {
+    exercicioId: string;
+    descansoSeg: number;
+  }) {
+    if (notificacaoAgendada) {
+      cancelarNotificacaoDescanso(notificacaoAgendada.identificador);
+      setNotificacaoAgendada(null);
+    }
+
+    if (!descansoSeg || !Number.isFinite(descansoSeg) || descansoSeg <= 0) {
+      setDescansoAtivo(null);
+      return;
+    }
+
+    const fimEm = Date.now() + descansoSeg * 1000;
+    setDescansoAtivo({ exercicioId, fimEm });
+
+    const identificador = await agendarNotificacaoDescanso(fimEm);
+    if (identificador) {
+      setNotificacaoAgendada({ identificador, fimEm });
+    }
+  }
+
+  async function handleAjustarDescanso(deltaSegundos: number) {
+    if (!descansoAtivo) return;
+
+    const novoFimEm = ajustarFimEm(descansoAtivo.fimEm, deltaSegundos);
+    if (calcularSegundosRestantes(novoFimEm) <= 0) {
+      handleDescansoConcluido();
+      return;
+    }
+
+    if (notificacaoAgendada) {
+      cancelarNotificacaoDescanso(notificacaoAgendada.identificador);
+      setNotificacaoAgendada(null);
+    }
+
+    setDescansoAtivo({ ...descansoAtivo, fimEm: novoFimEm });
+
+    const identificador = await agendarNotificacaoDescanso(novoFimEm);
+    if (identificador) {
+      setNotificacaoAgendada({ identificador, fimEm: novoFimEm });
+    }
+  }
+
   if (carregando) {
     return (
       <ThemedView style={styles.container}>
@@ -226,6 +325,8 @@ export default function ExecucaoTreinoScreen() {
               onConcluirSerie={(serie) => handleConcluirSerie(exercicioSelecionado.id, serie)}
               onConcluirExercicio={() => handleConcluirExercicio(exercicioSelecionado.id)}
               onEditarSerie={(serie) => handleEditarSerie(exercicioSelecionado.id, serie)}
+              onIniciarDescanso={handleIniciarDescanso}
+              emDescanso={descansoAtivo?.exercicioId === exercicioSelecionado.id}
               jaEstavaConcluidoAoAbrir={reaberturaJaConcluida}
             />
           </>
@@ -252,6 +353,13 @@ export default function ExecucaoTreinoScreen() {
               </ThemedView>
             )}
           </>
+        )}
+        {descansoAtivo && (
+          <CronometroDescanso
+            segundosRestantes={segundosRestantes}
+            onMais15={() => handleAjustarDescanso(15)}
+            onMenos15={() => handleAjustarDescanso(-15)}
+          />
         )}
       </SafeAreaView>
     </ThemedView>

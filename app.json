@@ -8,9 +8,11 @@
     "scheme": "shapefit",
     "userInterfaceStyle": "automatic",
     "ios": {
+      "bundleIdentifier": "com.shapefit.app",
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "package": "com.shapefit.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -37,6 +39,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "9a0502c3-3369-42bb-9927-f114dd2c6707"
+      }
     }
   }
 }

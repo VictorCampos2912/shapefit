@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, TextInput } from 'react-native';
+import { Alert, Keyboard, Pressable, StyleSheet, TextInput } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -15,7 +15,8 @@ type ExercicioExecucaoProps = {
   onConcluirSerie: (serie: SerieRealizada) => void;
   onConcluirExercicio: () => void;
   onEditarSerie: (serieEditada: SerieRealizada) => Promise<void>;
-  onIniciarDescanso?: () => void;
+  onIniciarDescanso?: (info: { exercicioId: string; descansoSeg: number }) => void;
+  emDescanso?: boolean;
   jaEstavaConcluidoAoAbrir?: boolean;
 };
 
@@ -49,6 +50,7 @@ export function ExercicioExecucao({
   onConcluirExercicio,
   onEditarSerie,
   onIniciarDescanso,
+  emDescanso = false,
   jaEstavaConcluidoAoAbrir = false,
 }: ExercicioExecucaoProps) {
   const theme = useTheme();
@@ -109,10 +111,15 @@ export function ExercicioExecucao({
   }
 
   function handleConcluirSerie() {
+    Keyboard.dismiss();
     const cargaKg = Number(estado.cargaKg);
     const reps = Number(estado.repsFeitas);
     onConcluirSerie({ serie: estado.serieAtual, cargaKg, reps });
-    onIniciarDescanso?.();
+
+    const eraUltimaSerie = estado.serieAtual >= exercicio.series;
+    if (!eraUltimaSerie) {
+      onIniciarDescanso?.({ exercicioId: exercicio.id, descansoSeg: exercicio.descansoSeg });
+    }
   }
 
   const podeConcluirSerie = estado.cargaKg.trim().length > 0 && estado.repsFeitas.trim().length > 0;
@@ -230,7 +237,7 @@ export function ExercicioExecucao({
         </Pressable>
       )}
 
-      {estado.iniciado && !estado.concluido && (
+      {estado.iniciado && !estado.concluido && !emDescanso && (
         <ThemedView
           type="backgroundSelected"
           style={[styles.areaSerieAtual, { borderWidth: 2, borderColor: theme.text }]}
@@ -287,6 +294,20 @@ export function ExercicioExecucao({
               Concluir série
             </ThemedText>
           </Pressable>
+
+          {renderSeriesConcluidas()}
+        </ThemedView>
+      )}
+
+      {estado.iniciado && !estado.concluido && emDescanso && (
+        <ThemedView
+          type="backgroundSelected"
+          style={[styles.areaSerieAtual, { borderWidth: 2, borderColor: theme.text }]}
+        >
+          <ThemedText type="small" themeColor="textSecondary">
+            Próxima: série {estado.serieAtual} de {exercicio.series} — aguarde o fim do
+            descanso
+          </ThemedText>
 
           {renderSeriesConcluidas()}
         </ThemedView>

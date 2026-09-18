@@ -46,3 +46,8 @@ export interface SessaoTreino extends SessaoRegistro {
   iniciadaEm: string;
   execucoes: ExecucaoExercicio[];
 }
+
+export type DescansoAtivo = {
+  exercicioId: string;
+  fimEm: number;
+} | null;
