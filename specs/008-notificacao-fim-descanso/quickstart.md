@@ -3,18 +3,37 @@
 **Feature**: 008-notificacao-fim-descanso | **Date**: 2026-09-17
 
 Guia para validar manualmente o comportamento descrito na spec, nos dois
-aparelhos-alvo (Redmi Note 12/Android e iPhone 16 Plus/iOS), via Expo Go, conforme
+aparelhos-alvo (Redmi Note 12/Android e iPhone 16 Plus/iOS), conforme
 Princípio III da Constituição.
+
+> **Atualização pós-implementação**: `expo-notifications` não funciona no Expo
+> Go em Android (crash de import, ver research.md, Decisão 0) — a validação
+> exige um **EAS development build** instalado no aparelho, não o Expo Go
+> puro. Ver research.md para o procedimento completo de build.
 
 ## Pré-requisitos
 
 - RF10, RF01, RF02, RF03, RF04, RF09a e RF05 implementados e funcionando — esta
   feature depende do estado `descansoAtivo`/`fimEm` já mantido pelo RF05
-- Dependências instaladas: `npm install` (após adicionar `expo-notifications` ao
-  `package.json` — ver plan.md, Complexity Tracking, para a justificativa da nova
-  dependência)
-- Expo Go instalado no aparelho de teste, com permissão de notificações concedida
-  ao ser solicitada na primeira execução deste fluxo
+- Dependências instaladas: `npm install` (após adicionar `expo-notifications`,
+  `expo-dev-client` ao `package.json` — ver plan.md, Complexity Tracking, para
+  a justificativa das novas dependências)
+- Um **development build** (APK gerado via `eas build --profile development
+  --platform android`) instalado no aparelho de teste — não o Expo Go — com:
+  - Permissão de notificações do app concedida no sistema
+  - Permissão "Alarmes e lembretes" (`SCHEDULE_EXACT_ALARM`) concedida em
+    Configurações > Apps > [app] > Alarmes e lembretes (necessária no Android
+    12+ para precisão do disparo — ver research.md, Decisão 8)
+  - **Em aparelhos Xiaomi/MIUI/HyperOS (ex.: Redmi Note 12)**: a restrição de
+    bateria/autostart do sistema para o app **precisa ser liberada
+    manualmente** em `Configurações > Bateria > Uso de bateria do app > [app]`
+    (permitir atividade em segundo plano) e `Configurações > Apps >
+    Permissões > Autostart`. **Sem isso, o delay do aviso com a tela
+    bloqueada é significativo e a vibração pode não ocorrer de forma
+    confiável, mesmo com todas as permissões de Android puro concedidas** —
+    causa raiz confirmada em teste manual real, ver research.md, Decisão 9.
+    Este é um comportamento de gerenciamento de energia específico da MIUI,
+    não resolvível por código do app.
 - Um treino de teste com pelo menos um exercício com `descanso_seg` curto (ex.: 15s,
   para acelerar os testes)
 
@@ -113,20 +132,33 @@ npm run ios
    (campos da próxima série liberados), pois essa constatação depende apenas do
    cálculo de tempo do RF05, não da notificação.
 
-### 9. Precisão do disparo no Android — risco conhecido de Doze mode (ver plan.md, Riscos Conhecidos)
+### 9. Precisão do disparo no Android — checklist de configuração antes de medir atraso
+
+**Antes de medir qualquer atraso**, confirmar que todos os itens abaixo estão
+satisfeitos no aparelho (ver "Pré-requisitos" acima) — pular esta checklist é
+a causa mais provável de um atraso "misterioso":
+- [ ] Permissão de notificações do app concedida no sistema
+- [ ] Permissão "Alarmes e lembretes" (`SCHEDULE_EXACT_ALARM`) concedida
+- [ ] **Xiaomi/MIUI/HyperOS apenas**: restrição de bateria/autostart liberada
+  para o app (`Configurações > Bateria > Uso de bateria do app` +
+  `Configurações > Apps > Permissões > Autostart`)
+
+Com a checklist acima satisfeita:
 
 1. Concluir uma série com descanso de ~60s no Redmi Note 12.
 2. Minimizar o app e deixar o aparelho completamente parado (sem tocar, sem outros
    apps em uso) por todo o período de descanso.
 3. Medir, com um cronômetro externo, o atraso entre o horário esperado (`fimEm`) e
    o momento real em que o som/vibração ocorrem.
-   **Esperado (melhor caso)**: atraso de poucos segundos, dentro da margem de
-   SC-002. **Resultado aceitável mas não ideal**: atraso maior, de até alguns
-   minutos, atribuível ao Android tratar o agendamento como alarme não-exato sob
-   Doze mode (ver plan.md, "Riscos Conhecidos", Risco 1) — este resultado **não
-   deve ser tratado como bug de implementação**, mas registrado como confirmação
-   do risco já documentado. Repetir o mesmo teste no iPhone 16 Plus para comparar,
-   já que esse risco é específico do Android.
+   **Esperado**: atraso de poucos segundos, dentro da margem de SC-002 — este é
+   o resultado confirmado em teste manual real no Redmi Note 12, uma vez que
+   todos os itens da checklist acima estão satisfeitos (research.md, Decisão
+   9). Se o atraso for significativo (minutos) mesmo com a checklist completa,
+   revisitar research.md, Decisão 8 (permissão `SCHEDULE_EXACT_ALARM`
+   especificamente) antes de assumir que é um bug de implementação. Repetir o
+   mesmo teste no iPhone 16 Plus para comparar, já que a checklist acima é
+   específica do Android (o iOS não tem um equivalente direto de
+   restrição de bateria por app configurável pelo usuário da mesma forma).
 
 ## Critérios de aceite de referência
 

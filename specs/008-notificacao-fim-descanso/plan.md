@@ -261,7 +261,7 @@ perceptíveis e inaceitáveis, a mitigação (migrar para development build para
 declarar `SCHEDULE_EXACT_ALARM`) é uma decisão de escopo maior, a ser tomada
 explicitamente em uma iteração futura — não implícita a este RF06.
 
-### Risco 2: Comportamento de entrega em segundo plano pode variar entre dispositivos/fabricantes Android
+### Risco 2: Comportamento de entrega em segundo plano pode variar entre dispositivos/fabricantes Android — **CONFIRMADO em teste manual real**
 
 **Descrição**: Fabricantes Android com customizações agressivas de gerenciamento
 de bateria (comuns em aparelhos como o Redmi Note 12, um dos dois aparelhos-alvo
@@ -270,8 +270,23 @@ Android (ex.: encerrar processos em segundo plano de forma mais agressiva que o
 AOSP), o que pode, em casos extremos, afetar a confiabilidade de entrega de
 notificações agendadas.
 
+**Confirmação (validação manual, Redmi Note 12)**: este risco deixou de ser
+hipotético. Com `SCHEDULE_EXACT_ALARM` concedida e notificações do app
+ativadas, o delay do aviso com a tela bloqueada permaneceu significativo, e a
+vibração parou de funcionar por completo — até a restrição de bateria/
+autostart do MIUI/HyperOS ser liberada manualmente para o app em
+`Configurações > Bateria > Uso de bateria do app` e `Configurações > Apps >
+Permissões > Autostart`. Após liberar, o comportamento esperado passou a
+ocorrer integralmente (sem delay perceptível, com ou sem tela bloqueada,
+vibração funcionando). Ver research.md, Decisão 9, para o relato completo do
+diagnóstico.
+
 **Mitigação adotada nesta feature**: nenhuma mitigação de código — este é um
-comportamento de sistema fora do controle do app. Registrado aqui para que a
-validação manual no Redmi Note 12 (Princípio III) preste atenção específica a esse
-comportamento, e para que qualquer divergência observada seja documentada como tal
-(não como um bug de implementação desta feature).
+comportamento de sistema fora do controle do app, e não existe API pública
+padronizada do Android para o app detectar ou contornar essa restrição de
+forma confiável entre fabricantes. A mitigação real é **operacional**: o
+`quickstart.md` (seção "Pré-requisitos" e Cenário 9) agora documenta
+explicitamente a checklist de configuração do aparelho (permissões de
+notificação + alarme exato + liberação de bateria/autostart em aparelhos
+Xiaomi) que deve ser satisfeita antes de considerar um atraso como bug de
+implementação.

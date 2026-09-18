@@ -589,6 +589,67 @@ configurações do sistema) — fica registrado como possível melhoria futura,
 não incluída no escopo funcional original desta spec (que já assumia
 degradação graciosa sem esse tipo de intervenção de UI).
 
+## Decisão 9: Causa raiz real do delay no Redmi Note 12 — restrição de bateria/autostart do MIUI/HyperOS, não `SCHEDULE_EXACT_ALARM`
+
+**Achado durante a validação manual (Redmi Note 12, após o build com
+`SCHEDULE_EXACT_ALARM`)**: mesmo com a permissão `SCHEDULE_EXACT_ALARM`
+concedida e as notificações do app ativadas no sistema, o delay com a tela
+bloqueada **piorou** em vez de melhorar, e a vibração parou de funcionar por
+completo (mesmo em modo silencioso, onde antes funcionava). Isso não fazia
+sentido como consequência de nenhuma mudança de código feita entre os dois
+builds (a única diferença era a permissão adicionada ao `app.json`).
+
+**Causa raiz real**: restrição de bateria/autostart específica da MIUI/
+HyperOS (Xiaomi) para o app, em
+`Configurações > Bateria > Uso de bateria do app > shapefit` (permitir
+atividade em segundo plano) e `Configurações > Apps > Permissões >
+Autostart`. Diferente do Android "puro" (AOSP), a MIUI impõe uma camada
+adicional de gerenciamento agressivo de energia por aplicativo, habilitada
+por padrão para apps recém-instalados — isso é conhecido na comunidade Expo/
+React Native como um dos principais motivos de notificações agendadas
+atrasarem ou não dispararem em aparelhos Xiaomi, **independentemente** de
+`SCHEDULE_EXACT_ALARM` estar concedida ou não a nível de Android puro. Após o
+usuário liberar essa restrição de bateria manualmente, o comportamento
+esperado passou a ocorrer integralmente: sem delay perceptível, tanto com o
+app em segundo plano quanto com a tela bloqueada, e com a vibração
+funcionando novamente.
+
+**Implicação para a Decisão 8 (revisão)**: a permissão `SCHEDULE_EXACT_ALARM`
+continua sendo uma boa prática e permanece no `app.json` (é a permissão
+"correta" a nível de Android puro para este caso de uso), mas o **verdadeiro
+fator decisivo** observado neste aparelho específico foi a configuração de
+bateria/autostart da MIUI, não a permissão de alarme exato em si — os dois
+achados podem ter se misturado no teste anterior (o build sem
+`SCHEDULE_EXACT_ALARM` "funcionando razoavelmente" e o build com a permissão
+"piorando" foi, na prática, uma variável de confusão: a configuração de
+bateria da MIUI não tinha sido tocada em nenhum dos dois testes, e o
+resultado ruim do segundo teste não foi causado pela permissão em si).
+
+**Decision**: nenhuma mudança de código adicional é necessária — a
+combinação de `SCHEDULE_EXACT_ALARM` (Android puro) + liberar a restrição de
+bateria/autostart do MIUI (config do aparelho, fora do controle do app) é o
+que garante a entrega confiável no Redmi Note 12. Esta feature não tem como
+forçar ou verificar programaticamente essa configuração específica de
+fabricante — não existe uma API pública padronizada do Android para isso
+(cada fabricante expõe sua própria tela de configurações, com nomes e
+caminhos diferentes). Fica documentado aqui como uma **instrução operacional
+para o usuário final** (ou para o quickstart.md de validação), não como algo
+resolvido em tempo de execução pelo app.
+
+**Alternatives considered**:
+- Tentar detectar programaticamente se o app está sujeito a essa restrição
+  (ex.: bibliotecas de terceiros que verificam heurísticas por fabricante,
+  como listas conhecidas de "apps que restringem notificações"): rejeitado —
+  adicionaria uma dependência de terceiros e uma camada de heurística frágil
+  (Princípio II) para resolver um problema que já tem solução simples e
+  documentada (orientar o usuário a liberar a configuração manualmente), sem
+  garantia de cobrir todos os fabricantes/versões de MIUI.
+- Adicionar ao app um botão/tela que abre diretamente a tela de configuração
+  de bateria do MIUI para o app: rejeitado nesta feature — não há uma API
+  pública estável e documentada oficialmente pela Xiaomi/Google para abrir
+  essa tela específica de forma confiável entre versões da MIUI/HyperOS;
+  seria uma solução frágil e fora do escopo funcional original da spec.
+
 ## Item de acompanhamento para a fase de implementação
 
 - Confirmar manualmente, antes de escrever o código, a forma exata do objeto de
