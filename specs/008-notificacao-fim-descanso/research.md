@@ -95,6 +95,59 @@ pelo EAS no Redmi Note 12, em vez de abrir o projeto no app Expo Go — esse é 
 ponto de atenção para o quickstart.md e para qualquer feature futura, não só o
 RF06.
 
+**Segundo achado durante a migração (erro de configuração do EAS Build, não
+relacionado a `expo-notifications`)**: o primeiro disparo de
+`eas build --profile development --platform android` falhou na fase
+`INSTALL_DEPENDENCIES` com:
+
+```
+npm error `npm ci` can only install packages when your package.json and
+package-lock.json or npm-shrinkwrap.json are in sync. Please update your lock
+file with `npm install` before continuing.
+npm error Missing: typescript@5.9.3 from lock file
+```
+
+**Causa raiz**: `eas-cli` havia sido adicionado como `devDependency` do projeto
+(`npm install --save-dev eas-cli`, para poder rodar `npx eas-cli` localmente).
+Uma dependência transitiva de `eas-cli` (`@expo/require-utils`, usada por
+`@expo/config` e por `ts-node`/`@oclif/core`) declara
+`peerDependencies.typescript: "^5.0.0 || ^5.0.0-0"` — uma faixa incompatível
+com o `typescript@~6.0.3` já usado pelo projeto (via `eslint-config-expo` e
+`tsconfig`). O `npm install` local tolerou essa incompatibilidade
+silenciosamente, apenas *deduplicando* (reaproveitando) o `typescript@6.0.3`
+do topo da árvore mesmo fora do range aceito por essa dependência transitiva
+(reportado como `invalid` por `npm ls`, mas sem impedir o `install`). O
+`npm ci` usado pelo EAS Build, porém, é estrito: recusa instalar quando o
+lockfile não reflete uma resolução válida para todos os `peerDependencies`
+declarados, e reporta a ausência de uma cópia de `typescript@5.9.3` (a
+versão que satisfaria aquele range) como se fosse uma dependência realmente
+"faltando" do lockfile.
+
+**Decision (correção)**: remover `eas-cli` de `package.json`
+(`npm uninstall eas-cli`) — não deveria ter sido adicionado como dependência
+do projeto em primeiro lugar. `eas-cli` é uma ferramenta de linha de comando
+usada pontualmente para disparar builds, não uma dependência de runtime nem de
+build do próprio app; deve ser invocada via `npx eas-cli <comando>` (que a
+baixa temporariamente, sem registrá-la em `package.json`/`package-lock.json`),
+ou instalada globalmente na máquina de quem opera os builds, nunca como
+dependência do projeto em si. Após a remoção, `npm ci --include=dev` local
+passou a completar sem erros (854 pacotes instalados, nenhuma inconsistência
+de `peerDependencies` reportada), confirmando que a causa raiz era
+especificamente essa dependência mal-colocada, não `expo-notifications` nem
+`expo-dev-client` (ambos permanecem em `dependencies`, como esperado).
+
+**Alternatives considered**:
+- Fixar a versão de `typescript` do projeto para `^5.x` para satisfazer o
+  range de `eas-cli`: rejeitado — downgrade desnecessário e arriscado do
+  TypeScript usado por todo o projeto só para acomodar uma ferramenta de CLI
+  que não deveria nem estar listada como dependência.
+- Usar `npm install` (em vez de `npm ci`) na configuração do EAS Build para
+  tolerar a mesma inconsistência que o ambiente local tolera: não avaliado
+  como opção real — o comando usado pelo EAS Build (`npm ci`) não é
+  configurável pelo `eas.json` nesta versão, e mesmo que fosse, apenas
+  mascararia a causa raiz (uma dependência de dev desnecessária no projeto)
+  em vez de corrigi-la.
+
 **Alternatives considered**:
 - Import dinâmico/lazy de `expo-notifications` só quando necessário, evitando
   o import estático no topo do arquivo: rejeitado — o efeito colateral está no
