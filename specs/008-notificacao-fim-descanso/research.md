@@ -171,6 +171,90 @@ especificamente essa dependência mal-colocada, não `expo-notifications` nem
   sempre — a mudança do SDK 53 apenas tornou isso explícito para push, mas o
   princípio já se aplicava a qualquer módulo nativo customizado).
 
+**Terceiro achado durante a validação manual no development build (Android)**:
+com o APK do development build instalado e funcionando (sem o crash da
+Decisão 0), o app passou a exibir o erro nativo
+`expo-notifications: Custom sound 'default' not found in native app.` na
+primeira execução, e nas execuções seguintes o alerta simplesmente não
+disparava mais com o app em primeiro plano (só ao minimizar ou navegar para
+outra tela do próprio app — comportamento visualmente parecido com "às vezes
+funciona"). Investigado lendo o código nativo Android do pacote
+(`android/.../channels/managers/AndroidXNotificationsChannelManager.java` e
+`NotificationChannelManagerModule.kt`).
+
+**Causa raiz**: o código deste RF06 passava `sound: 'default'` para
+`Notifications.setNotificationChannelAsync`. No Android, esse campo é tratado
+como o **nome de um arquivo de som customizado** a resolver via
+`mSoundResolver.resourceExists(filename)` — a string literal `'default'` não é
+um valor mágico reconhecido nesse contexto (diferente do `content.sound` da
+API JS de mais alto nível, onde `'default'` *é* um valor especial, mas esse é
+o campo de conteúdo da notificação individual, não o do canal). Quando a
+chave `sound` está simplesmente **ausente** do objeto passado ao canal, o
+código nativo usa `Settings.System.DEFAULT_NOTIFICATION_URI` (o som padrão
+real do sistema); quando ela está presente com um valor que não corresponde a
+um recurso de som embutido no app, o pacote loga um erro nativo e (nas
+execuções seguintes) o canal fica em um estado inconsistente, explicando por
+que o alerta parou de dar sinal em primeiro plano após a primeira tentativa.
+Contribuiu para a confusão o fato de canais de notificação Android serem
+**imutáveis** depois de criados (a maioria dos atributos, incluindo o som, não
+pode ser alterada por uma chamada subsequente a `setNotificationChannelAsync`
+com o mesmo `channelId`) — então mesmo corrigindo o código, o canal já criado
+com a configuração quebrada continuaria "preso" nela no aparelho de teste até
+ser explicitamente recriado sob um novo identificador.
+
+**Decision (correção)**: remover completamente o campo `sound` do objeto
+passado a `setNotificationChannelAsync` (deixando implícito o som padrão do
+sistema, que é o comportamento desejado — nenhum som customizado é usado por
+esta feature) e renomear o identificador do canal de `'descanso'` para
+`'descanso-v2'`, forçando o Android a criar um canal novo do zero (limpo) em
+vez de reaproveitar o canal antigo já criado com a configuração inválida nos
+aparelhos onde o app já havia rodado antes desta correção.
+
+**Alternatives considered**:
+- Manter `sound: 'default'` e adicionar um arquivo de som real chamado
+  `default` ao projeto (via config plugin do `expo-notifications`): rejeitado
+  — desnecessário; o requisito é apenas "som + vibração", satisfeito pelo som
+  padrão do sistema, sem necessidade de um asset de som customizado
+  (Princípio II — simplicidade no MVP).
+- Deletar/atualizar o canal antigo (`'descanso'`) programaticamente via
+  `Notifications.deleteNotificationChannelAsync('descanso')` antes de criar o
+  novo, mantendo o mesmo nome de canal: avaliado como alternativa válida, mas
+  rejeitado em favor de simplesmente trocar o identificador — mais simples,
+  sem exigir uma chamada de exclusão condicional adicional na inicialização
+  do app, e sem risco de a exclusão falhar silenciosamente em versões mais
+  antigas do Android.
+
+**Quarto achado durante a mesma validação manual (vibração não ocorria, com o
+aparelho fora do modo silencioso o som já funcionava)**: após a correção do
+som, o usuário reportou que, tirando o aparelho do modo silencioso, o som
+passou a tocar corretamente, mas a vibração parou de ocorrer — tanto com o
+app em outra tela quanto com a tela bloqueada.
+
+**Causa raiz**: confirmada lendo
+`android/.../channels/managers/AndroidXNotificationsChannelManager.java`
+(método que aplica as opções do canal): `vibrationPattern` e `enableVibrate`
+são dois campos **independentes** na API nativa do Android
+(`android.app.NotificationChannel`) — `channel.setVibrationPattern(...)`
+apenas define *qual* padrão usar **se** a vibração estiver habilitada, mas não
+a habilita sozinho; é `channel.enableVibration(true)` (mapeado pelo campo
+`enableVibrate` do pacote) quem efetivamente liga a vibração no canal. Como
+este RF06 só passava `vibrationPattern`, sem `enableVibrate: true`, o canal
+Android criado nunca tinha a vibração habilitada — o padrão nativo de um
+`NotificationChannel` recém-criado é `enableVibration = false`.
+
+**Decision (correção)**: adicionar `enableVibrate: true` ao objeto passado a
+`setNotificationChannelAsync`, junto do `vibrationPattern` já existente, e
+renomear novamente o identificador do canal (de `'descanso-v2'` para
+`'descanso-v3'`) para forçar a recriação limpa nos aparelhos de teste — pelo
+mesmo motivo de imutabilidade de canais já registrado no achado anterior.
+
+**Alternatives considered**:
+- Assumir que `vibrationPattern` sozinho seria suficiente para habilitar a
+  vibração (suposição original, não verificada contra o código nativo antes
+  desta correção): refutado diretamente pelo comportamento observado no
+  dispositivo físico e pela leitura do código-fonte nativo — os dois campos
+  são de fato independentes na API Android subjacente.
+
 ## Decisão 1: Trigger de agendamento por data absoluta (`SchedulableTriggerInputTypes.DATE`)
 
 **Decision**: A notificação é agendada com

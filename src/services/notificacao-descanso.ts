@@ -1,7 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
-const CANAL_DESCANSO = 'descanso';
+const CANAL_DESCANSO = 'descanso-v3';
 
 export function configurarNotificacoesDescanso(): void {
   Notifications.setNotificationHandler({
@@ -18,7 +18,7 @@ export function configurarNotificacoesDescanso(): void {
       name: 'Fim do descanso',
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
-      sound: 'default',
+      enableVibrate: true,
       lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
     });
   }

@@ -213,11 +213,12 @@ esta feature (escopo pequeno, aditivo).
 - [X] T013 Executar o roteiro completo de [quickstart.md](./quickstart.md) (cenários 1, 2 e
   3) manualmente no Android (Redmi Note 12, ou emulador equivalente) via Expo Go.
 
-- [ ] T014 Executar o roteiro completo de [quickstart.md](./quickstart.md) (cenários 1, 2 e
+- [X] T014 Executar o roteiro completo de [quickstart.md](./quickstart.md) (cenários 1, 2 e
   3) manualmente no iOS (iPhone 16 Plus, ou simulador equivalente) via Expo Go, com atenção
   especial ao comportamento do `Alert.alert` nativo (apresentação diferente de Android) e
   aos campos de `TextInput` numérico/decimal, área com histórico de divergência entre
-  plataformas (ver plan.md, Constitution Check, Princípio III).
+  plataformas (ver plan.md, Constitution Check, Princípio III) — validado no iPhone 16 Plus,
+  todos os cenários OK.
 
 - [X] T015 [P] Rodar o type-check do projeto (`npx tsc --noEmit` ou script equivalente já
   configurado) e confirmar ausência de erros de tipo em todos os arquivos tocados por esta

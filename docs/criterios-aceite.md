@@ -219,6 +219,20 @@ continuar. Não é um requisito do MVP atual — decisão consciente de adiar, n
 - [ ] Se o app for minimizado (segundo plano) durante o descanso, o tempo restante ao
       voltar para o app reflete o tempo real decorrido, não pausa artificialmente
 - [ ] Ao chegar a zero, o cronômetro para e aciona o aviso (ver RF06)
+- [ ] Se `descanso_seg` estiver ausente, zero ou não numérico no exercício, o cronômetro
+      não é exibido — o evento de "descanso concluído" dispara imediatamente
+- [ ] Se o usuário concluir outra série (do mesmo exercício ou de outro) enquanto um
+      cronômetro anterior ainda está contando, o cronômetro anterior é substituído pelo
+      novo (sem acumular múltiplos cronômetros)
+- [ ] Se o app for fechado por completo (não apenas minimizado) durante o descanso, o
+      cronômetro não é retomado ao reabrir — o usuário retoma o exercício normalmente,
+      sem cronômetro ativo (comportamento aceito, não é falha)
+
+**Nota arquitetural para o `/speckit.plan`:** o timestamp de início do cronômetro precisa
+sobreviver à navegação para outras abas do app (não só background/foreground), então não
+pode viver como estado local do componente `ExercicioExecucao` (que é controlado, sem
+estado próprio desde o RF03) — deve morar na rota `[treinoId].tsx`, junto de
+`estadosPorExercicio`, ou em local equivalente que não seja desmontado ao trocar de aba.
 
 ---
 
@@ -226,6 +240,13 @@ continuar. Não é um requisito do MVP atual — decisão consciente de adiar, n
 
 **Decisões:**
 - Aviso por som **e** vibração juntos
+- Implementado como agendamento no sistema operacional (não reação em JS), disparado no
+  momento em que o cronômetro inicia/é ajustado, usando o `fimEm` do RF05 — necessário
+  porque o JS é suspenso em segundo plano
+- Permissão de notificação é pedida "quando necessário" (no primeiro agendamento), sem
+  fluxo de onboarding próprio; se negada, o app segue funcionando normalmente (a fonte de
+  verdade do descanso concluído continua sendo o cálculo de tempo do RF05, não a
+  notificação em si)
 
 **Critérios de aceite:**
 - [ ] Ao término do descanso, o app emite um som e uma vibração simultaneamente
@@ -235,6 +256,20 @@ continuar. Não é um requisito do MVP atual — decisão consciente de adiar, n
       silencioso, exceto pela vibração)
 - [ ] Após o aviso, o app exibe claramente que o descanso terminou e libera o próximo
       registro de série
+- [ ] O aviso também dispara corretamente com o **app em primeiro plano** (não só em
+      segundo plano/tela bloqueada) — atenção especial na implementação, já que o
+      `expo-notifications` suprime som/alerta em primeiro plano por padrão, exigindo
+      configuração explícita de `setNotificationHandler`
+- [ ] Ao ajustar ou substituir o cronômetro (RF05), o aviso agendado anteriormente é
+      cancelado e um novo é agendado para o novo horário — nunca dois avisos pendentes
+      simultâneos
+- [ ] Se o ajuste do tempo restante resultar em zero ou negativo, o aviso dispara
+      imediatamente, sem aguardar um horário futuro
+- [ ] Se a notificação não puder ser exibida por qualquer motivo (permissão negada, app
+      fechado), o app ainda reflete corretamente que o descanso terminou ao ser reaberto —
+      a notificação nunca é a única fonte de verdade sobre a conclusão do descanso
+- [ ] Tocar na notificação (com app minimizado/tela bloqueada) traz o app de volta à tela
+      de execução do exercício correto, já com o descanso concluído
 
 ---
 
@@ -293,14 +328,11 @@ continuar. Não é um requisito do MVP atual — decisão consciente de adiar, n
   último na fila original
 
 **Critérios de aceite:**
-- [x] O usuário consegue editar carga e/ou reps de qualquer série já concluída do
+- [ ] O usuário consegue editar carga e/ou reps de qualquer série já concluída do
       exercício atualmente em execução, antes de tocar em "Concluir exercício"
-- [x] A edição não reabre nem altera o estado de conclusão do exercício — apenas o valor
+- [ ] A edição não reabre nem altera o estado de conclusão do exercício — apenas o valor
       daquela série específica é atualizado
-- [x] O app pede confirmação antes de salvar uma edição, para evitar alteração acidental
-
-> **Status (2026-09-17):** implementado e validado apenas no Android — validação no
-> iPhone 16 Plus (iOS) ainda pendente (ver seção 13 do PRD, "Dívida técnica acumulada").
+- [ ] O app pede confirmação antes de salvar uma edição, para evitar alteração acidental
 
 ---
 
@@ -327,4 +359,5 @@ RF01 a RF10 concluídos. Este documento, junto com o PRD v1.1, está pronto para
 como contexto no `/speckit.specify` de cada requisito.
 
 **Ordem recomendada de implementação:** RF10 → RF01 → RF02 → RF03 → RF04 → RF09a → RF05 →
+
 RF06 → RF07 → RF08 → RF09b.
