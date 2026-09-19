@@ -295,19 +295,41 @@ specs/008-notificacao-fim-descanso/research.md.
   iniciado
 
 **Critérios de aceite:**
-- [ ] A sessão salva (em andamento ou finalizada) é vinculada ao `perfil_id` ativo no
-      momento em que a execução do treino foi iniciada
-- [ ] A sessão é marcada como concluída automaticamente quando todos os exercícios do
-      treino são concluídos
-- [ ] Existe um botão "Finalizar treino" acessível a qualquer momento durante a execução,
-      permitindo encerrar a sessão mesmo com exercícios pendentes
-- [ ] Ao finalizar manualmente com exercícios pendentes, apenas as séries já registradas
-      são salvas — exercícios não iniciados não geram registro vazio no histórico
-- [ ] Uma sessão em andamento (não finalizada) persiste ao fechar e reabrir o app,
-      retomando de onde parou
-- [ ] Uma sessão finalizada é salva permanentemente e passa a aparecer no histórico (RF08)
-- [ ] Depois de finalizar uma sessão, o usuário consegue iniciar uma nova sessão
-      (do mesmo treino ou de outro) sem qualquer resquício da sessão anterior
+- [X] A sessão salva (em andamento ou finalizada) é vinculada ao `perfil_id` ativo no
+      momento em que a execução do treino foi iniciada — validado em Android (Redmi
+      Note 12) e iOS (iPhone 16 Plus)
+- [X] A sessão é marcada como concluída automaticamente quando todos os exercícios do
+      treino são concluídos — validado em ambos os aparelhos
+- [X] Existe um botão "Finalizar treino" acessível a qualquer momento durante a execução,
+      permitindo encerrar a sessão mesmo com exercícios pendentes — validado em ambos
+      os aparelhos; ajustado após validação manual para ficar visível apenas na tela
+      de lista de exercícios (não na tela de execução de um exercício específico) e
+      com cor de atenção (`warning`/amarelo) em vez de verde — ver
+      specs/009-salvar-sessao-treino/research.md, Decisão 7 (revisada)
+- [X] Ao finalizar manualmente com exercícios pendentes, apenas as séries já registradas
+      são salvas — exercícios não iniciados não geram registro vazio no histórico —
+      validado em ambos os aparelhos
+- [X] Uma sessão em andamento (não finalizada) persiste ao fechar e reabrir o app,
+      retomando de onde parou — validado em ambos os aparelhos (comportamento
+      herdado do RF04/RF05, reconfirmado)
+- [X] Uma sessão finalizada é salva permanentemente e passa a aparecer no histórico (RF08)
+      — a persistência e distinção entre sessões finalizadas está garantida (campo
+      `id` próprio por sessão); a exibição em tela de histórico em si é escopo do RF08,
+      ainda não implementado
+- [X] Depois de finalizar uma sessão, o usuário consegue iniciar uma nova sessão
+      (do mesmo treino ou de outro) sem qualquer resquício da sessão anterior —
+      validado em ambos os aparelhos, incluindo múltiplas execuções do mesmo treino
+      ao longo do tempo
+
+**Nota de implementação (2026-09-18):** durante a validação manual, o usuário
+identificou três ajustes de UX não previstos no plano original, implementados nesta
+mesma feature (RF07) e documentados como demanda pós-implementação: (1) o botão
+"Finalizar treino" foi restrito à tela de lista de exercícios; (2) sua cor mudou de
+verde/`success` para amarelo/`warning`; (3) foi adicionado um contador de sessões
+finalizadas por treino na tela de lista de treinos (RF02), exibido ao final do nome
+do treino, alinhado à direita. Detalhes completos em
+specs/009-salvar-sessao-treino/spec.md (User Story 4, FR-013, Assumptions) e
+specs/009-salvar-sessao-treino/research.md (Decisões 7 e 10).
 
 ---
 

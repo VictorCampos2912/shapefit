@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -8,6 +8,7 @@ import { ThemedView } from '@/components/themed-view';
 import { TreinoListItem } from '@/components/treino/treino-list-item';
 import { Spacing } from '@/constants/theme';
 import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
+import { contarSessoesFinalizadas } from '@/services/sessao-treino-storage';
 import { importarTreino, importarTreinoExemplo, listarTreinos } from '@/services/treino-storage';
 import type { ResultadoImportacao, Treino } from '@/types/treino';
 
@@ -50,13 +51,22 @@ function exibirResultadoImportacao(resultado: ResultadoImportacao | null) {
 export default function TreinosScreen() {
   const { perfilAtivo } = usePerfilAtivo();
   const [treinos, setTreinos] = useState<Treino[]>([]);
+  const [contagensPorTreino, setContagensPorTreino] = useState<Record<string, number>>({});
   const [carregando, setCarregando] = useState(true);
   const [importando, setImportando] = useState(false);
+
+  async function carregarContagens(perfilId: string, lista: Treino[]) {
+    const entradas = await Promise.all(
+      lista.map(async (treino) => [treino.id, await contarSessoesFinalizadas(perfilId, treino.id)] as const),
+    );
+    setContagensPorTreino(Object.fromEntries(entradas));
+  }
 
   async function recarregarTreinos() {
     if (!perfilAtivo) return;
     const lista = await listarTreinos(perfilAtivo.id);
     setTreinos(lista);
+    await carregarContagens(perfilAtivo.id, lista);
   }
 
   useEffect(() => {
@@ -69,12 +79,20 @@ export default function TreinosScreen() {
         setTreinos(lista);
         setCarregando(false);
       }
+      await carregarContagens(perfilAtivo.id, lista);
     })();
     return () => {
       ativo = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reload deve depender só do id do perfil ativo (research.md, Decisão 2), não do objeto perfilAtivo inteiro
   }, [perfilAtivo?.id]);
+
+  useFocusEffect(
+    useCallback(() => {
+      recarregarTreinos();
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- recarrega ao ganhar foco (ex.: voltar de uma sessão finalizada), sem precisar de mais dependências
+    }, [perfilAtivo?.id]),
+  );
 
   async function handleImportarTreino() {
     if (!perfilAtivo) return;
@@ -148,6 +166,7 @@ export default function TreinosScreen() {
             <TreinoListItem
               treino={item}
               nomeDuplicado={nomesDuplicados.has(item.nome)}
+              qtdSessoesFinalizadas={contagensPorTreino[item.id] ?? 0}
               onPress={() => handleSelecionarTreino(item)}
             />
           )}

@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Crypto from 'expo-crypto';
 
 import type { SerieRealizada, SessaoTreino } from '@/types/execucao-treino';
 
@@ -20,7 +21,7 @@ async function setSessoes(perfilId: string, sessoes: SessaoTreino[]): Promise<vo
 
 export async function obterSessao(perfilId: string, treinoId: string): Promise<SessaoTreino | null> {
   const sessoes = await getSessoes(perfilId);
-  return sessoes.find((sessao) => sessao.treinoId === treinoId) ?? null;
+  return sessoes.find((sessao) => sessao.treinoId === treinoId && sessao.finalizadaEm === null) ?? null;
 }
 
 export async function registrarSerieConcluida(params: {
@@ -33,9 +34,10 @@ export async function registrarSerieConcluida(params: {
   const { perfilId, treinoId, exercicioId, serie, totalSeriesDoExercicio } = params;
   const sessoes = await getSessoes(perfilId);
 
-  let sessao = sessoes.find((item) => item.treinoId === treinoId);
+  let sessao = sessoes.find((item) => item.treinoId === treinoId && item.finalizadaEm === null);
   if (!sessao) {
     sessao = {
+      id: Crypto.randomUUID(),
       perfilId,
       treinoId,
       iniciadaEm: new Date().toISOString(),
@@ -66,9 +68,9 @@ export async function marcarExercicioConcluido(params: {
   const { perfilId, treinoId, exercicioId } = params;
   const sessoes = await getSessoes(perfilId);
 
-  const sessao = sessoes.find((item) => item.treinoId === treinoId);
+  const sessao = sessoes.find((item) => item.treinoId === treinoId && item.finalizadaEm === null);
   if (!sessao) {
-    throw new Error(`Nenhuma sessão encontrada para o treino ${treinoId} do perfil ${perfilId}`);
+    throw new Error(`Nenhuma sessão em andamento encontrada para o treino ${treinoId} do perfil ${perfilId}`);
   }
 
   const execucao = sessao.execucoes.find((item) => item.exercicioId === exercicioId);
@@ -93,9 +95,9 @@ export async function atualizarSerieRealizada(params: {
   const { perfilId, treinoId, exercicioId, serie, novaCargaKg, novosReps } = params;
   const sessoes = await getSessoes(perfilId);
 
-  const sessao = sessoes.find((item) => item.treinoId === treinoId);
+  const sessao = sessoes.find((item) => item.treinoId === treinoId && item.finalizadaEm === null);
   if (!sessao) {
-    throw new Error(`Nenhuma sessão encontrada para o treino ${treinoId} do perfil ${perfilId}`);
+    throw new Error(`Nenhuma sessão em andamento encontrada para o treino ${treinoId} do perfil ${perfilId}`);
   }
 
   const execucao = sessao.execucoes.find((item) => item.exercicioId === exercicioId);
@@ -110,6 +112,29 @@ export async function atualizarSerieRealizada(params: {
 
   serieRealizada.cargaKg = novaCargaKg;
   serieRealizada.reps = novosReps;
+
+  await setSessoes(perfilId, sessoes);
+  return sessao;
+}
+
+export async function contarSessoesFinalizadas(perfilId: string, treinoId: string): Promise<number> {
+  const sessoes = await getSessoes(perfilId);
+  return sessoes.filter((sessao) => sessao.treinoId === treinoId && sessao.finalizadaEm !== null).length;
+}
+
+export async function finalizarSessao(perfilId: string, sessaoId: string): Promise<SessaoTreino> {
+  const sessoes = await getSessoes(perfilId);
+
+  const sessao = sessoes.find((item) => item.id === sessaoId);
+  if (!sessao) {
+    throw new Error(`Nenhuma sessão encontrada com id ${sessaoId} para o perfil ${perfilId}`);
+  }
+
+  if (sessao.finalizadaEm !== null) {
+    return sessao;
+  }
+
+  sessao.finalizadaEm = new Date().toISOString();
 
   await setSessoes(perfilId, sessoes);
   return sessao;

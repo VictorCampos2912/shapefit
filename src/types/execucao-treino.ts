@@ -42,6 +42,7 @@ export type ExecucaoExercicio = {
 };
 
 export interface SessaoTreino extends SessaoRegistro {
+  id: string;
   treinoId: string;
   iniciadaEm: string;
   execucoes: ExecucaoExercicio[];

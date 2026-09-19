@@ -12,6 +12,7 @@ import { Spacing } from '@/constants/theme';
 import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
 import {
   atualizarSerieRealizada,
+  finalizarSessao,
   marcarExercicioConcluido,
   obterSessao,
   registrarSerieConcluida,
@@ -81,6 +82,7 @@ export default function ExecucaoTreinoScreen() {
   const [carregando, setCarregando] = useState(true);
   const [exercicioSelecionadoId, setExercicioSelecionadoId] = useState<string | null>(null);
   const [estadosPorExercicio, setEstadosPorExercicio] = useState<Record<string, EstadoExecucaoExercicio>>({});
+  const [sessaoAtualId, setSessaoAtualId] = useState<string | null>(null);
   const [reaberturaJaConcluida, setReaberturaJaConcluida] = useState(false);
   const [descansoAtivo, setDescansoAtivo] = useState<DescansoAtivo>(null);
   const [notificacaoAgendada, setNotificacaoAgendada] = useState<{
@@ -104,6 +106,7 @@ export default function ExecucaoTreinoScreen() {
         const sessao = await obterSessao(perfilAtivo.id, encontrado.id);
         if (ativo) {
           setEstadosPorExercicio(estadosPorExercicioDaSessao(sessao, encontrado.exercicios));
+          setSessaoAtualId(sessao?.id ?? null);
         }
       }
 
@@ -175,6 +178,8 @@ export default function ExecucaoTreinoScreen() {
     });
     const execucao = sessao.execucoes.find((item) => item.exercicioId === exercicioId);
     if (!execucao) return;
+
+    setSessaoAtualId(sessao.id);
 
     setEstadosPorExercicio((atual) => {
       const estadoAtual = atual[exercicioId] ?? criarEstadoExecucaoInicial(exercicioId);
@@ -285,6 +290,27 @@ export default function ExecucaoTreinoScreen() {
     }
   }
 
+  async function handleFinalizarTreino() {
+    if (!perfilAtivo || !sessaoAtualId) return;
+
+    handleDescansoConcluido();
+    await finalizarSessao(perfilAtivo.id, sessaoAtualId);
+
+    setSessaoAtualId(null);
+    setEstadosPorExercicio({});
+    setExercicioSelecionadoId(null);
+  }
+
+  useEffect(() => {
+    const todosConcluidos =
+      treino?.exercicios.every((item) => estadosPorExercicio[item.id]?.concluido) ?? false;
+    if (todosConcluidos && sessaoAtualId !== null) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      handleFinalizarTreino();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [estadosPorExercicio, sessaoAtualId, treino?.exercicios]);
+
   if (carregando) {
     return (
       <ThemedView style={styles.container}>
@@ -352,6 +378,15 @@ export default function ExecucaoTreinoScreen() {
                 </ThemedText>
               </ThemedView>
             )}
+            {sessaoAtualId && (
+              <Pressable onPress={handleFinalizarTreino}>
+                <ThemedView type="warningBackground" style={styles.botaoFinalizarTreino}>
+                  <ThemedText type="smallBold" themeColor="warning" style={styles.textoCentralizado}>
+                    Finalizar treino
+                  </ThemedText>
+                </ThemedView>
+              </Pressable>
+            )}
           </>
         )}
         {descansoAtivo && (
@@ -379,6 +414,10 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   parabens: {
+    borderRadius: Spacing.two,
+    padding: Spacing.three,
+  },
+  botaoFinalizarTreino: {
     borderRadius: Spacing.two,
     padding: Spacing.three,
   },
