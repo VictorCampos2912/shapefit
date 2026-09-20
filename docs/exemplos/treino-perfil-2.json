@@ -1,0 +1,13 @@
+{
+  "nome": "Treino Perfil 2 - Teste Segregação",
+  "exercicios": [
+    {
+      "id": "supino-reto-p2",
+      "nome": "Supino Reto",
+      "series": 3,
+      "reps_alvo": "8-10",
+      "carga_sugerida_kg": 30,
+      "descanso_seg": 60
+    }
+  ]
+}

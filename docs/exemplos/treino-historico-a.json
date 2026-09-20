@@ -1,0 +1,29 @@
+{
+  "nome": "Treino Histórico A - Peito/Costas",
+  "exercicios": [
+    {
+      "id": "supino-reto-a",
+      "nome": "Supino Reto",
+      "series": 3,
+      "reps_alvo": "8-10",
+      "carga_sugerida_kg": 40,
+      "descanso_seg": 60
+    },
+    {
+      "id": "rosca-direta-a",
+      "nome": "Rosca direta",
+      "series": 3,
+      "reps_alvo": "10-12",
+      "carga_sugerida_kg": 15,
+      "descanso_seg": 45
+    },
+    {
+      "id": "leg-press-a",
+      "nome": "Leg Press 45°",
+      "series": 3,
+      "reps_alvo": "12-15",
+      "carga_sugerida_kg": 80,
+      "descanso_seg": 60
+    }
+  ]
+}

@@ -1,180 +1,111 @@
-import { Image } from 'expo-image';
-import { SymbolView } from 'expo-symbols';
-import { Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import { FlatList, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ExternalLink } from '@/components/external-link';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Collapsible } from '@/components/ui/collapsible';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+import { Spacing } from '@/constants/theme';
+import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
+import { obterHistoricoPorPerfil } from '@/services/historico-evolucao';
+import type { EvolucaoExercicio, HistoricoPerfil } from '@/types/historico';
 
-export default function TabTwoScreen() {
-  const safeAreaInsets = useSafeAreaInsets();
-  const insets = {
-    ...safeAreaInsets,
-    bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
-  };
-  const theme = useTheme();
+function formatarData(iso: string): string {
+  return new Date(iso).toLocaleString();
+}
 
-  const contentPlatformStyle = Platform.select({
-    android: {
-      paddingTop: insets.top,
-      paddingLeft: insets.left,
-      paddingRight: insets.right,
-      paddingBottom: insets.bottom,
-    },
-    web: {
-      paddingTop: Spacing.six,
-      paddingBottom: Spacing.four,
-    },
-  });
+function SecaoExercicio({ evolucao }: { evolucao: EvolucaoExercicio }) {
+  return (
+    <Collapsible title={evolucao.nomeExibido}>
+      {evolucao.registros.length === 0 ? (
+        <ThemedText type="small" themeColor="textSecondary">
+          Nenhum registro para este exercício ainda.
+        </ThemedText>
+      ) : (
+        <ThemedView style={styles.listaRegistros}>
+          {evolucao.registros.map((registro, indice) => (
+            <ThemedText key={`${registro.data}-${indice}`} type="small">
+              {formatarData(registro.data)} · {registro.cargaKg}kg · {registro.reps} reps
+            </ThemedText>
+          ))}
+        </ThemedView>
+      )}
+    </Collapsible>
+  );
+}
+
+export default function HistoricoScreen() {
+  const { perfilAtivo } = usePerfilAtivo();
+  const [historico, setHistorico] = useState<HistoricoPerfil | null>(null);
+
+  async function recarregarHistorico() {
+    if (!perfilAtivo) return;
+    setHistorico(await obterHistoricoPorPerfil(perfilAtivo.id));
+  }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- mesmo padrão de supressão já usado no RF07 ([treinoId].tsx) para este mesmo lint; recarregarHistorico() só dispara setState de forma assíncrona (após o await), não sincronamente dentro do corpo do efeito
+    recarregarHistorico();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- recarrega só por id do perfil ativo, mesmo padrão do RF02 (index.tsx)
+  }, [perfilAtivo?.id]);
+
+  useFocusEffect(
+    useCallback(() => {
+      recarregarHistorico();
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- mesmo padrão do RF02/RF07 (index.tsx): recarrega ao ganhar foco (ex.: voltar de finalizar um treino, trocar de perfil)
+    }, [perfilAtivo?.id]),
+  );
 
   return (
-    <ScrollView
-      style={[styles.scrollView, { backgroundColor: theme.background }]}
-      contentInset={insets}
-      contentContainerStyle={[styles.contentContainer, contentPlatformStyle]}>
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="subtitle">Explore</ThemedText>
-          <ThemedText style={styles.centerText} themeColor="textSecondary">
-            This starter app includes example{'\n'}code to help you get started.
-          </ThemedText>
+    <ThemedView style={styles.container}>
+      <SafeAreaView style={styles.safeArea}>
+        <ThemedText type="subtitle">Histórico de evolução</ThemedText>
 
-          <ExternalLink href="https://docs.expo.dev" asChild>
-            <Pressable style={({ pressed }) => pressed && styles.pressed}>
-              <ThemedView type="backgroundElement" style={styles.linkButton}>
-                <ThemedText type="link">Expo documentation</ThemedText>
-                <SymbolView
-                  tintColor={theme.text}
-                  name={{ ios: 'arrow.up.right.square', android: 'link', web: 'link' }}
-                  size={12}
-                />
-              </ThemedView>
-            </Pressable>
-          </ExternalLink>
-        </ThemedView>
+        {historico === null && <ThemedText type="default">Carregando...</ThemedText>}
 
-        <ThemedView style={styles.sectionsWrapper}>
-          <Collapsible title="File-based routing">
-            <ThemedText type="small">
-              This app has two screens: <ThemedText type="code">src/app/index.tsx</ThemedText> and{' '}
-              <ThemedText type="code">src/app/explore.tsx</ThemedText>
+        {historico !== null && !historico.temSessoesFinalizadas && (
+          <ThemedView type="backgroundElement" style={styles.estadoVazio}>
+            <ThemedText type="smallBold">Nenhum registro de treino finalizado ainda</ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              Assim que você finalizar uma sessão de treino, a evolução de cada exercício aparece
+              aqui.
             </ThemedText>
-            <ThemedText type="small">
-              The layout file in <ThemedText type="code">src/app/_layout.tsx</ThemedText> sets up
-              the tab navigator.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/router/introduction">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
+          </ThemedView>
+        )}
 
-          <Collapsible title="Android, iOS, and web support">
-            <ThemedView type="backgroundElement" style={styles.collapsibleContent}>
-              <ThemedText type="small">
-                You can open this project on Android, iOS, and the web. To open the web version,
-                press <ThemedText type="smallBold">w</ThemedText> in the terminal running this
-                project.
-              </ThemedText>
-              <Image
-                source={require('@/assets/images/tutorial-web.png')}
-                style={styles.imageTutorial}
-              />
-            </ThemedView>
-          </Collapsible>
-
-          <Collapsible title="Images">
-            <ThemedText type="small">
-              For static images, you can use the <ThemedText type="code">@2x</ThemedText> and{' '}
-              <ThemedText type="code">@3x</ThemedText> suffixes to provide files for different
-              screen densities.
-            </ThemedText>
-            <Image source={require('@/assets/images/react-logo.png')} style={styles.imageReact} />
-            <ExternalLink href="https://reactnative.dev/docs/images">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Light and dark mode components">
-            <ThemedText type="small">
-              This template has light and dark mode support. The{' '}
-              <ThemedText type="code">useColorScheme()</ThemedText> hook lets you inspect what the
-              user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Animations">
-            <ThemedText type="small">
-              This template includes an example of an animated component. The{' '}
-              <ThemedText type="code">src/components/ui/collapsible.tsx</ThemedText> component uses
-              the powerful <ThemedText type="code">react-native-reanimated</ThemedText> library to
-              animate opening this hint.
-            </ThemedText>
-          </Collapsible>
-        </ThemedView>
-        {Platform.OS === 'web' && <WebBadge />}
-      </ThemedView>
-    </ScrollView>
+        {historico !== null && historico.temSessoesFinalizadas && (
+          <FlatList
+            data={historico.evolucoes}
+            keyExtractor={(evolucao) => evolucao.nomeExibido}
+            contentContainerStyle={styles.lista}
+            renderItem={({ item }) => <SecaoExercicio evolucao={item} />}
+          />
+        )}
+      </SafeAreaView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
+  container: {
     flex: 1,
   },
-  contentContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  container: {
-    maxWidth: MaxContentWidth,
-    flexGrow: 1,
-  },
-  titleContainer: {
+  safeArea: {
+    flex: 1,
+    padding: Spacing.four,
     gap: Spacing.three,
-    alignItems: 'center',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.six,
   },
-  centerText: {
-    textAlign: 'center',
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-  linkButton: {
-    flexDirection: 'row',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.five,
-    justifyContent: 'center',
+  estadoVazio: {
+    borderRadius: Spacing.two,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.four,
     gap: Spacing.one,
-    alignItems: 'center',
   },
-  sectionsWrapper: {
-    gap: Spacing.five,
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
+  lista: {
+    gap: Spacing.two,
   },
-  collapsibleContent: {
-    alignItems: 'center',
-  },
-  imageTutorial: {
-    width: '100%',
-    aspectRatio: 296 / 171,
-    borderRadius: Spacing.three,
-    marginTop: Spacing.two,
-  },
-  imageReact: {
-    width: 100,
-    height: 100,
-    alignSelf: 'center',
+  listaRegistros: {
+    gap: Spacing.one,
   },
 });

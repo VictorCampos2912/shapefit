@@ -1,0 +1,21 @@
+{
+  "nome": "Treino Histórico B - Braços",
+  "exercicios": [
+    {
+      "id": "supino-reto-b",
+      "nome": "supino  reto",
+      "series": 4,
+      "reps_alvo": "8-10",
+      "carga_sugerida_kg": 42.5,
+      "descanso_seg": 60
+    },
+    {
+      "id": "rosca-direta-barra-b",
+      "nome": "Rosca direta com barra",
+      "series": 3,
+      "reps_alvo": "10-12",
+      "carga_sugerida_kg": 20,
+      "descanso_seg": 45
+    }
+  ]
+}

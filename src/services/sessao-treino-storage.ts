@@ -122,6 +122,11 @@ export async function contarSessoesFinalizadas(perfilId: string, treinoId: strin
   return sessoes.filter((sessao) => sessao.treinoId === treinoId && sessao.finalizadaEm !== null).length;
 }
 
+export async function listarSessoesFinalizadas(perfilId: string): Promise<SessaoTreino[]> {
+  const sessoes = await getSessoes(perfilId);
+  return sessoes.filter((sessao) => sessao.finalizadaEm !== null);
+}
+
 export async function finalizarSessao(perfilId: string, sessaoId: string): Promise<SessaoTreino> {
   const sessoes = await getSessoes(perfilId);
 
