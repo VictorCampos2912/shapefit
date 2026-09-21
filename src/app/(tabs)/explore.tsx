@@ -1,21 +1,100 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { FlatList, StyleSheet } from 'react-native';
+import { Alert, FlatList, Pressable, StyleSheet, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Collapsible } from '@/components/ui/collapsible';
 import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
+import { atualizarSerieDeSessaoFinalizada } from '@/services/sessao-treino-storage';
 import { obterHistoricoPorPerfil } from '@/services/historico-evolucao';
-import type { EvolucaoExercicio, HistoricoPerfil } from '@/types/historico';
+import type { EvolucaoExercicio, HistoricoPerfil, RegistroHistorico } from '@/types/historico';
+import { sanitizarCarga, sanitizarReps } from '@/utils/sanitizar-serie';
+
+type EdicaoRegistroEmAndamento = {
+  sessaoId: string;
+  exercicioId: string;
+  serie: number;
+  cargaKg: string;
+  reps: string;
+};
+
+type ParamsEditarRegistro = {
+  sessaoId: string;
+  exercicioId: string;
+  serie: number;
+  cargaKg: number;
+  reps: number;
+};
 
 function formatarData(iso: string): string {
   return new Date(iso).toLocaleString();
 }
 
-function SecaoExercicio({ evolucao }: { evolucao: EvolucaoExercicio }) {
+function chaveRegistro(registro: Pick<RegistroHistorico, 'sessaoId' | 'exercicioId' | 'serie'>): string {
+  return `${registro.sessaoId}:${registro.exercicioId}:${registro.serie}`;
+}
+
+function SecaoExercicio({
+  evolucao,
+  onEditarRegistro,
+}: {
+  evolucao: EvolucaoExercicio;
+  onEditarRegistro: (params: ParamsEditarRegistro) => Promise<void>;
+}) {
+  const theme = useTheme();
+  const [edicaoAtiva, setEdicaoAtiva] = useState<EdicaoRegistroEmAndamento | null>(null);
+
+  function handleIniciarEdicao(registro: RegistroHistorico) {
+    setEdicaoAtiva({
+      sessaoId: registro.sessaoId,
+      exercicioId: registro.exercicioId,
+      serie: registro.serie,
+      cargaKg: String(registro.cargaKg),
+      reps: String(registro.reps),
+    });
+  }
+
+  function handleCancelarEdicao() {
+    setEdicaoAtiva(null);
+  }
+
+  function handleAlterarCarga(valor: string) {
+    setEdicaoAtiva((atual) => (atual ? { ...atual, cargaKg: sanitizarCarga(valor) } : atual));
+  }
+
+  function handleAlterarReps(valor: string) {
+    setEdicaoAtiva((atual) => (atual ? { ...atual, reps: sanitizarReps(valor) } : atual));
+  }
+
+  function handleSalvarEdicao() {
+    if (!edicaoAtiva) return;
+    const { sessaoId, exercicioId, serie, cargaKg, reps } = edicaoAtiva;
+
+    Alert.alert('Confirmar alteração', `Confirma a alteração da série ${serie}?`, [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Salvar',
+        onPress: async () => {
+          await onEditarRegistro({
+            sessaoId,
+            exercicioId,
+            serie,
+            cargaKg: Number(cargaKg),
+            reps: Number(reps),
+          });
+          setEdicaoAtiva(null);
+        },
+      },
+    ]);
+  }
+
+  const podeSalvarEdicao =
+    !!edicaoAtiva && edicaoAtiva.cargaKg.trim().length > 0 && edicaoAtiva.reps.trim().length > 0;
+
   return (
     <Collapsible title={evolucao.nomeExibido}>
       {evolucao.registros.length === 0 ? (
@@ -24,11 +103,77 @@ function SecaoExercicio({ evolucao }: { evolucao: EvolucaoExercicio }) {
         </ThemedText>
       ) : (
         <ThemedView style={styles.listaRegistros}>
-          {evolucao.registros.map((registro, indice) => (
-            <ThemedText key={`${registro.data}-${indice}`} type="small">
-              {formatarData(registro.data)} · {registro.cargaKg}kg · {registro.reps} reps
-            </ThemedText>
-          ))}
+          {evolucao.registros.map((registro) => {
+            const emEdicao = edicaoAtiva && chaveRegistro(edicaoAtiva) === chaveRegistro(registro);
+            return (
+              <ThemedView key={chaveRegistro(registro)} style={styles.itemRegistro}>
+                {emEdicao ? (
+                  <ThemedView style={styles.edicaoRegistro}>
+                    <ThemedView style={styles.campo}>
+                      <ThemedText type="smallBold" themeColor="text">
+                        Carga (kg)
+                      </ThemedText>
+                      <TextInput
+                        value={edicaoAtiva?.cargaKg}
+                        onChangeText={handleAlterarCarga}
+                        keyboardType="decimal-pad"
+                        inputMode="decimal"
+                        style={[
+                          styles.input,
+                          { color: theme.text, borderColor: theme.text, backgroundColor: theme.background },
+                        ]}
+                        placeholder="0.0"
+                        placeholderTextColor={theme.textSecondary}
+                      />
+                    </ThemedView>
+                    <ThemedView style={styles.campo}>
+                      <ThemedText type="smallBold" themeColor="text">
+                        Repetições
+                      </ThemedText>
+                      <TextInput
+                        value={edicaoAtiva?.reps}
+                        onChangeText={handleAlterarReps}
+                        keyboardType="number-pad"
+                        inputMode="numeric"
+                        style={[
+                          styles.input,
+                          { color: theme.text, borderColor: theme.text, backgroundColor: theme.background },
+                        ]}
+                        placeholder="0"
+                        placeholderTextColor={theme.textSecondary}
+                      />
+                    </ThemedView>
+                    <ThemedView style={styles.botoesEdicao}>
+                      <Pressable onPress={handleCancelarEdicao} style={styles.botaoCancelarEdicao}>
+                        <ThemedText type="smallBold" themeColor="text">
+                          Cancelar
+                        </ThemedText>
+                      </Pressable>
+                      <Pressable
+                        onPress={handleSalvarEdicao}
+                        disabled={!podeSalvarEdicao}
+                        style={[
+                          styles.botaoSalvarEdicao,
+                          { backgroundColor: podeSalvarEdicao ? theme.text : theme.textSecondary },
+                        ]}
+                      >
+                        <ThemedText type="smallBold" themeColor="background">
+                          Salvar edição
+                        </ThemedText>
+                      </Pressable>
+                    </ThemedView>
+                  </ThemedView>
+                ) : (
+                  <Pressable onPress={() => handleIniciarEdicao(registro)} style={styles.linhaRegistro}>
+                    <ThemedText type="small">
+                      {formatarData(registro.data)} · {registro.cargaKg}kg · {registro.reps} reps
+                    </ThemedText>
+                    <ThemedText type="link">Editar</ThemedText>
+                  </Pressable>
+                )}
+              </ThemedView>
+            );
+          })}
         </ThemedView>
       )}
     </Collapsible>
@@ -57,6 +202,42 @@ export default function HistoricoScreen() {
     }, [perfilAtivo?.id]),
   );
 
+  async function handleEditarRegistro(params: ParamsEditarRegistro) {
+    if (!perfilAtivo) return;
+
+    const sessao = await atualizarSerieDeSessaoFinalizada({
+      perfilId: perfilAtivo.id,
+      sessaoId: params.sessaoId,
+      exercicioId: params.exercicioId,
+      serie: params.serie,
+      novaCargaKg: params.cargaKg,
+      novosReps: params.reps,
+    });
+    const execucao = sessao.execucoes.find((item) => item.exercicioId === params.exercicioId);
+    const serieAtualizada = execucao?.seriesRealizadas.find((item) => item.serie === params.serie);
+    if (!serieAtualizada) return;
+
+    // Patch pontual do registro editado — nenhuma mudança de agrupamento/ordenação/
+    // nomeExibido é necessária, já que a edição nunca altera data ou nome do exercício
+    // (research.md, Decisão 6).
+    setHistorico((atual) => {
+      if (!atual || !atual.temSessoesFinalizadas) return atual;
+      return {
+        ...atual,
+        evolucoes: atual.evolucoes.map((evolucao) => ({
+          ...evolucao,
+          registros: evolucao.registros.map((registro) =>
+            registro.sessaoId === params.sessaoId &&
+            registro.exercicioId === params.exercicioId &&
+            registro.serie === params.serie
+              ? { ...registro, cargaKg: serieAtualizada.cargaKg, reps: serieAtualizada.reps }
+              : registro,
+          ),
+        })),
+      };
+    });
+  }
+
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
@@ -79,7 +260,9 @@ export default function HistoricoScreen() {
             data={historico.evolucoes}
             keyExtractor={(evolucao) => evolucao.nomeExibido}
             contentContainerStyle={styles.lista}
-            renderItem={({ item }) => <SecaoExercicio evolucao={item} />}
+            renderItem={({ item }) => (
+              <SecaoExercicio evolucao={item} onEditarRegistro={handleEditarRegistro} />
+            )}
           />
         )}
       </SafeAreaView>
@@ -107,5 +290,41 @@ const styles = StyleSheet.create({
   },
   listaRegistros: {
     gap: Spacing.one,
+  },
+  itemRegistro: {
+    gap: Spacing.one,
+  },
+  linhaRegistro: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  edicaoRegistro: {
+    gap: Spacing.two,
+  },
+  campo: {
+    gap: Spacing.one,
+  },
+  input: {
+    borderWidth: 2,
+    borderRadius: Spacing.one,
+    paddingHorizontal: Spacing.two,
+    paddingVertical: Spacing.two,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  botoesEdicao: {
+    flexDirection: 'row',
+    gap: Spacing.two,
+  },
+  botaoCancelarEdicao: {
+    borderRadius: Spacing.two,
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.two,
+  },
+  botaoSalvarEdicao: {
+    borderRadius: Spacing.two,
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.two,
   },
 });

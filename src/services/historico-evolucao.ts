@@ -56,6 +56,9 @@ export async function obterHistoricoPorPerfil(perfilId: string): Promise<Histori
           data: sessao.finalizadaEm as string,
           cargaKg: serie.cargaKg,
           reps: serie.reps,
+          sessaoId: sessao.id,
+          exercicioId: execucao.exercicioId,
+          serie: serie.serie,
           nomeOriginal: exercicio.nome,
         });
       }
@@ -69,11 +72,16 @@ export async function obterHistoricoPorPerfil(perfilId: string): Promise<Histori
       }
       const itensOrdenados = [...itens].sort((a, b) => b.data.localeCompare(a.data));
       const nomeExibido = itensOrdenados[0].nomeOriginal;
-      const registros: RegistroHistorico[] = itensOrdenados.map(({ data, cargaKg, reps }) => ({
-        data,
-        cargaKg,
-        reps,
-      }));
+      const registros: RegistroHistorico[] = itensOrdenados.map(
+        ({ data, cargaKg, reps, sessaoId, exercicioId, serie }) => ({
+          data,
+          cargaKg,
+          reps,
+          sessaoId,
+          exercicioId,
+          serie,
+        }),
+      );
       return { nomeExibido, registros };
     },
   );

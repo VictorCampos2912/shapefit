@@ -127,6 +127,45 @@ export async function listarSessoesFinalizadas(perfilId: string): Promise<Sessao
   return sessoes.filter((sessao) => sessao.finalizadaEm !== null);
 }
 
+export async function atualizarSerieDeSessaoFinalizada(params: {
+  perfilId: string;
+  sessaoId: string;
+  exercicioId: string;
+  serie: number;
+  novaCargaKg: number;
+  novosReps: number;
+}): Promise<SessaoTreino> {
+  const { perfilId, sessaoId, exercicioId, serie, novaCargaKg, novosReps } = params;
+  const sessoes = await getSessoes(perfilId);
+
+  const sessao = sessoes.find((item) => item.id === sessaoId);
+  if (!sessao) {
+    throw new Error(`Nenhuma sessão encontrada com id ${sessaoId} para o perfil ${perfilId}`);
+  }
+
+  if (sessao.finalizadaEm === null) {
+    throw new Error(
+      `Sessão ${sessaoId} ainda está em andamento — atualizarSerieDeSessaoFinalizada só opera sobre sessões já finalizadas (use atualizarSerieRealizada para sessões em andamento)`,
+    );
+  }
+
+  const execucao = sessao.execucoes.find((item) => item.exercicioId === exercicioId);
+  if (!execucao) {
+    throw new Error(`Nenhuma execução encontrada para o exercício ${exercicioId} na sessão ${sessaoId}`);
+  }
+
+  const serieRealizada = execucao.seriesRealizadas.find((item) => item.serie === serie);
+  if (!serieRealizada) {
+    throw new Error(`Nenhuma série ${serie} encontrada na execução do exercício ${exercicioId} na sessão ${sessaoId}`);
+  }
+
+  serieRealizada.cargaKg = novaCargaKg;
+  serieRealizada.reps = novosReps;
+
+  await setSessoes(perfilId, sessoes);
+  return sessao;
+}
+
 export async function finalizarSessao(perfilId: string, sessaoId: string): Promise<SessaoTreino> {
   const sessoes = await getSessoes(perfilId);
 

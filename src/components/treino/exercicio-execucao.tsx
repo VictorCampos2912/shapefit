@@ -7,6 +7,7 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { EstadoExecucaoExercicio, SerieRealizada } from '@/types/execucao-treino';
 import type { ExercicioPlanejado } from '@/types/treino';
+import { sanitizarCarga, sanitizarReps } from '@/utils/sanitizar-serie';
 
 type ExercicioExecucaoProps = {
   exercicio: ExercicioPlanejado;
@@ -25,22 +26,6 @@ type EdicaoSerieEmAndamento = {
   cargaKg: string;
   reps: string;
 };
-
-function sanitizarCarga(valor: string): string {
-  const normalizado = valor.replace(',', '.').replace(/[^0-9.]/g, '');
-  const primeiroPonto = normalizado.indexOf('.');
-  if (primeiroPonto === -1) {
-    return normalizado;
-  }
-  return (
-    normalizado.slice(0, primeiroPonto + 1) +
-    normalizado.slice(primeiroPonto + 1).replace(/\./g, '')
-  );
-}
-
-function sanitizarReps(valor: string): string {
-  return valor.replace(/[^0-9]/g, '');
-}
 
 export function ExercicioExecucao({
   exercicio,
