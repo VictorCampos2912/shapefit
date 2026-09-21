@@ -1,7 +1,8 @@
 # PRD — App de Acompanhamento de Treino e Nutrição
 
 **Versão:** 1.1 (MVP)
-**Autor:** [seVictor CamposData:** 2026-09-14
+**Autor:** Victor Campos
+**Data:** 2026-09-14
 **Status:** Rascunho para desenvolvimento via SDD
 
 ---
@@ -177,9 +178,16 @@ prática, não só na teoria do contrato.
   `Stack.Navigator`
 - Notificações locais: **`expo-notifications`** (adicionado no RF06) — agendamento de
   avisos do sistema operacional para o fim do descanso, necessário porque o JS do app é
-  suspenso em segundo plano; justificativa completa em
-  `specs/008-notificacao-fim-descanso/plan.md` (seção "Complexity Tracking")
-- Testes em dispositivo real via Expo Go (sem build nativo nesta fase)
+  suspenso em segundo plano
+- Testes em dispositivo real via Expo Go (sem build nativo) até o RF05, inclusive.
+  **A partir do RF06** (notificações), o projeto migrou para um **development build no
+  Android** — `expo-notifications` quebrava o carregamento do app no Expo Go puro
+  nesse aparelho especificamente. **No iOS, o Expo Go puro continuou funcionando
+  normalmente** mesmo após o RF06 (confirmado em teste real) — o crash de import é uma
+  limitação específica do Expo Go no Android, não da biblioteca em si. Resumindo:
+  Android usa development build a partir do RF06; iOS pode continuar em Expo Go puro
+  em toda a linha do tempo do projeto. Reflita essa distinção por plataforma nos
+  `quickstart.md` de features futuras, sem precisar de nova confirmação a cada vez.
 
 ## 10. Telas do MVP
 
@@ -219,9 +227,12 @@ prática, não só na teoria do contrato.
   RF02, RF07, RF08) — isso aumenta o escopo do MVP em relação à v1.0 do PRD. Vale reavaliar
   se RF10 (perfil) deve ser implementado **antes** dos demais requisitos, já que os outros
   dependem dele para funcionar corretamente
-- **Dívida técnica acumulada — RESOLVIDA (2026-09-17):** RF01, RF02, RF03, RF04, RF09a e
-  RF05 foram todos implementados e validados nos dois aparelhos-alvo (Redmi Note 12/Android
-  e iPhone 16 Plus/iOS). Não há dívida de validação pendente no momento.
+- **Dívida técnica acumulada — RESOLVIDA (atualizada em 2026-09-18):** RF01, RF02, RF03,
+  RF04, RF09a, RF05, RF06 e RF07 foram todos implementados e validados nos dois
+  aparelhos-alvo (Redmi Note 12/Android e iPhone 16 Plus/iOS).
+- **RF08 — pendência pontual (2026-09-20):** implementado, testado e corrigido no Android
+  (Redmi Note 12). Teste no iPhone 16 Plus previsto para o dia seguinte — pendência de
+  1 dia, não tratada como dívida acumulada.
 
 ## 14. Abordagem de identidade visual
 
