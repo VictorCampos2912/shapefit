@@ -136,6 +136,13 @@ export async function atualizarSerieDeSessaoFinalizada(params: {
   novosReps: number;
 }): Promise<SessaoTreino> {
   const { perfilId, sessaoId, exercicioId, serie, novaCargaKg, novosReps } = params;
+
+  if (!Number.isFinite(novaCargaKg) || !Number.isFinite(novosReps)) {
+    throw new Error(
+      `Valores inválidos para atualizarSerieDeSessaoFinalizada — novaCargaKg=${novaCargaKg} novosReps=${novosReps} (ambos precisam ser números finitos)`,
+    );
+  }
+
   const sessoes = await getSessoes(perfilId);
 
   const sessao = sessoes.find((item) => item.id === sessaoId);

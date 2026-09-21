@@ -79,21 +79,34 @@ function SecaoExercicio({
       {
         text: 'Salvar',
         onPress: async () => {
-          await onEditarRegistro({
-            sessaoId,
-            exercicioId,
-            serie,
-            cargaKg: Number(cargaKg),
-            reps: Number(reps),
-          });
-          setEdicaoAtiva(null);
+          try {
+            await onEditarRegistro({
+              sessaoId,
+              exercicioId,
+              serie,
+              cargaKg: Number(cargaKg),
+              reps: Number(reps),
+            });
+            setEdicaoAtiva(null);
+          } catch {
+            // edicaoAtiva permanece preenchido (não é zerado) para o usuário não perder
+            // os valores digitados e poder tentar salvar de novo ou cancelar manualmente.
+            Alert.alert(
+              'Não foi possível salvar',
+              'Ocorreu um erro ao salvar a alteração. Tente novamente.',
+            );
+          }
         },
       },
     ]);
   }
 
   const podeSalvarEdicao =
-    !!edicaoAtiva && edicaoAtiva.cargaKg.trim().length > 0 && edicaoAtiva.reps.trim().length > 0;
+    !!edicaoAtiva &&
+    edicaoAtiva.cargaKg.trim().length > 0 &&
+    edicaoAtiva.reps.trim().length > 0 &&
+    Number.isFinite(Number(edicaoAtiva.cargaKg)) &&
+    Number.isFinite(Number(edicaoAtiva.reps));
 
   return (
     <Collapsible title={evolucao.nomeExibido}>
