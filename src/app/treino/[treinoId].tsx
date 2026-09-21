@@ -8,6 +8,7 @@ import { ThemedView } from '@/components/themed-view';
 import { CronometroDescanso } from '@/components/treino/cronometro-descanso';
 import { ExercicioExecucao } from '@/components/treino/exercicio-execucao';
 import { ExercicioListItem, type EstadoVisualExercicio } from '@/components/treino/exercicio-list-item';
+import { ProgressRing } from '@/components/ui/progress-ring';
 import { Spacing } from '@/constants/theme';
 import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
 import {
@@ -314,8 +315,8 @@ export default function ExecucaoTreinoScreen() {
   if (carregando) {
     return (
       <ThemedView style={styles.container}>
-        <SafeAreaView style={styles.safeArea}>
-          <ThemedText type="default">Carregando treino...</ThemedText>
+        <SafeAreaView style={[styles.safeArea, styles.estadoCarregando]}>
+          <ProgressRing />
         </SafeAreaView>
       </ThemedView>
     );
@@ -412,6 +413,10 @@ const styles = StyleSheet.create({
   },
   lista: {
     gap: Spacing.two,
+  },
+  estadoCarregando: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   parabens: {
     borderRadius: Spacing.two,

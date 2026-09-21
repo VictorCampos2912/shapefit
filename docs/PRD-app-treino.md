@@ -179,6 +179,12 @@ prática, não só na teoria do contrato.
 - Notificações locais: **`expo-notifications`** (adicionado no RF06) — agendamento de
   avisos do sistema operacional para o fim do descanso, necessário porque o JS do app é
   suspenso em segundo plano
+- Gráficos vetoriais: **`react-native-svg`** (adicionado em 2026-09-21, identidade
+  visual) — biblioteca padrão do ecossistema Expo para desenho vetorial (mantida pela
+  Software Mansion/Expo); necessária porque o app não tinha nenhuma forma de desenhar
+  vetores dinâmicos (anel de progresso, conjunto de ícones de interface customizados) —
+  `expo-symbols`, já em uso, só cobre ícones estáticos do sistema (SF Symbols/Material),
+  sem parametrização por progresso nem controle de traço/forma customizada
 - Testes em dispositivo real via Expo Go (sem build nativo) até o RF05, inclusive.
   **A partir do RF06** (notificações), o projeto migrou para um **development build no
   Android** — `expo-notifications` quebrava o carregamento do app no Expo Go puro

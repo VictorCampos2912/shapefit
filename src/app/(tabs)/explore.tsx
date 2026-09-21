@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Collapsible } from '@/components/ui/collapsible';
+import { ProgressRing } from '@/components/ui/progress-ring';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
@@ -256,7 +257,11 @@ export default function HistoricoScreen() {
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="subtitle">Histórico de evolução</ThemedText>
 
-        {historico === null && <ThemedText type="default">Carregando...</ThemedText>}
+        {historico === null && (
+          <ThemedView style={styles.estadoCarregando}>
+            <ProgressRing />
+          </ThemedView>
+        )}
 
         {historico !== null && !historico.temSessoesFinalizadas && (
           <ThemedView type="backgroundElement" style={styles.estadoVazio}>
@@ -291,6 +296,10 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: Spacing.four,
     gap: Spacing.three,
+  },
+  estadoCarregando: {
+    paddingVertical: Spacing.six,
+    alignItems: 'center',
   },
   estadoVazio: {
     borderRadius: Spacing.two,

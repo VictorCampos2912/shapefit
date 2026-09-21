@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { ProgressRing } from '@/components/ui/progress-ring';
 import { TreinoListItem } from '@/components/treino/treino-list-item';
 import { Spacing } from '@/constants/theme';
 import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
@@ -149,6 +150,12 @@ export default function TreinosScreen() {
           </Pressable>
         </ThemedView>
 
+        {carregando && (
+          <ThemedView style={styles.estadoCarregando}>
+            <ProgressRing />
+          </ThemedView>
+        )}
+
         {!carregando && treinos.length === 0 && (
           <ThemedView type="backgroundElement" style={styles.estadoVazio}>
             <ThemedText type="smallBold">Nenhum treino importado ainda</ThemedText>
@@ -187,6 +194,10 @@ const styles = StyleSheet.create({
   },
   acoes: {
     gap: Spacing.two,
+  },
+  estadoCarregando: {
+    paddingVertical: Spacing.six,
+    alignItems: 'center',
   },
   estadoVazio: {
     borderRadius: Spacing.two,

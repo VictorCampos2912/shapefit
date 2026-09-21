@@ -18,6 +18,8 @@ export const Colors = {
     successBackground: '#E3F2E6',
     warning: '#8A6D00',
     warningBackground: '#FFF6DA',
+    accent: '#FF6529',
+    accentTint: '#FFE4D6',
   },
   dark: {
     text: '#ffffff',
@@ -29,6 +31,8 @@ export const Colors = {
     successBackground: '#1D3320',
     warning: '#F2C94C',
     warningBackground: '#3A2E0F',
+    accent: '#FF7A45',
+    accentTint: '#3A2318',
   },
 } as const;
 
