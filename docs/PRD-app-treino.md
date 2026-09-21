@@ -227,12 +227,11 @@ prática, não só na teoria do contrato.
   RF02, RF07, RF08) — isso aumenta o escopo do MVP em relação à v1.0 do PRD. Vale reavaliar
   se RF10 (perfil) deve ser implementado **antes** dos demais requisitos, já que os outros
   dependem dele para funcionar corretamente
-- **Dívida técnica acumulada — RESOLVIDA (atualizada em 2026-09-18):** RF01, RF02, RF03,
-  RF04, RF09a, RF05, RF06 e RF07 foram todos implementados e validados nos dois
-  aparelhos-alvo (Redmi Note 12/Android e iPhone 16 Plus/iOS).
-- **RF08 — pendência pontual (2026-09-20):** implementado, testado e corrigido no Android
-  (Redmi Note 12). Teste no iPhone 16 Plus previsto para o dia seguinte — pendência de
-  1 dia, não tratada como dívida acumulada.
+- **Dívida técnica acumulada — RESOLVIDA (atualizada em 2026-09-21):** RF01, RF02, RF03,
+  RF04, RF09a, RF05, RF06, RF07, RF08 e RF09b foram todos implementados e validados nos
+  dois aparelhos-alvo (Redmi Note 12/Android e iPhone 16 Plus/iOS). RF10 já validado
+  desde sua implementação original. Não há dívida de validação pendente no momento —
+  todos os requisitos funcionais do PRD original (RF01–RF10) estão completos.
 
 ## 14. Abordagem de identidade visual
 
