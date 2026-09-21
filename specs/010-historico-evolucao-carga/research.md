@@ -304,3 +304,52 @@ exatamente qual registro está descartando e por quê.
   contrato de retorno só para um diagnóstico de desenvolvimento aumenta a superfície
   do tipo sem necessidade (Princípio II), quando `console.warn` direto já resolve o
   pedido.
+
+## Decisão 13 (correção pós-validação manual): rótulos das abas "Treinos"/"Histórico", não mais "Home"/"Explore"
+
+**Achado durante a validação manual em dispositivo real**: ao testar o RF08 já
+implementado e funcionando corretamente no Android (T009/T012/T014, todas
+confirmadas), o usuário questionou por que a aba do histórico continuava rotulada
+"Explore" — nome do boilerplate original do template Expo, sem relação nenhuma com
+"histórico de evolução".
+
+**Decisão original (pré-correção, registrada em spec.md, Assumptions)**: manter o
+rótulo "Explore" inalterado, citando como precedente o fato de o RF02
+(`003-listar-treinos`) não ter renomeado a aba "Home" ao substituir seu conteúdo
+boilerplate pela lista de treinos.
+
+**Por que essa decisão original estava malfundamentada**: revisando
+`specs/003-listar-treinos/spec.md` e `research.md` a pedido do usuário, nenhum dos
+dois documentos menciona rótulo de aba em nenhum momento — o RF02 nunca decidiu
+manter "Home"; simplesmente nunca revisitou esse rótulo especificamente. Não havia,
+portanto, um "padrão já estabelecido" a seguir — apenas um valor nunca alterado desde
+o `create-expo-app` inicial. Citar isso como precedente deliberado foi um erro de
+raciocínio desta sessão de planejamento, não uma decisão de produto real herdada de
+uma feature anterior.
+
+**Decision (revisada)**: `src/components/app-tabs.tsx` (`NativeTabs.Trigger.Label`) e
+`src/components/app-tabs.web.tsx` (texto dentro de `TabButton`) passam a usar
+"Treinos" para a primeira aba (`index`/`home`, RF02) e "Histórico" para a segunda
+(`explore`, este RF08) — refletindo o conteúdo real de cada uma. Nenhuma outra
+referência a "Home"/"Explore" foi encontrada em `src/` (confirmado por busca em todo
+o diretório).
+
+**Rationale**: os rótulos de navegação são a forma mais direta de o usuário entender
+o que cada aba faz antes mesmo de tocar nela — mantê-los como texto de boilerplate
+genérico, quando o conteúdo real já é específico e funcional (desde o RF02 e agora o
+RF08), é uma inconsistência de UX sem justificativa de produto, distinta da decisão
+registrada no PRD (seção 14) de postergar *identidade visual* (cores, tipografia)
+enquanto o foco está em funcionalidade — nomear corretamente uma aba não é
+"identidade visual", é comunicação básica da navegação.
+
+**Alternatives considered**:
+- Manter "Explore" e resolver isso em uma passada de identidade visual futura,
+  separada: rejeitado — a mudança é trivial (duas strings, dois arquivos, sem lógica
+  nova), o risco de regressão é essencialmente zero, e adiar uma correção tão barata
+  só para "não misturar escopos" não se justifica quando o próprio usuário já
+  identificou o problema testando esta feature.
+- Renomear apenas "Explore" para "Histórico", deixando "Home" como estava: avaliado,
+  mas rejeitado a pedido explícito do usuário — se a aba de treinos vai ganhar um
+  nome correto, faz sentido corrigir as duas de uma vez, já que o mesmo raciocínio
+  (rótulo genérico de boilerplate vs. conteúdo real específico) se aplica igualmente
+  a ambas.

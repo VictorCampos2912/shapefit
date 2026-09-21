@@ -255,11 +255,18 @@ registros do perfil 2.
   digitados de formas diferentes entre treinos, a tela exibe a grafia do registro mais
   recente daquele grupo como título da evolução — não uma lista de variantes nem a
   primeira grafia encontrada.
-- **Navegação — reaproveitamento da aba "Explore"**: seguindo o mesmo padrão já usado
-  pelo RF02 (que substituiu o conteúdo de exemplo da aba "Home" do template padrão do
-  Expo), esta feature substitui integralmente o conteúdo de exemplo da aba "Explore" já
-  existente no app pelo histórico de evolução — não é criada uma aba nova além das duas
-  já existentes.
+- **Navegação — reaproveitamento da aba já existente do template Expo**: esta feature
+  substitui integralmente o conteúdo de exemplo da segunda aba do template Expo (a rota
+  `explore.tsx`) pelo histórico de evolução — não é criada uma aba nova além das duas já
+  existentes. **Correção pós-validação manual (ver research.md, Decisão 13)**:
+  o rótulo dessa aba, exibido ao usuário, passa de "Explore" para "Histórico" — o
+  boilerplate original do template Expo rotulava as duas abas como "Home" e "Explore",
+  e a primeira suposição desta spec era manter "Explore" inalterado, citando como
+  precedente o fato de o RF02 não ter renomeado "Home" ao substituir seu conteúdo. Essa
+  suposição estava equivocada: o RF02 nunca tomou essa decisão explicitamente (sua
+  spec/research não menciona rótulo de aba), então não havia de fato um "padrão já
+  usado" a seguir — apenas um rótulo nunca revisitado. Corrigido nesta feature: os dois
+  rótulos passam a refletir o conteúdo real de cada aba ("Treinos" e "Histórico").
 - **Treinos não são excluídos nesta versão do app**: nenhum requisito implementado até
   aqui (RF01–RF10) permite remover um treino já importado, então a resolução de nome de
   exercício via treino de origem (FR-004) encontra o treino correspondente em todos os
