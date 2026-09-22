@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Keyboard, Pressable, StyleSheet, TextInput } from 'react-native';
+import { Alert, Keyboard, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -194,10 +194,10 @@ export function ExercicioExecucao({
                     Série {serieRealizada.serie}: {serieRealizada.cargaKg}kg ×{' '}
                     {serieRealizada.reps} reps
                   </ThemedText>
-                  <ThemedView style={styles.linhaComIcone}>
+                  <View style={styles.linhaComIcone}>
                     <EditarIcon size={14} color={theme.text} />
                     <ThemedText type="link">Editar</ThemedText>
-                  </ThemedView>
+                  </View>
                 </Pressable>
               )}
             </ThemedView>

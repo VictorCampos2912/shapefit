@@ -1,6 +1,6 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, FlatList, Pressable, StyleSheet, TextInput } from 'react-native';
+import { Alert, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -183,10 +183,10 @@ function SecaoExercicio({
                     <ThemedText type="small">
                       {formatarData(registro.data)} · {registro.cargaKg}kg · {registro.reps} reps
                     </ThemedText>
-                    <ThemedView style={styles.linhaComIconeEditar}>
+                    <View style={styles.linhaComIconeEditar}>
                       <EditarIcon size={14} color={theme.text} />
                       <ThemedText type="link">Editar</ThemedText>
-                    </ThemedView>
+                    </View>
                   </Pressable>
                 )}
               </ThemedView>

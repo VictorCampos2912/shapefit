@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -19,10 +19,10 @@ export function PerfilListItem({ perfil, ativo = false, onPress }: PerfilListIte
   return (
     <Pressable onPress={onPress}>
       <ThemedView type={ativo ? 'backgroundSelected' : 'backgroundElement'} style={styles.container}>
-        <ThemedView style={styles.linhaNome}>
+        <View style={styles.linhaNome}>
           <PerfilIcon size={16} color={theme.text} />
           <ThemedText type="smallBold">{perfil.nome}</ThemedText>
-        </ThemedView>
+        </View>
         <ThemedText type="small" themeColor="textSecondary">
           {perfil.objetivo}
         </ThemedText>
