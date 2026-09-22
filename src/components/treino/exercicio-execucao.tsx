@@ -3,6 +3,7 @@ import { Alert, Keyboard, Pressable, StyleSheet, TextInput } from 'react-native'
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { ConcluirIcon, EditarIcon } from '@/components/ui/icons';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { EstadoExecucaoExercicio, SerieRealizada } from '@/types/execucao-treino';
@@ -193,7 +194,10 @@ export function ExercicioExecucao({
                     Série {serieRealizada.serie}: {serieRealizada.cargaKg}kg ×{' '}
                     {serieRealizada.reps} reps
                   </ThemedText>
-                  <ThemedText type="link">Editar</ThemedText>
+                  <ThemedView style={styles.linhaComIcone}>
+                    <EditarIcon size={14} color={theme.text} />
+                    <ThemedText type="link">Editar</ThemedText>
+                  </ThemedView>
                 </Pressable>
               )}
             </ThemedView>
@@ -272,9 +276,11 @@ export function ExercicioExecucao({
             disabled={!podeConcluirSerie}
             style={[
               styles.botaoIniciar,
+              styles.linhaComIcone,
               { backgroundColor: podeConcluirSerie ? theme.text : theme.textSecondary },
             ]}
           >
+            <ConcluirIcon size={16} color={theme.background} />
             <ThemedText type="smallBold" themeColor="background">
               Concluir série
             </ThemedText>
@@ -300,9 +306,7 @@ export function ExercicioExecucao({
 
       {estado.concluido && jaEstavaConcluidoAoAbrir && (
         <ThemedView type="successBackground" style={[styles.areaConcluido, { borderColor: theme.success }]}>
-          <ThemedText type="title" themeColor="success" style={styles.iconeConcluido}>
-            ✓
-          </ThemedText>
+          <ConcluirIcon size={44} color={theme.success} strokeWidth={2.5} />
           <ThemedText type="subtitle" themeColor="success" style={styles.textoCentralizado}>
             Este já foi feito, volte no próximo treino
           </ThemedText>
@@ -313,16 +317,15 @@ export function ExercicioExecucao({
 
       {estado.concluido && !jaEstavaConcluidoAoAbrir && (
         <ThemedView type="successBackground" style={[styles.areaConcluido, { borderColor: theme.success }]}>
-          <ThemedText type="title" themeColor="success" style={styles.iconeConcluido}>
-            ✓
-          </ThemedText>
+          <ConcluirIcon size={44} color={theme.success} strokeWidth={2.5} />
           <ThemedText type="subtitle" themeColor="success" style={styles.textoCentralizado}>
             Todas as séries concluídas!
           </ThemedText>
           <Pressable
             onPress={onConcluirExercicio}
-            style={[styles.botaoConcluirExercicio, { backgroundColor: theme.success }]}
+            style={[styles.botaoConcluirExercicio, styles.linhaComIconeCentralizada, { backgroundColor: theme.success }]}
           >
+            <ConcluirIcon size={16} color={theme.background} />
             <ThemedText type="smallBold" themeColor="background">
               Concluir exercício
             </ThemedText>
@@ -368,9 +371,6 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
     alignItems: 'center',
   },
-  iconeConcluido: {
-    fontSize: 48,
-  },
   textoCentralizado: {
     textAlign: 'center',
   },
@@ -406,5 +406,16 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.two,
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.two,
+  },
+  linhaComIcone: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.one,
+  },
+  linhaComIconeCentralizada: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.one,
   },
 });

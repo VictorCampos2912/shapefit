@@ -8,8 +8,10 @@ import { ThemedView } from '@/components/themed-view';
 import { CronometroDescanso } from '@/components/treino/cronometro-descanso';
 import { ExercicioExecucao } from '@/components/treino/exercicio-execucao';
 import { ExercicioListItem, type EstadoVisualExercicio } from '@/components/treino/exercicio-list-item';
+import { FinalizarIcon, VoltarIcon } from '@/components/ui/icons';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
 import {
   atualizarSerieRealizada,
@@ -78,6 +80,7 @@ function estadosPorExercicioDaSessao(
 export default function ExecucaoTreinoScreen() {
   const { treinoId } = useLocalSearchParams<{ treinoId: string }>();
   const { perfilAtivo } = usePerfilAtivo();
+  const theme = useTheme();
 
   const [treino, setTreino] = useState<Treino | null>(null);
   const [carregando, setCarregando] = useState(true);
@@ -339,8 +342,9 @@ export default function ExecucaoTreinoScreen() {
       <SafeAreaView style={styles.safeArea}>
         {exercicioSelecionado ? (
           <>
-            <Pressable onPress={handleVoltarParaLista}>
-              <ThemedText type="link">← Voltar para exercícios</ThemedText>
+            <Pressable onPress={handleVoltarParaLista} style={styles.linhaComIcone}>
+              <VoltarIcon size={16} color={theme.text} />
+              <ThemedText type="link">Voltar para exercícios</ThemedText>
             </Pressable>
             <ExercicioExecucao
               exercicio={exercicioSelecionado}
@@ -381,7 +385,8 @@ export default function ExecucaoTreinoScreen() {
             )}
             {sessaoAtualId && (
               <Pressable onPress={handleFinalizarTreino}>
-                <ThemedView type="warningBackground" style={styles.botaoFinalizarTreino}>
+                <ThemedView type="warningBackground" style={[styles.botaoFinalizarTreino, styles.linhaComIconeCentralizada]}>
+                  <FinalizarIcon size={18} color={theme.warning} />
                   <ThemedText type="smallBold" themeColor="warning" style={styles.textoCentralizado}>
                     Finalizar treino
                   </ThemedText>
@@ -428,5 +433,16 @@ const styles = StyleSheet.create({
   },
   textoCentralizado: {
     textAlign: 'center',
+  },
+  linhaComIcone: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.one,
+  },
+  linhaComIconeCentralizada: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.one,
   },
 });

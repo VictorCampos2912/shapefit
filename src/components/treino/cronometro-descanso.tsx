@@ -2,6 +2,7 @@ import { Pressable, StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { DescansoIcon } from '@/components/ui/icons';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { formatarTempo } from '@/utils/cronometro-descanso';
@@ -17,9 +18,12 @@ export function CronometroDescanso({ segundosRestantes, onMais15, onMenos15 }: C
 
   return (
     <ThemedView type="backgroundSelected" style={[styles.container, { borderColor: theme.text }]}>
-      <ThemedText type="small" themeColor="textSecondary">
-        Descanso
-      </ThemedText>
+      <ThemedView style={styles.linhaTitulo}>
+        <DescansoIcon size={16} color={theme.textSecondary} />
+        <ThemedText type="small" themeColor="textSecondary">
+          Descanso
+        </ThemedText>
+      </ThemedView>
       <ThemedText type="title">{formatarTempo(segundosRestantes)}</ThemedText>
       <ThemedView style={styles.botoes}>
         <Pressable onPress={onMenos15} style={[styles.botao, { borderColor: theme.text }]}>
@@ -38,6 +42,11 @@ export function CronometroDescanso({ segundosRestantes, onMais15, onMenos15 }: C
 }
 
 const styles = StyleSheet.create({
+  linhaTitulo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.one,
+  },
   container: {
     borderRadius: Spacing.two,
     borderWidth: 2,

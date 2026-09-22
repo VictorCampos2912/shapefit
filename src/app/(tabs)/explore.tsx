@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Collapsible } from '@/components/ui/collapsible';
+import { EditarIcon } from '@/components/ui/icons';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -182,7 +183,10 @@ function SecaoExercicio({
                     <ThemedText type="small">
                       {formatarData(registro.data)} · {registro.cargaKg}kg · {registro.reps} reps
                     </ThemedText>
-                    <ThemedText type="link">Editar</ThemedText>
+                    <ThemedView style={styles.linhaComIconeEditar}>
+                      <EditarIcon size={14} color={theme.text} />
+                      <ThemedText type="link">Editar</ThemedText>
+                    </ThemedView>
                   </Pressable>
                 )}
               </ThemedView>
@@ -320,6 +324,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  linhaComIconeEditar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.half,
   },
   edicaoRegistro: {
     gap: Spacing.two,

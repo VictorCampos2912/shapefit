@@ -5,9 +5,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { ImportarIcon, PerfilIcon } from '@/components/ui/icons';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { TreinoListItem } from '@/components/treino/treino-list-item';
 import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
 import { contarSessoesFinalizadas } from '@/services/sessao-treino-storage';
 import { importarTreino, importarTreinoExemplo, listarTreinos } from '@/services/treino-storage';
@@ -51,6 +53,7 @@ function exibirResultadoImportacao(resultado: ResultadoImportacao | null) {
 
 export default function TreinosScreen() {
   const { perfilAtivo } = usePerfilAtivo();
+  const theme = useTheme();
   const [treinos, setTreinos] = useState<Treino[]>([]);
   const [contagensPorTreino, setContagensPorTreino] = useState<Record<string, number>>({});
   const [carregando, setCarregando] = useState(true);
@@ -134,18 +137,21 @@ export default function TreinosScreen() {
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="subtitle">Meus treinos</ThemedText>
 
-        <Pressable onPress={() => router.push('/perfil/selecionar')}>
+        <Pressable onPress={() => router.push('/perfil/selecionar')} style={styles.linhaComIcone}>
+          <PerfilIcon size={14} color={theme.text} />
           <ThemedText type="link">
             Perfil ativo: {perfilAtivo?.nome ?? '—'} (trocar)
           </ThemedText>
         </Pressable>
 
         <ThemedView style={styles.acoes}>
-          <Pressable onPress={handleImportarTreino} disabled={importando}>
+          <Pressable onPress={handleImportarTreino} disabled={importando} style={styles.linhaComIcone}>
+            <ImportarIcon size={16} color={theme.text} />
             <ThemedText type="link">Importar treino</ThemedText>
           </Pressable>
 
-          <Pressable onPress={handleImportarTreinoExemplo} disabled={importando}>
+          <Pressable onPress={handleImportarTreinoExemplo} disabled={importando} style={styles.linhaComIcone}>
+            <ImportarIcon size={16} color={theme.text} />
             <ThemedText type="link">Importar treino de exemplo</ThemedText>
           </Pressable>
         </ThemedView>
@@ -191,6 +197,11 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: Spacing.four,
     gap: Spacing.three,
+  },
+  linhaComIcone: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.one,
   },
   acoes: {
     gap: Spacing.two,
