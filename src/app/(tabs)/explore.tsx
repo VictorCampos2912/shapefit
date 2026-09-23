@@ -5,6 +5,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { BotaoAcoes } from '@/components/ui/botao-acoes';
+import { Button } from '@/components/ui/button';
 import { Collapsible } from '@/components/ui/collapsible';
 import { EditarIcon } from '@/components/ui/icons';
 import { ProgressRing } from '@/components/ui/progress-ring';
@@ -164,18 +166,13 @@ function SecaoExercicio({
                           Cancelar
                         </ThemedText>
                       </Pressable>
-                      <Pressable
+                      <Button
                         onPress={handleSalvarEdicao}
                         disabled={!podeSalvarEdicao}
-                        style={[
-                          styles.botaoSalvarEdicao,
-                          { backgroundColor: podeSalvarEdicao ? theme.text : theme.textSecondary },
-                        ]}
+                        style={styles.botaoSalvarEdicao}
                       >
-                        <ThemedText type="smallBold" themeColor="background">
-                          Salvar edição
-                        </ThemedText>
-                      </Pressable>
+                        Salvar edição
+                      </Button>
                     </ThemedView>
                   </ThemedView>
                 ) : (
@@ -184,7 +181,7 @@ function SecaoExercicio({
                       {formatarData(registro.data)} · {registro.cargaKg}kg · {registro.reps} reps
                     </ThemedText>
                     <View style={styles.linhaComIconeEditar}>
-                      <EditarIcon size={14} color={theme.text} />
+                      <EditarIcon size={14} color={theme.accent} />
                       <ThemedText type="link">Editar</ThemedText>
                     </View>
                   </Pressable>
@@ -259,7 +256,10 @@ export default function HistoricoScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="subtitle">Histórico de evolução</ThemedText>
+        <View style={styles.linhaTitulo}>
+          <ThemedText type="subtitle">Histórico de evolução</ThemedText>
+          <BotaoAcoes />
+        </View>
 
         {historico === null && (
           <ThemedView style={styles.estadoCarregando}>
@@ -300,6 +300,11 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: Spacing.four,
     gap: Spacing.three,
+  },
+  linhaTitulo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   estadoCarregando: {
     paddingVertical: Spacing.six,

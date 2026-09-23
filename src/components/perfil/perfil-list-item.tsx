@@ -18,7 +18,9 @@ export function PerfilListItem({ perfil, ativo = false, onPress }: PerfilListIte
 
   return (
     <Pressable onPress={onPress}>
-      <ThemedView type={ativo ? 'backgroundSelected' : 'backgroundElement'} style={styles.container}>
+      <ThemedView
+        type={ativo ? 'accentTint' : 'backgroundElement'}
+        style={[styles.container, ativo && { borderWidth: 2, borderColor: theme.accent }]}>
         <View style={styles.linhaNome}>
           <PerfilIcon size={16} color={theme.text} />
           <ThemedText type="smallBold">{perfil.nome}</ThemedText>

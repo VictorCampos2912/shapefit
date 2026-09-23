@@ -3,6 +3,7 @@ import { Alert, Keyboard, Pressable, StyleSheet, TextInput, View } from 'react-n
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { Button } from '@/components/ui/button';
 import { ConcluirIcon, EditarIcon } from '@/components/ui/icons';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -171,18 +172,13 @@ export function ExercicioExecucao({
                         Cancelar
                       </ThemedText>
                     </Pressable>
-                    <Pressable
+                    <Button
                       onPress={handleSalvarEdicaoSerie}
                       disabled={!podeSalvarEdicao}
-                      style={[
-                        styles.botaoSalvarEdicao,
-                        { backgroundColor: podeSalvarEdicao ? theme.text : theme.textSecondary },
-                      ]}
+                      style={styles.botaoSalvarEdicao}
                     >
-                      <ThemedText type="smallBold" themeColor="background">
-                        Salvar edição
-                      </ThemedText>
-                    </Pressable>
+                      Salvar edição
+                    </Button>
                   </ThemedView>
                 </ThemedView>
               ) : (
@@ -195,7 +191,7 @@ export function ExercicioExecucao({
                     {serieRealizada.reps} reps
                   </ThemedText>
                   <View style={styles.linhaComIcone}>
-                    <EditarIcon size={14} color={theme.text} />
+                    <EditarIcon size={14} color={theme.accent} />
                     <ThemedText type="link">Editar</ThemedText>
                   </View>
                 </Pressable>
@@ -216,14 +212,9 @@ export function ExercicioExecucao({
       </ThemedText>
 
       {!estado.iniciado && (
-        <Pressable
-          onPress={handleIniciarExercicio}
-          style={[styles.botaoIniciar, { backgroundColor: theme.text }]}
-        >
-          <ThemedText type="smallBold" themeColor="background">
-            Iniciar exercício
-          </ThemedText>
-        </Pressable>
+        <Button onPress={handleIniciarExercicio} style={styles.botaoIniciar}>
+          Iniciar exercício
+        </Button>
       )}
 
       {estado.iniciado && !estado.concluido && !emDescanso && (
@@ -271,20 +262,14 @@ export function ExercicioExecucao({
             />
           </ThemedView>
 
-          <Pressable
+          <Button
             onPress={handleConcluirSerie}
             disabled={!podeConcluirSerie}
-            style={[
-              styles.botaoIniciar,
-              styles.linhaComIcone,
-              { backgroundColor: podeConcluirSerie ? theme.text : theme.textSecondary },
-            ]}
+            icon={<ConcluirIcon size={16} color={theme.background} />}
+            style={styles.botaoIniciar}
           >
-            <ConcluirIcon size={16} color={theme.background} />
-            <ThemedText type="smallBold" themeColor="background">
-              Concluir série
-            </ThemedText>
-          </Pressable>
+            Concluir série
+          </Button>
 
           {renderSeriesConcluidas()}
         </ThemedView>
@@ -321,15 +306,14 @@ export function ExercicioExecucao({
           <ThemedText type="subtitle" themeColor="success" style={styles.textoCentralizado}>
             Todas as séries concluídas!
           </ThemedText>
-          <Pressable
+          <Button
+            variant="success"
             onPress={onConcluirExercicio}
-            style={[styles.botaoConcluirExercicio, styles.linhaComIconeCentralizada, { backgroundColor: theme.success }]}
+            icon={<ConcluirIcon size={16} color={theme.background} />}
+            style={styles.botaoConcluirExercicio}
           >
-            <ConcluirIcon size={16} color={theme.background} />
-            <ThemedText type="smallBold" themeColor="background">
-              Concluir exercício
-            </ThemedText>
-          </Pressable>
+            Concluir exercício
+          </Button>
 
           {renderSeriesConcluidas()}
         </ThemedView>

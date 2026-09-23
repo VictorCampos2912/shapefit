@@ -4,8 +4,6 @@ import Svg, { Circle } from 'react-native-svg';
 
 import { useTheme } from '@/hooks/use-theme';
 
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
-
 type ProgressRingProps = {
   /** Progresso de 0 a 1. Omitido = modo indeterminado (spinner de carregamento). */
   progress?: number;
@@ -62,7 +60,7 @@ export function ProgressRing({ progress, size = 40, strokeWidth = 5 }: ProgressR
           strokeWidth={strokeWidth}
           fill="none"
         />
-        <AnimatedCircle
+        <Circle
           cx={size / 2}
           cy={size / 2}
           r={radius}

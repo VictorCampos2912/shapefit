@@ -62,20 +62,20 @@ export async function registrarSerieConcluida(params: {
 
 export async function marcarExercicioConcluido(params: {
   perfilId: string;
-  treinoId: string;
+  sessaoId: string;
   exercicioId: string;
 }): Promise<SessaoTreino> {
-  const { perfilId, treinoId, exercicioId } = params;
+  const { perfilId, sessaoId, exercicioId } = params;
   const sessoes = await getSessoes(perfilId);
 
-  const sessao = sessoes.find((item) => item.treinoId === treinoId && item.finalizadaEm === null);
+  const sessao = sessoes.find((item) => item.id === sessaoId);
   if (!sessao) {
-    throw new Error(`Nenhuma sessão em andamento encontrada para o treino ${treinoId} do perfil ${perfilId}`);
+    throw new Error(`Nenhuma sessão encontrada com id ${sessaoId} para o perfil ${perfilId}`);
   }
 
   const execucao = sessao.execucoes.find((item) => item.exercicioId === exercicioId);
   if (!execucao) {
-    throw new Error(`Nenhuma execução encontrada para o exercício ${exercicioId} na sessão do treino ${treinoId}`);
+    throw new Error(`Nenhuma execução encontrada para o exercício ${exercicioId} na sessão ${sessaoId}`);
   }
 
   execucao.status = 'concluido';

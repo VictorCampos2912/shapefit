@@ -26,6 +26,23 @@ export type ResultadoImportacao = {
   erro: string | null;
 };
 
+export type TreinoIgnorado = {
+  /** Nome do treino, quando o próprio campo "nome" era válido; null se nem isso. */
+  nome: string | null;
+  motivo: string;
+};
+
+export type TreinoImportadoComPendencias = {
+  treino: Treino;
+  exerciciosIgnorados: ExercicioIgnorado[];
+};
+
+export type ResultadoImportacaoMultipla = {
+  treinos: TreinoImportadoComPendencias[];
+  treinosIgnorados: TreinoIgnorado[];
+  erro: string | null;
+};
+
 export type TreinosPorPerfilState = {
   treinos: Treino[];
 };

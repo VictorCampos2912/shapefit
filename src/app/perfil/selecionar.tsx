@@ -1,10 +1,11 @@
 import { router } from 'expo-router';
-import { Alert, FlatList, Pressable, StyleSheet } from 'react-native';
+import { Alert, FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PerfilListItem } from '@/components/perfil/perfil-list-item';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { Button } from '@/components/ui/button';
 import { Spacing } from '@/constants/theme';
 import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
 
@@ -47,9 +48,9 @@ export default function SelecionarPerfilScreen() {
           )}
         />
 
-        <Pressable style={styles.criarButton} onPress={() => router.push('/perfil/criar')}>
-          <ThemedText type="smallBold">Criar novo perfil</ThemedText>
-        </Pressable>
+        <Button variant="outline" onPress={() => router.push('/perfil/criar')}>
+          Criar novo perfil
+        </Button>
       </SafeAreaView>
     </ThemedView>
   );
@@ -66,12 +67,5 @@ const styles = StyleSheet.create({
   },
   lista: {
     gap: Spacing.two,
-  },
-  criarButton: {
-    borderWidth: 1,
-    borderColor: '#8888',
-    borderRadius: Spacing.two,
-    paddingVertical: Spacing.three,
-    alignItems: 'center',
   },
 });

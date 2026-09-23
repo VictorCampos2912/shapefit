@@ -76,8 +76,18 @@ e histórico separados. Perfis não são sincronizados entre aparelhos diferente
 | RF06 | Notificar (som/vibração) ao fim do descanso | Média |
 | RF07 | Salvar sessão de treino (completa ou finalizada manualmente), associada ao perfil ativo | Alta |
 | RF08 | Tela de histórico: evolução de carga por exercício ao longo do tempo, filtrada pelo perfil ativo | Média |
-| RF09 | Editar/corrigir um registro de série já feito (sessão atual ou passada) | Baixa |
+| RF09a | Editar/corrigir um registro de série já feito, da sessão **atual em andamento** (adiantado, implementado logo após o RF04 — ver `docs/criterios-aceite.md`) | Baixa |
+| RF09b | Editar/corrigir um registro de série já feito, de uma sessão **já finalizada** no passado (depende do RF07/RF08) | Baixa |
 | RF10 | Criar e selecionar perfil local (nome, dados físicos, objetivo) | Alta |
+
+**Pós-MVP (não fazem parte do RF01–RF10 original — pedidos pelo usuário depois do MVP completo e validado, ver seção 13):**
+
+| ID | Requisito | Prioridade | Spec |
+|----|-----------|------------|------|
+| RF11 | Importar múltiplos treinos de um único arquivo (estende o RF01) | Alta | `specs/012-importar-multiplos-treinos/` |
+| RF12 | Conclusão explícita de sessão de treino — lista permanece concluída até o usuário iniciar uma nova sessão (estende o RF07) | Alta | `specs/013-nova-sessao-treino/` |
+| RF13 | Vibração diferenciada ao fim do descanso, mais intensa que a da notificação (estende o RF06) | Média | `specs/014-vibracao-fim-descanso/` |
+| RF14 | Tela separada para trocar perfil e importar treino, acessada por ícone em cada aba (estende o RF02/RF10) | Média | `specs/015-menu-de-acoes/` |
 
 ## 7. Requisitos não funcionais
 
@@ -185,6 +195,11 @@ prática, não só na teoria do contrato.
   vetores dinâmicos (anel de progresso, conjunto de ícones de interface customizados) —
   `expo-symbols`, já em uso, só cobre ícones estáticos do sistema (SF Symbols/Material),
   sem parametrização por progresso nem controle de traço/forma customizada
+- Tipografia: **`@expo-google-fonts/big-shoulders-display`** (adicionado em 2026-09-21,
+  melhorias de layout) — fonte de exibição (títulos/subtítulos) com personalidade visual,
+  alinhada à identidade de marca já definida (ícone/logo); pacote só de assets/JS sobre o
+  `expo-font` (já presente no projeto), sem código nativo novo — não exige novo build de
+  desenvolvimento
 - Testes em dispositivo real via Expo Go (sem build nativo) até o RF05, inclusive.
   **A partir do RF06** (notificações), o projeto migrou para um **development build no
   Android** — `expo-notifications` quebrava o carregamento do app no Expo Go puro
@@ -236,8 +251,12 @@ prática, não só na teoria do contrato.
 - **Dívida técnica acumulada — RESOLVIDA (atualizada em 2026-09-21):** RF01, RF02, RF03,
   RF04, RF09a, RF05, RF06, RF07, RF08 e RF09b foram todos implementados e validados nos
   dois aparelhos-alvo (Redmi Note 12/Android e iPhone 16 Plus/iOS). RF10 já validado
-  desde sua implementação original. Não há dívida de validação pendente no momento —
-  todos os requisitos funcionais do PRD original (RF01–RF10) estão completos.
+  desde sua implementação original. Não há dívida de validação pendente no MVP original
+  (RF01–RF10).
+- **Pendência atual (2026-09-22):** RF11–RF14 (pós-MVP, ver seção 6) estão com código
+  implementado e validados via web (Expo web + Playwright), mas **ainda não validados
+  nos dois aparelhos-alvo** — RF13 (vibração) em particular só é verificável em
+  aparelho físico. Critérios de aceite detalhados em `docs/criterios-aceite.md`.
 
 ## 14. Abordagem de identidade visual
 

@@ -3,8 +3,10 @@ import { Pressable, StyleSheet, TextInput } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { Button } from '@/components/ui/button';
 import { OBJETIVO_OPCOES, SEXO_OPCOES } from '@/constants/perfil';
 import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import type { ObjetivoTreino, Sexo } from '@/types/perfil';
 
 type DadosFormulario = {
@@ -22,6 +24,7 @@ type PerfilFormProps = {
 };
 
 export function PerfilForm({ onSubmit, submitting = false }: PerfilFormProps) {
+  const theme = useTheme();
   const [nome, setNome] = useState('');
   const [pesoKg, setPesoKg] = useState('');
   const [alturaCm, setAlturaCm] = useState('');
@@ -106,7 +109,10 @@ export function PerfilForm({ onSubmit, submitting = false }: PerfilFormProps) {
             <Pressable
               key={opcao}
               onPress={() => setSexo(opcao)}
-              style={[styles.opcaoButton, sexo === opcao && styles.opcaoButtonSelecionada]}>
+              style={[
+                styles.opcaoButton,
+                sexo === opcao && { backgroundColor: theme.accentTint, borderColor: theme.accent },
+              ]}>
               <ThemedText type="small">{opcao}</ThemedText>
             </Pressable>
           ))}
@@ -120,7 +126,10 @@ export function PerfilForm({ onSubmit, submitting = false }: PerfilFormProps) {
             <Pressable
               key={opcao}
               onPress={() => setObjetivo(opcao)}
-              style={[styles.opcaoButton, objetivo === opcao && styles.opcaoButtonSelecionada]}>
+              style={[
+                styles.opcaoButton,
+                objetivo === opcao && { backgroundColor: theme.accentTint, borderColor: theme.accent },
+              ]}>
               <ThemedText type="small">{opcao}</ThemedText>
             </Pressable>
           ))}
@@ -133,14 +142,9 @@ export function PerfilForm({ onSubmit, submitting = false }: PerfilFormProps) {
         </ThemedText>
       )}
 
-      <Pressable
-        style={[styles.submitButton, submitting && styles.submitButtonDisabled]}
-        onPress={handleSubmit}
-        disabled={submitting}>
-        <ThemedText type="smallBold" themeColor="background">
-          {submitting ? 'Salvando…' : 'Salvar perfil'}
-        </ThemedText>
-      </Pressable>
+      <Button onPress={handleSubmit} disabled={submitting}>
+        {submitting ? 'Salvando…' : 'Salvar perfil'}
+      </Button>
     </ThemedView>
   );
 }
@@ -170,18 +174,5 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.four,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.one,
-  },
-  opcaoButtonSelecionada: {
-    backgroundColor: '#3c87f7',
-    borderColor: '#3c87f7',
-  },
-  submitButton: {
-    backgroundColor: '#000000',
-    borderRadius: Spacing.two,
-    paddingVertical: Spacing.three,
-    alignItems: 'center',
-  },
-  submitButtonDisabled: {
-    opacity: 0.6,
   },
 });

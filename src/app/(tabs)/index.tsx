@@ -1,19 +1,18 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, FlatList, Pressable, StyleSheet } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { ImportarIcon, PerfilIcon } from '@/components/ui/icons';
+import { BotaoAcoes } from '@/components/ui/botao-acoes';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { TreinoListItem } from '@/components/treino/treino-list-item';
 import { Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
 import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
 import { contarSessoesFinalizadas } from '@/services/sessao-treino-storage';
-import { importarTreino, importarTreinoExemplo, listarTreinos } from '@/services/treino-storage';
-import type { ResultadoImportacao, Treino } from '@/types/treino';
+import { listarTreinos } from '@/services/treino-storage';
+import type { Treino } from '@/types/treino';
 
 function calcularNomesDuplicados(treinos: Treino[]): Set<string> {
   const contagem = new Map<string, number>();
@@ -29,35 +28,11 @@ function calcularNomesDuplicados(treinos: Treino[]): Set<string> {
   return duplicados;
 }
 
-function exibirResultadoImportacao(resultado: ResultadoImportacao | null) {
-  if (resultado === null) {
-    return;
-  }
-
-  if (resultado.erro) {
-    Alert.alert('Não foi possível importar o treino', resultado.erro);
-    return;
-  }
-
-  if (resultado.exerciciosIgnorados.length > 0) {
-    const motivos = resultado.exerciciosIgnorados.map((item) => `• ${item.motivo}`).join('\n');
-    Alert.alert(
-      'Treino importado de forma incompleta',
-      `O treino "${resultado.treino?.nome}" foi importado, mas os seguintes exercícios foram ignorados:\n\n${motivos}`,
-    );
-    return;
-  }
-
-  Alert.alert('Treino importado', `O treino "${resultado.treino?.nome}" foi importado com sucesso.`);
-}
-
 export default function TreinosScreen() {
   const { perfilAtivo } = usePerfilAtivo();
-  const theme = useTheme();
   const [treinos, setTreinos] = useState<Treino[]>([]);
   const [contagensPorTreino, setContagensPorTreino] = useState<Record<string, number>>({});
   const [carregando, setCarregando] = useState(true);
-  const [importando, setImportando] = useState(false);
 
   async function carregarContagens(perfilId: string, lista: Treino[]) {
     const entradas = await Promise.all(
@@ -98,34 +73,6 @@ export default function TreinosScreen() {
     }, [perfilAtivo?.id]),
   );
 
-  async function handleImportarTreino() {
-    if (!perfilAtivo) return;
-    setImportando(true);
-    try {
-      const resultado = await importarTreino(perfilAtivo.id);
-      exibirResultadoImportacao(resultado);
-      if (resultado?.treino) {
-        await recarregarTreinos();
-      }
-    } finally {
-      setImportando(false);
-    }
-  }
-
-  async function handleImportarTreinoExemplo() {
-    if (!perfilAtivo) return;
-    setImportando(true);
-    try {
-      const resultado = await importarTreinoExemplo(perfilAtivo.id);
-      exibirResultadoImportacao(resultado);
-      if (resultado.treino) {
-        await recarregarTreinos();
-      }
-    } finally {
-      setImportando(false);
-    }
-  }
-
   function handleSelecionarTreino(treino: Treino) {
     router.push({ pathname: '/treino/[treinoId]', params: { treinoId: treino.id } });
   }
@@ -135,26 +82,10 @@ export default function TreinosScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="subtitle">Meus treinos</ThemedText>
-
-        <Pressable onPress={() => router.push('/perfil/selecionar')} style={styles.linhaComIcone}>
-          <PerfilIcon size={14} color={theme.text} />
-          <ThemedText type="link">
-            Perfil ativo: {perfilAtivo?.nome ?? '—'} (trocar)
-          </ThemedText>
-        </Pressable>
-
-        <ThemedView style={styles.acoes}>
-          <Pressable onPress={handleImportarTreino} disabled={importando} style={styles.linhaComIcone}>
-            <ImportarIcon size={16} color={theme.text} />
-            <ThemedText type="link">Importar treino</ThemedText>
-          </Pressable>
-
-          <Pressable onPress={handleImportarTreinoExemplo} disabled={importando} style={styles.linhaComIcone}>
-            <ImportarIcon size={16} color={theme.text} />
-            <ThemedText type="link">Importar treino de exemplo</ThemedText>
-          </Pressable>
-        </ThemedView>
+        <View style={styles.linhaTitulo}>
+          <ThemedText type="subtitle">Meus treinos</ThemedText>
+          <BotaoAcoes />
+        </View>
 
         {carregando && (
           <ThemedView style={styles.estadoCarregando}>
@@ -166,7 +97,7 @@ export default function TreinosScreen() {
           <ThemedView type="backgroundElement" style={styles.estadoVazio}>
             <ThemedText type="smallBold">Nenhum treino importado ainda</ThemedText>
             <ThemedText type="small" themeColor="textSecondary">
-              Use a ação &ldquo;Importar treino&rdquo; acima para trazer um treino para este perfil.
+              Toque no ícone de ações (⋯) no topo para importar um treino.
             </ThemedText>
           </ThemedView>
         )}
@@ -198,13 +129,10 @@ const styles = StyleSheet.create({
     padding: Spacing.four,
     gap: Spacing.three,
   },
-  linhaComIcone: {
+  linhaTitulo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.one,
-  },
-  acoes: {
-    gap: Spacing.two,
+    justifyContent: 'space-between',
   },
   estadoCarregando: {
     paddingVertical: Spacing.six,

@@ -1,3 +1,8 @@
+import {
+  BigShouldersDisplay_700Bold,
+  BigShouldersDisplay_800ExtraBold,
+  useFonts,
+} from '@expo-google-fonts/big-shoulders-display';
 import { DarkTheme, DefaultTheme, Redirect, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
@@ -27,10 +32,18 @@ function RootNavigator() {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const [fontsLoaded, fontError] = useFonts({
+    BigShouldersDisplay_700Bold,
+    BigShouldersDisplay_800ExtraBold,
+  });
 
   useEffect(() => {
     configurarNotificacoesDescanso();
   }, []);
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

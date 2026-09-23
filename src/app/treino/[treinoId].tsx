@@ -1,6 +1,6 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { AppState, FlatList, Pressable, StyleSheet } from 'react-native';
+import { AppState, FlatList, Pressable, StyleSheet, Vibration } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -8,6 +8,7 @@ import { ThemedView } from '@/components/themed-view';
 import { CronometroDescanso } from '@/components/treino/cronometro-descanso';
 import { ExercicioExecucao } from '@/components/treino/exercicio-execucao';
 import { ExercicioListItem, type EstadoVisualExercicio } from '@/components/treino/exercicio-list-item';
+import { Button } from '@/components/ui/button';
 import { FinalizarIcon, VoltarIcon } from '@/components/ui/icons';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { Spacing } from '@/constants/theme';
@@ -34,6 +35,8 @@ import {
 } from '@/types/execucao-treino';
 import type { Treino } from '@/types/treino';
 import { ajustarFimEm, calcularSegundosRestantes } from '@/utils/cronometro-descanso';
+
+const PADRAO_VIBRACAO_FIM_DESCANSO = [0, 500, 200, 500, 200, 500];
 
 function estadoVisualDoExercicio(
   exercicioId: string,
@@ -87,6 +90,7 @@ export default function ExecucaoTreinoScreen() {
   const [exercicioSelecionadoId, setExercicioSelecionadoId] = useState<string | null>(null);
   const [estadosPorExercicio, setEstadosPorExercicio] = useState<Record<string, EstadoExecucaoExercicio>>({});
   const [sessaoAtualId, setSessaoAtualId] = useState<string | null>(null);
+  const [sessaoFinalizadaAutomaticamente, setSessaoFinalizadaAutomaticamente] = useState(false);
   const [reaberturaJaConcluida, setReaberturaJaConcluida] = useState(false);
   const [descansoAtivo, setDescansoAtivo] = useState<DescansoAtivo>(null);
   const [notificacaoAgendada, setNotificacaoAgendada] = useState<{
@@ -229,8 +233,8 @@ export default function ExecucaoTreinoScreen() {
   }
 
   async function handleConcluirExercicio(exercicioId: string) {
-    if (!perfilAtivo || !treino) return;
-    await marcarExercicioConcluido({ perfilId: perfilAtivo.id, treinoId: treino.id, exercicioId });
+    if (!perfilAtivo || !sessaoAtualId) return;
+    await marcarExercicioConcluido({ perfilId: perfilAtivo.id, sessaoId: sessaoAtualId, exercicioId });
     setExercicioSelecionadoId(null);
   }
 
@@ -240,6 +244,7 @@ export default function ExecucaoTreinoScreen() {
 
   function handleDescansoConcluido() {
     setDescansoAtivo(null);
+    Vibration.vibrate(PADRAO_VIBRACAO_FIM_DESCANSO);
     if (notificacaoAgendada) {
       cancelarNotificacaoDescanso(notificacaoAgendada.identificador);
       setNotificacaoAgendada(null);
@@ -303,17 +308,26 @@ export default function ExecucaoTreinoScreen() {
     setSessaoAtualId(null);
     setEstadosPorExercicio({});
     setExercicioSelecionadoId(null);
+    setSessaoFinalizadaAutomaticamente(false);
   }
 
+  function handleNovaSessaoDeTreino() {
+    setSessaoAtualId(null);
+    setEstadosPorExercicio({});
+    setExercicioSelecionadoId(null);
+    setSessaoFinalizadaAutomaticamente(false);
+  }
+
+  const todosConcluidos =
+    treino?.exercicios.every((item) => estadosPorExercicio[item.id]?.concluido) ?? false;
+
   useEffect(() => {
-    const todosConcluidos =
-      treino?.exercicios.every((item) => estadosPorExercicio[item.id]?.concluido) ?? false;
-    if (todosConcluidos && sessaoAtualId !== null) {
+    if (todosConcluidos && sessaoAtualId !== null && !sessaoFinalizadaAutomaticamente && perfilAtivo) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      handleFinalizarTreino();
+      setSessaoFinalizadaAutomaticamente(true);
+      finalizarSessao(perfilAtivo.id, sessaoAtualId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [estadosPorExercicio, sessaoAtualId, treino?.exercicios]);
+  }, [todosConcluidos, sessaoAtualId, sessaoFinalizadaAutomaticamente, perfilAtivo]);
 
   if (carregando) {
     return (
@@ -343,7 +357,7 @@ export default function ExecucaoTreinoScreen() {
         {exercicioSelecionado ? (
           <>
             <Pressable onPress={handleVoltarParaLista} style={styles.linhaComIcone}>
-              <VoltarIcon size={16} color={theme.text} />
+              <VoltarIcon size={16} color={theme.accent} />
               <ThemedText type="link">Voltar para exercícios</ThemedText>
             </Pressable>
             <ExercicioExecucao
@@ -376,14 +390,14 @@ export default function ExecucaoTreinoScreen() {
                 />
               )}
             />
-            {treino.exercicios.every((item) => estadosPorExercicio[item.id]?.concluido) && (
+            {todosConcluidos && (
               <ThemedView type="successBackground" style={styles.parabens}>
                 <ThemedText type="smallBold" themeColor="success" style={styles.textoCentralizado}>
                   🎉 Parabéns pelo treino de hoje!
                 </ThemedText>
               </ThemedView>
             )}
-            {sessaoAtualId && (
+            {sessaoAtualId && !todosConcluidos && (
               <Pressable onPress={handleFinalizarTreino}>
                 <ThemedView type="warningBackground" style={[styles.botaoFinalizarTreino, styles.linhaComIconeCentralizada]}>
                   <FinalizarIcon size={18} color={theme.warning} />
@@ -392,6 +406,9 @@ export default function ExecucaoTreinoScreen() {
                   </ThemedText>
                 </ThemedView>
               </Pressable>
+            )}
+            {sessaoAtualId && todosConcluidos && (
+              <Button onPress={handleNovaSessaoDeTreino}>Nova sessão de Treino</Button>
             )}
           </>
         )}

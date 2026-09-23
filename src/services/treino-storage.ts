@@ -7,7 +7,9 @@ import type {
   ExercicioIgnorado,
   ExercicioPlanejado,
   ResultadoImportacao,
+  ResultadoImportacaoMultipla,
   Treino,
+  TreinoImportadoComPendencias,
   TreinosPorPerfilState,
 } from '@/types/treino';
 
@@ -93,17 +95,20 @@ function validarEstruturaTreino(
   return { ok: true, nome: raiz.nome.trim(), exerciciosBrutos: raiz.exercicios };
 }
 
-async function processarConteudo(conteudo: string, perfilId: string): Promise<ResultadoImportacao> {
-  let bruto: unknown;
-  try {
-    bruto = JSON.parse(conteudo);
-  } catch {
-    return { treino: null, exerciciosIgnorados: [], erro: 'O arquivo selecionado não é um JSON válido.' };
-  }
+type ResultadoMontagemTreino =
+  | { ok: true; treino: Treino; exerciciosIgnorados: ExercicioIgnorado[] }
+  | { ok: false; nome: string | null; motivo: string };
 
+/**
+ * Valida e monta um único treino a partir de um valor bruto (um elemento do array,
+ * ou o objeto único na raiz do arquivo) — função pura, não lê nem escreve
+ * AsyncStorage. Reaproveitada tanto pelo caminho de treino único quanto pelo de
+ * múltiplos treinos (specs/012-importar-multiplos-treinos).
+ */
+function montarTreinoValido(bruto: unknown, perfilId: string): ResultadoMontagemTreino {
   const estrutura = validarEstruturaTreino(bruto);
   if (!estrutura.ok) {
-    return { treino: null, exerciciosIgnorados: [], erro: estrutura.motivo };
+    return { ok: false, nome: null, motivo: estrutura.motivo };
   }
 
   const exerciciosIgnorados: ExercicioIgnorado[] = [];
@@ -120,9 +125,9 @@ async function processarConteudo(conteudo: string, perfilId: string): Promise<Re
 
   if (exercicios.length === 0) {
     return {
-      treino: null,
-      exerciciosIgnorados: [],
-      erro: 'Nenhum exercício válido foi encontrado no arquivo.',
+      ok: false,
+      nome: estrutura.nome,
+      motivo: 'Nenhum exercício válido foi encontrado no arquivo.',
     };
   }
 
@@ -134,13 +139,69 @@ async function processarConteudo(conteudo: string, perfilId: string): Promise<Re
     importadoEm: new Date().toISOString(),
   };
 
-  const state = await getTreinosState(perfilId);
-  await setTreinosState(perfilId, { treinos: [...state.treinos, treino] });
-
-  return { treino, exerciciosIgnorados, erro: null };
+  return { ok: true, treino, exerciciosIgnorados };
 }
 
-export async function importarTreino(perfilId: string): Promise<ResultadoImportacao | null> {
+async function processarConteudoObjeto(bruto: unknown, perfilId: string): Promise<ResultadoImportacao> {
+  const resultado = montarTreinoValido(bruto, perfilId);
+  if (!resultado.ok) {
+    return { treino: null, exerciciosIgnorados: [], erro: resultado.motivo };
+  }
+
+  const state = await getTreinosState(perfilId);
+  await setTreinosState(perfilId, { treinos: [...state.treinos, resultado.treino] });
+
+  return { treino: resultado.treino, exerciciosIgnorados: resultado.exerciciosIgnorados, erro: null };
+}
+
+async function processarConteudoArray(bruto: unknown[], perfilId: string): Promise<ResultadoImportacaoMultipla> {
+  if (bruto.length === 0) {
+    return { treinos: [], treinosIgnorados: [], erro: 'O arquivo não contém nenhum treino.' };
+  }
+
+  const treinos: TreinoImportadoComPendencias[] = [];
+  const treinosIgnorados: ResultadoImportacaoMultipla['treinosIgnorados'] = [];
+
+  for (const item of bruto) {
+    const resultado = montarTreinoValido(item, perfilId);
+    if (resultado.ok) {
+      treinos.push({ treino: resultado.treino, exerciciosIgnorados: resultado.exerciciosIgnorados });
+    } else {
+      treinosIgnorados.push({ nome: resultado.nome, motivo: resultado.motivo });
+    }
+  }
+
+  if (treinos.length > 0) {
+    const state = await getTreinosState(perfilId);
+    await setTreinosState(perfilId, {
+      treinos: [...state.treinos, ...treinos.map((item) => item.treino)],
+    });
+  }
+
+  return { treinos, treinosIgnorados, erro: null };
+}
+
+async function processarConteudo(
+  conteudo: string,
+  perfilId: string,
+): Promise<ResultadoImportacao | ResultadoImportacaoMultipla> {
+  let bruto: unknown;
+  try {
+    bruto = JSON.parse(conteudo);
+  } catch {
+    return { treino: null, exerciciosIgnorados: [], erro: 'O arquivo selecionado não é um JSON válido.' };
+  }
+
+  if (Array.isArray(bruto)) {
+    return processarConteudoArray(bruto, perfilId);
+  }
+
+  return processarConteudoObjeto(bruto, perfilId);
+}
+
+export async function importarTreino(
+  perfilId: string,
+): Promise<ResultadoImportacao | ResultadoImportacaoMultipla | null> {
   const resultado = await DocumentPicker.getDocumentAsync({
     type: 'application/json',
     copyToCacheDirectory: true,
@@ -154,7 +215,9 @@ export async function importarTreino(perfilId: string): Promise<ResultadoImporta
   return processarConteudo(conteudo, perfilId);
 }
 
-export async function importarTreinoExemplo(perfilId: string): Promise<ResultadoImportacao> {
+export async function importarTreinoExemplo(
+  perfilId: string,
+): Promise<ResultadoImportacao | ResultadoImportacaoMultipla> {
   const conteudo = JSON.stringify(treinoExemplo);
   return processarConteudo(conteudo, perfilId);
 }

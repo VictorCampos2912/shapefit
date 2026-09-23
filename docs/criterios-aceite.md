@@ -32,26 +32,27 @@ iPhone 16 Plus), via Expo Go.
 - Suporta múltiplos perfis no mesmo aparelho (ex: você + 1-2 familiares)
 - Troca de perfil ativo é **bloqueada** enquanto houver uma sessão de treino em andamento
 
-**Critérios de aceite:**
-- [ ] Ao abrir o app pela primeira vez (nenhum perfil criado ainda), a tela de criação de
+**Critérios de aceite:** *(validados em Android e iOS — ver
+`specs/001-perfil-local/tasks.md`, 100% concluído)*
+- [X] Ao abrir o app pela primeira vez (nenhum perfil criado ainda), a tela de criação de
       perfil é exibida antes de qualquer outra tela
-- [ ] O formulário de criação exige o preenchimento de todos os campos (nome, peso,
+- [X] O formulário de criação exige o preenchimento de todos os campos (nome, peso,
       altura, idade, sexo, objetivo) antes de permitir salvar o perfil
-- [ ] Se algum campo obrigatório não for preenchido, o app impede o salvamento e indica
+- [X] Se algum campo obrigatório não for preenchido, o app impede o salvamento e indica
       quais campos faltam
-- [ ] Após criar o perfil, ele passa a ser o perfil ativo e o app navega para a lista de
+- [X] Após criar o perfil, ele passa a ser o perfil ativo e o app navega para a lista de
       treinos (RF02) desse perfil
-- [ ] Se já existem perfis salvos, o app exibe uma lista de perfis para seleção ao abrir,
+- [X] Se já existem perfis salvos, o app exibe uma lista de perfis para seleção ao abrir,
       em vez do formulário de criação
-- [ ] A partir da lista de perfis, há uma opção clara para "Criar novo perfil"
-- [ ] O usuário consegue trocar de perfil ativo a qualquer momento **sem** uma sessão de
+- [X] A partir da lista de perfis, há uma opção clara para "Criar novo perfil"
+- [X] O usuário consegue trocar de perfil ativo a qualquer momento **sem** uma sessão de
       treino em andamento, sem precisar reinstalar o app
-- [ ] Se houver uma sessão de treino em andamento (RF07) para o perfil ativo, a opção de
+- [X] Se houver uma sessão de treino em andamento (RF07) para o perfil ativo, a opção de
       trocar de perfil fica desabilitada ou exibe um aviso explicando que é preciso
       finalizar a sessão atual primeiro
-- [ ] Ao trocar de perfil ativo, todas as telas que dependem do perfil (treinos, execução,
+- [X] Ao trocar de perfil ativo, todas as telas que dependem do perfil (treinos, execução,
       histórico) atualizam imediatamente para refletir apenas os dados do novo perfil ativo
-- [ ] Não existe campo de senha, PIN ou qualquer mecanismo de autenticação — qualquer
+- [X] Não existe campo de senha, PIN ou qualquer mecanismo de autenticação — qualquer
       pessoa com acesso ao aparelho pode trocar de perfil livremente (fora da restrição de
       sessão em andamento)
 
@@ -66,29 +67,30 @@ iPhone 16 Plus), via Expo Go.
   falhou, sem bloquear a importação inteira
 - **Novo (v1.1):** o treino importado é vinculado ao perfil ativo no momento da importação
 
-**Critérios de aceite:**
-- [ ] O treino importado é salvo associado ao `perfil_id` do perfil ativo (RF10)
-- [ ] Um treino importado por um perfil não aparece para nenhum outro perfil
-- [ ] O usuário consegue abrir o seletor de arquivos do sistema a partir do app e escolher
+**Critérios de aceite:** *(validados em Android e iOS — ver
+`specs/002-importar-treino-json/tasks.md`, 100% concluído)*
+- [X] O treino importado é salvo associado ao `perfil_id` do perfil ativo (RF10)
+- [X] Um treino importado por um perfil não aparece para nenhum outro perfil
+- [X] O usuário consegue abrir o seletor de arquivos do sistema a partir do app e escolher
       um `.json`
-- [ ] Um arquivo JSON válido (seguindo o schema da seção 8 do PRD) é importado com sucesso
+- [X] Um arquivo JSON válido (seguindo o schema da seção 8 do PRD) é importado com sucesso
       e o treino aparece na lista de treinos salvos
-- [ ] Se um exercício do JSON tiver campo obrigatório faltando ou com tipo errado (ex:
+- [X] Se um exercício do JSON tiver campo obrigatório faltando ou com tipo errado (ex:
       `series` como texto em vez de número), esse exercício específico é ignorado, mas o
       restante do treino é importado normalmente
-- [ ] Quando há erro parcial, o app exibe uma mensagem informando que o treino foi
+- [X] Quando há erro parcial, o app exibe uma mensagem informando que o treino foi
       importado incompleto e, se possível, qual(is) exercício(s) foram ignorados
-- [ ] Se o arquivo selecionado não for um JSON válido (erro de sintaxe, arquivo
+- [X] Se o arquivo selecionado não for um JSON válido (erro de sintaxe, arquivo
       corrompido), o app exibe mensagem de erro clara e não importa nada
-- [ ] O arquivo de exemplo pré-carregado no app importa sem erros, servindo como
+- [X] O arquivo de exemplo pré-carregado no app importa sem erros, servindo como
       referência de teste
-- [ ] Se o campo `nome` do treino (nível raiz) estiver ausente, ou a lista `exercicios`
+- [X] Se o campo `nome` do treino (nível raiz) estiver ausente, ou a lista `exercicios`
       estiver ausente/vazia, o arquivo é tratado como inválido (mesmo tratamento de um
       JSON malformado) — a importação inteira é rejeitada, sem criar treino algum
-- [ ] Se, após a validação individual de cada exercício, nenhum exercício válido restar,
+- [X] Se, após a validação individual de cada exercício, nenhum exercício válido restar,
       o app não cria um treino vazio — trata como falha de importação e informa que
       nenhum exercício válido foi encontrado
-- [ ] Se o usuário cancelar a seleção de arquivo no seletor do sistema, nenhuma ação
+- [X] Se o usuário cancelar a seleção de arquivo no seletor do sistema, nenhuma ação
       ocorre — sem mensagem de erro, sem alteração na lista de treinos
 
 ---
@@ -104,23 +106,24 @@ iPhone 16 Plus), via Expo Go.
   para tornar a importação testável. Ao especificar o RF02, revisar/remover esse ponto de
   entrada temporário e integrá-lo à tela de lista de treinos definitiva
 
-**Critérios de aceite:**
-- [ ] A lista exibida contém apenas os treinos vinculados ao perfil ativo no momento
-- [ ] Trocar de perfil ativo (RF10) atualiza esta lista imediatamente, sem precisar
+**Critérios de aceite:** *(validados em Android e iOS — ver
+`specs/003-listar-treinos/tasks.md`, 100% concluído)*
+- [X] A lista exibida contém apenas os treinos vinculados ao perfil ativo no momento
+- [X] Trocar de perfil ativo (RF10) atualiza esta lista imediatamente, sem precisar
       reabrir o app
-- [ ] Todos os treinos importados aparecem em uma lista, identificados pelo campo `nome`
+- [X] Todos os treinos importados aparecem em uma lista, identificados pelo campo `nome`
       do JSON
-- [ ] Importar um novo treino não substitui nem apaga os treinos já salvos
-- [ ] O usuário consegue tocar em um treino da lista para abri-lo (preparando a transição
+- [X] Importar um novo treino não substitui nem apaga os treinos já salvos
+- [X] O usuário consegue tocar em um treino da lista para abri-lo (preparando a transição
       para o RF03 — execução)
-- [ ] Se dois treinos importados tiverem o mesmo `nome`, ambos aparecem na lista, exibindo
+- [X] Se dois treinos importados tiverem o mesmo `nome`, ambos aparecem na lista, exibindo
       a data/hora de importação junto ao nome para diferenciá-los
-- [ ] A lista persiste entre sessões do app (fechar e reabrir o app não apaga os treinos
+- [X] A lista persiste entre sessões do app (fechar e reabrir o app não apaga os treinos
       importados)
-- [ ] Se o perfil ativo ainda não importou nenhum treino, a tela exibe uma indicação clara
+- [X] Se o perfil ativo ainda não importou nenhum treino, a tela exibe uma indicação clara
       disso (não uma lista vazia sem explicação), com a ação de importar visível e
       acessível a partir desse estado
-- [ ] A ação de importar treino fica disponível **somente** a partir desta tela — não
+- [X] A ação de importar treino fica disponível **somente** a partir desta tela — não
       existe mais em nenhuma outra tela do app (substitui o ponto de entrada provisório
       criado no RF01)
 
@@ -139,23 +142,24 @@ continuar. Não é um requisito do MVP atual — decisão consciente de adiar, n
   exercício fazer a seguir, útil quando o equipamento do próximo exercício planejado não
   está disponível
 
-**Critérios de aceite:**
-- [ ] Ao abrir um treino (vindo da lista do RF02), o app exibe a lista de exercícios do
+**Critérios de aceite:** *(validados em Android e iOS — ver
+`specs/004-execucao-treino/tasks.md`, 100% concluído)*
+- [X] Ao abrir um treino (vindo da lista do RF02), o app exibe a lista de exercícios do
       treino com seus dados planejados (séries, reps_alvo, carga_sugerida_kg, descanso_seg)
-- [ ] O usuário consegue selecionar qualquer exercício da lista para iniciar, não apenas o
+- [X] O usuário consegue selecionar qualquer exercício da lista para iniciar, não apenas o
       primeiro
-- [ ] Ao abrir um exercício, o app exibe um botão "Iniciar exercício"
-- [ ] Durante a execução, há campos para registrar **carga (kg, com decimal)** e
+- [X] Ao abrir um exercício, o app exibe um botão "Iniciar exercício"
+- [X] Durante a execução, há campos para registrar **carga (kg, com decimal)** e
       **repetições feitas** para a série atual
-- [ ] O campo de carga aceita valores decimais (ex: 42.5) e rejeita entrada não numérica
-- [ ] O campo de carga é pré-preenchido com o valor de `carga_sugerida_kg` do JSON, editável
+- [X] O campo de carga aceita valores decimais (ex: 42.5) e rejeita entrada não numérica
+- [X] O campo de carga é pré-preenchido com o valor de `carga_sugerida_kg` do JSON, editável
       pelo usuário
-- [ ] O app indica visualmente qual série está em andamento (ex: "Série 2 de 4")
-- [ ] O campo de repetições feitas aceita apenas números inteiros não negativos (diferente
+- [X] O app indica visualmente qual série está em andamento (ex: "Série 2 de 4")
+- [X] O campo de repetições feitas aceita apenas números inteiros não negativos (diferente
       do campo de carga, que aceita decimal)
-- [ ] Se `carga_sugerida_kg` estiver ausente ou zero no JSON do exercício, o campo de
+- [X] Se `carga_sugerida_kg` estiver ausente ou zero no JSON do exercício, o campo de
       carga é exibido vazio (não trava a tela), permanecendo editável normalmente
-- [ ] O campo de repetições feitas não é restringido ao intervalo de `reps_alvo` — aceita
+- [X] O campo de repetições feitas não é restringido ao intervalo de `reps_alvo` — aceita
       qualquer valor informado pelo usuário, já que `reps_alvo` é apenas uma meta
       planejada, não um limite de validação
 
@@ -179,23 +183,24 @@ continuar. Não é um requisito do MVP atual — decisão consciente de adiar, n
   livremente, sem bloqueio** — decisão por simplicidade (Princípio II); não há validação
   impedindo iniciar o Treino B com o Treino A ainda em andamento
 
-**Critérios de aceite:**
-- [ ] O botão "Concluir série" só fica habilitado quando os campos de carga e reps estão
+**Critérios de aceite:** *(validados em Android e iOS — ver
+`specs/005-avancar-series-exercicios/tasks.md`, 100% concluído)*
+- [X] O botão "Concluir série" só fica habilitado quando os campos de carga e reps estão
       preenchidos
-- [ ] Ao tocar em "Concluir série", os dados são registrados e o cronômetro de descanso
+- [X] Ao tocar em "Concluir série", os dados são registrados e o cronômetro de descanso
       inicia automaticamente (ver RF05)
-- [ ] Após concluir todas as séries planejadas de um exercício, o botão "Concluir
+- [X] Após concluir todas as séries planejadas de um exercício, o botão "Concluir
       exercício" fica habilitado
-- [ ] Ao concluir um exercício, o app volta para a lista de exercícios do treino, com o
+- [X] Ao concluir um exercício, o app volta para a lista de exercícios do treino, com o
       exercício concluído marcado visualmente (ex: check ✓)
-- [ ] O usuário consegue selecionar qualquer exercício ainda não concluído para ser o
+- [X] O usuário consegue selecionar qualquer exercício ainda não concluído para ser o
       próximo, não apenas o seguinte na ordem do JSON
-- [ ] Se o usuário sair da tela de execução e voltar (ou fechar e reabrir o app) antes de
+- [X] Se o usuário sair da tela de execução e voltar (ou fechar e reabrir o app) antes de
       concluir o treino, o progresso das séries já registradas é mantido — retomando
       exatamente de onde parou (persistência real, sobrevive ao fechamento completo do app)
-- [ ] O usuário consegue iniciar/continuar um segundo treino sem que o app bloqueie ou
+- [X] O usuário consegue iniciar/continuar um segundo treino sem que o app bloqueie ou
       avise sobre o primeiro treino ainda em andamento
-- [ ] Ao tentar trocar de perfil ativo (RF10) com este treino em andamento, a troca é
+- [X] Ao tentar trocar de perfil ativo (RF10) com este treino em andamento, a troca é
       bloqueada — validar esse cenário explicitamente nos testes do RF04, já que é este
       requisito que torna o bloqueio do RF10 funcional pela primeira vez
 
@@ -208,23 +213,24 @@ continuar. Não é um requisito do MVP atual — decisão consciente de adiar, n
 - Duração padrão vem do `descanso_seg` do JSON, mas o usuário pode ajustar durante a
   contagem em incrementos de 15s (+/-)
 
-**Critérios de aceite:**
-- [ ] Ao tocar em "Concluir série", o cronômetro de descanso inicia automaticamente, sem
+**Critérios de aceite:** *(validados em Android — Redmi Note 12 — e iOS — iPhone 16
+Plus — ver `specs/007-cronometro-descanso/tasks.md`, 100% concluído)*
+- [X] Ao tocar em "Concluir série", o cronômetro de descanso inicia automaticamente, sem
       ação extra do usuário
-- [ ] O tempo inicial exibido corresponde ao `descanso_seg` do exercício no JSON
-- [ ] O usuário consegue adicionar ou remover 15 segundos do tempo restante a qualquer
+- [X] O tempo inicial exibido corresponde ao `descanso_seg` do exercício no JSON
+- [X] O usuário consegue adicionar ou remover 15 segundos do tempo restante a qualquer
       momento durante a contagem, quantas vezes quiser
-- [ ] O cronômetro continua contando corretamente mesmo se o usuário navegar para outra
+- [X] O cronômetro continua contando corretamente mesmo se o usuário navegar para outra
       tela do app durante o descanso (ex: consultar histórico)
-- [ ] Se o app for minimizado (segundo plano) durante o descanso, o tempo restante ao
+- [X] Se o app for minimizado (segundo plano) durante o descanso, o tempo restante ao
       voltar para o app reflete o tempo real decorrido, não pausa artificialmente
-- [ ] Ao chegar a zero, o cronômetro para e aciona o aviso (ver RF06)
-- [ ] Se `descanso_seg` estiver ausente, zero ou não numérico no exercício, o cronômetro
+- [X] Ao chegar a zero, o cronômetro para e aciona o aviso (ver RF06)
+- [X] Se `descanso_seg` estiver ausente, zero ou não numérico no exercício, o cronômetro
       não é exibido — o evento de "descanso concluído" dispara imediatamente
-- [ ] Se o usuário concluir outra série (do mesmo exercício ou de outro) enquanto um
+- [X] Se o usuário concluir outra série (do mesmo exercício ou de outro) enquanto um
       cronômetro anterior ainda está contando, o cronômetro anterior é substituído pelo
       novo (sem acumular múltiplos cronômetros)
-- [ ] Se o app for fechado por completo (não apenas minimizado) durante o descanso, o
+- [X] Se o app for fechado por completo (não apenas minimizado) durante o descanso, o
       cronômetro não é retomado ao reabrir — o usuário retoma o exercício normalmente,
       sem cronômetro ativo (comportamento aceito, não é falha)
 
@@ -268,20 +274,23 @@ descobertos durante a validação manual: `sound: 'default'` inválido no canal 
 (deveria ser omitido) e falta de `enableVibrate: true` (vibração não é ativada
 automaticamente por `vibrationPattern` sozinho). Detalhes completos em
 specs/008-notificacao-fim-descanso/research.md.
-- [ ] O aviso também dispara corretamente com o **app em primeiro plano** (não só em
+- [X] O aviso também dispara corretamente com o **app em primeiro plano** (não só em
       segundo plano/tela bloqueada) — atenção especial na implementação, já que o
       `expo-notifications` suprime som/alerta em primeiro plano por padrão, exigindo
-      configuração explícita de `setNotificationHandler`
-- [ ] Ao ajustar ou substituir o cronômetro (RF05), o aviso agendado anteriormente é
+      configuração explícita de `setNotificationHandler` — validado em Android e iOS
+      (User Story 1 de `specs/008-notificacao-fim-descanso/`, 100% concluída)
+- [X] Ao ajustar ou substituir o cronômetro (RF05), o aviso agendado anteriormente é
       cancelado e um novo é agendado para o novo horário — nunca dois avisos pendentes
-      simultâneos
-- [ ] Se o ajuste do tempo restante resultar em zero ou negativo, o aviso dispara
-      imediatamente, sem aguardar um horário futuro
-- [ ] Se a notificação não puder ser exibida por qualquer motivo (permissão negada, app
+      simultâneos — validado em Android e iOS
+- [X] Se o ajuste do tempo restante resultar em zero ou negativo, o aviso dispara
+      imediatamente, sem aguardar um horário futuro — validado em Android e iOS
+- [X] Se a notificação não puder ser exibida por qualquer motivo (permissão negada, app
       fechado), o app ainda reflete corretamente que o descanso terminou ao ser reaberto —
-      a notificação nunca é a única fonte de verdade sobre a conclusão do descanso
-- [ ] Tocar na notificação (com app minimizado/tela bloqueada) traz o app de volta à tela
-      de execução do exercício correto, já com o descanso concluído
+      a notificação nunca é a única fonte de verdade sobre a conclusão do descanso —
+      validado em Android e iOS
+- [X] Tocar na notificação (com app minimizado/tela bloqueada) traz o app de volta à tela
+      de execução do exercício correto, já com o descanso concluído — validado em Android
+      (Redmi Note 12, após liberar restrição de bateria/autostart do MIUI) e iOS
 
 ---
 
@@ -339,15 +348,16 @@ specs/009-salvar-sessao-treino/research.md (Decisões 7 e 10).
 - Exibição em lista simples com valores por data (sem gráfico no MVP)
 - **Novo (v1.1):** o histórico exibido é sempre filtrado pelo perfil ativo
 
-**Critérios de aceite:**
-- [ ] O histórico exibido contém apenas registros de sessões do perfil ativo
-- [ ] Trocar de perfil ativo (RF10) atualiza o histórico exibido imediatamente
-- [ ] O usuário consegue consultar, por exercício, uma lista dos registros anteriores
+**Critérios de aceite:** *(validados em Android e iOS — ver
+`specs/010-historico-evolucao-carga/tasks.md`, 100% concluído)*
+- [X] O histórico exibido contém apenas registros de sessões do perfil ativo
+- [X] Trocar de perfil ativo (RF10) atualiza o histórico exibido imediatamente
+- [X] O usuário consegue consultar, por exercício, uma lista dos registros anteriores
       (data, carga em kg, reps)
-- [ ] A lista é ordenada da mais recente para a mais antiga
-- [ ] Apenas sessões **finalizadas** aparecem no histórico (sessões em andamento não
+- [X] A lista é ordenada da mais recente para a mais antiga
+- [X] Apenas sessões **finalizadas** aparecem no histórico (sessões em andamento não
       contam)
-- [ ] Se um exercício nunca foi registrado antes, a tela de histórico indica isso de forma
+- [X] Se um exercício nunca foi registrado antes, a tela de histórico indica isso de forma
       clara (em vez de aparecer vazia sem explicação)
 
 ---
@@ -361,12 +371,13 @@ specs/009-salvar-sessao-treino/research.md (Decisões 7 e 10).
   erro de digitação em uma série até o fim do MVP, já que o RF09 completo estava por
   último na fila original
 
-**Critérios de aceite:**
-- [ ] O usuário consegue editar carga e/ou reps de qualquer série já concluída do
+**Critérios de aceite:** *(validados em Android e iOS — ver
+`specs/006-editar-serie-em-andamento/tasks.md`, 100% concluído)*
+- [X] O usuário consegue editar carga e/ou reps de qualquer série já concluída do
       exercício atualmente em execução, antes de tocar em "Concluir exercício"
-- [ ] A edição não reabre nem altera o estado de conclusão do exercício — apenas o valor
+- [X] A edição não reabre nem altera o estado de conclusão do exercício — apenas o valor
       daquela série específica é atualizado
-- [ ] O app pede confirmação antes de salvar uma edição, para evitar alteração acidental
+- [X] O app pede confirmação antes de salvar uma edição, para evitar alteração acidental
 
 ---
 
@@ -376,22 +387,112 @@ specs/009-salvar-sessao-treino/research.md (Decisões 7 e 10).
 - Escopo desta parte: séries de sessões **já finalizadas**, acessível a partir da tela de
   histórico (RF08) — depende do RF07 (finalização) e RF08 (histórico) existirem
 
-**Critérios de aceite:**
-- [ ] O usuário consegue editar carga e/ou reps de qualquer série de uma sessão finalizada,
+**Critérios de aceite:** *(validados em Android e iOS — ver
+`specs/011-editar-serie-finalizada/tasks.md`, 100% concluído)*
+- [X] O usuário consegue editar carga e/ou reps de qualquer série de uma sessão finalizada,
       a partir da tela de histórico
-- [ ] A edição de uma série em uma sessão já finalizada não reabre a sessão como "em
+- [X] A edição de uma série em uma sessão já finalizada não reabre a sessão como "em
       andamento" — ela continua finalizada, apenas com o valor daquela série atualizado
-- [ ] Após editar, o novo valor é refletido imediatamente na tela de histórico (RF08)
-- [ ] O app pede confirmação antes de salvar uma edição, para evitar alteração acidental
+- [X] Após editar, o novo valor é refletido imediatamente na tela de histórico (RF08)
+- [X] O app pede confirmação antes de salvar uma edição, para evitar alteração acidental
       de dados de treinos passados
 
 ---
 
 ## Resumo — todos os requisitos com critérios definidos
 
-RF01 a RF10 concluídos. Este documento, junto com o PRD v1.1, está pronto para ser usado
-como contexto no `/speckit.specify` de cada requisito.
+RF01 a RF10 (incluindo RF09a e RF09b) concluídos e com todos os critérios de aceite
+validados em Android (Redmi Note 12) e iOS (iPhone 16 Plus) — atualizado em
+2026-09-22. RF11–RF14 (pós-MVP) implementados e com código validado via web, ainda
+pendentes de validação real nos dois aparelhos (ver seção "Melhorias
+pós-desenvolvimento" abaixo). Este documento, junto com o PRD v1.1, está pronto para
+ser usado como contexto no `/speckit.specify` de cada requisito.
 
 **Ordem recomendada de implementação:** RF10 → RF01 → RF02 → RF03 → RF04 → RF09a → RF05 →
-
 RF06 → RF07 → RF08 → RF09b.
+
+---
+
+## Melhorias pós-desenvolvimento (RF11–RF14, fora do escopo original do MVP)
+
+Os itens abaixo não fazem parte do PRD original (RF01–RF10) — foram pedidos pelo
+usuário depois do MVP estar completo e validado. Registrados na tabela de requisitos
+do PRD (seção 6) em 2026-09-22. Código implementado e validado via Expo web
+(Playwright) para RF11, RF12 e RF14; **RF13 não é verificável sem aparelho físico**
+(vibração não existe em navegador/emulador). Nenhum dos quatro tem validação real em
+Android/iOS ainda — os critérios abaixo continuam `[ ]` até essa validação acontecer.
+
+---
+
+### RF11 — Importar múltiplos treinos de um único arquivo
+
+**Spec**: `specs/012-importar-multiplos-treinos/` · estende o RF01.
+
+**Critérios de aceite:**
+- [ ] Um arquivo cujo elemento raiz é um array com dois ou mais treinos válidos
+      importa todos eles de uma vez, cada um aparecendo na lista de treinos do perfil
+      ativo
+- [ ] Cada treino importado exibe exatamente os próprios exercícios, sem mistura com
+      os de outro treino do mesmo arquivo
+- [ ] Um arquivo cujo elemento raiz é um único objeto de treino continua funcionando
+      exatamente como antes (RF01 inalterado)
+- [ ] Um treino inválido dentro do array não invalida os demais — os válidos são
+      importados, e o usuário é informado de quais foram ignorados e o motivo
+- [ ] Um array vazio (`[]`) é tratado como arquivo inválido, nenhum treino é importado
+- [ ] Ao final de uma importação múltipla, o usuário vê uma única mensagem resumindo
+      quantos treinos foram importados — nunca uma mensagem por treino
+
+---
+
+### RF12 — Conclusão explícita de sessão de treino
+
+**Spec**: `specs/013-nova-sessao-treino/` · estende o RF07.
+
+**Critérios de aceite:**
+- [ ] Ao concluir o último exercício de um treino, a lista de exercícios permanece
+      com todos marcados como concluídos (verde), de forma estável — sem reverter
+      sozinha
+- [ ] O botão "Finalizar treino" desaparece assim que todos os exercícios estão
+      concluídos
+- [ ] Um botão "Nova sessão de Treino" aparece só quando todos os exercícios estão
+      concluídos
+- [ ] Ao apertar "Nova sessão de Treino", a tela volta ao estado inicial (nenhum
+      exercício marcado como concluído), pronta para uma nova execução
+- [ ] O contador de sessões finalizadas (RF07) e o histórico (RF08) atualizam
+      corretamente assim que o último exercício é concluído, mesmo sem o usuário
+      apertar "Nova sessão de Treino"
+- [ ] O botão "Finalizar treino" (encerramento manual antecipado, antes de todos os
+      exercícios concluídos) continua se comportando exatamente como antes
+
+---
+
+### RF13 — Vibração diferenciada ao fim do descanso
+
+**Spec**: `specs/014-vibracao-fim-descanso/` · estende o RF06. **Requer aparelho
+físico com vibração habilitada — não verificável em emulador/web.**
+
+**Critérios de aceite:**
+- [ ] Ao fim do descanso, com o app em primeiro plano, o aparelho vibra com um padrão
+      perceptivelmente mais forte/longo que o da notificação do sistema
+- [ ] Um ajuste manual (-15s) que leva o tempo restante a zero também dispara a
+      vibração, sem esperar a contagem regressiva natural
+- [ ] Com o app em segundo plano, só a vibração já existente da notificação ocorre —
+      sem vibração adicional duplicada
+- [ ] Se a vibração estiver desativada nas configurações do aparelho, nenhuma
+      vibração ocorre (comportamento padrão do sistema, sem código contornando isso)
+
+---
+
+### RF14 — Tela separada para trocar perfil e importar treino
+
+**Spec**: `specs/015-menu-de-acoes/` · estende o RF02/RF10.
+
+**Critérios de aceite:**
+- [ ] A tela "Treinos" não mostra mais os atalhos de trocar perfil, importar treino
+      ou importar treino de exemplo — só título, ícone de ações e lista/estado vazio
+- [ ] Um ícone de ações, visível e no mesmo lugar em qualquer aba (Treinos e
+      Histórico), abre uma tela dedicada com as três ações
+- [ ] As três ações, a partir dessa tela, se comportam exatamente como antes (mesmo
+      fluxo de importação, mesma navegação de troca de perfil)
+- [ ] A mensagem de estado vazio da lista de treinos orienta o usuário a usar o ícone
+      de ações para importar um treino

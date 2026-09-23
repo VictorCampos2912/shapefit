@@ -63,6 +63,11 @@ export const Fonts = Platform.select({
   },
 });
 
+export const DisplayFontFamily = {
+  bold: 'BigShouldersDisplay_700Bold',
+  extraBold: 'BigShouldersDisplay_800ExtraBold',
+} as const;
+
 export const Spacing = {
   half: 2,
   one: 4,
