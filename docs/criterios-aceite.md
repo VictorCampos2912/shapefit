@@ -452,6 +452,9 @@ Android/iOS ainda — os critérios abaixo continuam `[ ]` até essa validação
 - [ ] Ao concluir o último exercício de um treino, a lista de exercícios permanece
       com todos marcados como concluídos (verde), de forma estável — sem reverter
       sozinha
+- [ ] Isso continua verdade mesmo saindo da tela (outra aba, por exemplo) e voltando
+      a abrir o mesmo treino — o reset só acontece ao apertar "Nova sessão de
+      Treino" (FR-007, corrigido em 2026-09-23 após teste real do usuário)
 - [ ] O botão "Finalizar treino" desaparece assim que todos os exercícios estão
       concluídos
 - [ ] Um botão "Nova sessão de Treino" aparece só quando todos os exercícios estão
@@ -472,12 +475,21 @@ Android/iOS ainda — os critérios abaixo continuam `[ ]` até essa validação
 físico com vibração habilitada — não verificável em emulador/web.**
 
 **Critérios de aceite:**
-- [ ] Ao fim do descanso, com o app em primeiro plano, o aparelho vibra com um padrão
-      perceptivelmente mais forte/longo que o da notificação do sistema
+- [X] Ao fim do descanso, com o app em primeiro plano, o aparelho vibra com um padrão
+      forte (3 vibrações longas) — **confirmado pelo usuário em Android**
 - [ ] Um ajuste manual (-15s) que leva o tempo restante a zero também dispara a
       vibração, sem esperar a contagem regressiva natural
-- [ ] Com o app em segundo plano, só a vibração já existente da notificação ocorre —
-      sem vibração adicional duplicada
+- [X] Com o app em segundo plano, a vibração da notificação ocorre — **confirmado
+      pelo usuário em Android**
+- [X] Reabrir o app depois disso **não** dispara a vibração forte de novo (corrigido
+      em 2026-09-23 — bug relatado pelo usuário no iPhone: vibrava 3x ao reabrir;
+      **correção confirmada pelo usuário em Android**)
+- [ ] Apertar "Finalizar treino" com um descanso ativo não dispara a vibração forte
+      do descanso (corrigido em 2026-09-23, efeito colateral encontrado durante a
+      correção acima)
+- [ ] A vibração em segundo plano (notificação) e em primeiro plano têm a **mesma
+      intensidade** (atualizado em 2026-09-23 — antes desta mudança a notificação
+      usava um padrão mais simples; pedido do usuário após comparar as duas)
 - [ ] Se a vibração estiver desativada nas configurações do aparelho, nenhuma
       vibração ocorre (comportamento padrão do sistema, sem código contornando isso)
 

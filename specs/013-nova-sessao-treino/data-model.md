@@ -11,6 +11,18 @@ verdade sobre se uma sessão está finalizada — esta feature não introduz nen
 novo nem muda quando `finalizadaEm` é preenchido (continua sendo no momento em que o
 último exercício é concluído, ver `research.md` Decisão 1).
 
+## Campo persistido novo (correção pós-teste, 2026-09-23)
+
+### `SessaoTreino.revisadaPeloUsuario: boolean`
+
+Novo campo em `src/types/execucao-treino.ts`. `false` ao criar a sessão
+(`registrarSerieConcluida`); vira `true` quando o usuário aperta "Nova sessão de
+Treino" ou "Finalizar treino" (`marcarSessaoRevisada`, `research.md` Decisão 6).
+Permite que a tela de execução, ao ser remontada (ex.: usuário saiu para outra aba e
+voltou), distinga "sessão concluída que o usuário ainda não reconheceu" (continua
+mostrando tudo verde) de "sessão já reconhecida" (mostra o treino pronto para
+começar).
+
 ## Estado local novo (não persistido — vive só na tela de execução)
 
 ### `sessaoFinalizadaAutomaticamente: boolean`

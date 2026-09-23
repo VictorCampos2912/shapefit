@@ -149,6 +149,33 @@ clique. **Falta validação real em Android e iOS** (T009).
 
 ---
 
+## Fase 7: Correção pós-teste (2026-09-23)
+
+**Purpose**: Bug real reportado pelo usuário após testar RF12 em Android e iOS —
+sair da tela de execução e voltar resetava a sessão sozinha, mesmo sem apertar
+"Nova sessão de Treino" (violava FR-002/FR-007). Ver `research.md`, Decisão 6.
+
+- [X] T012 Adicionar `revisadaPeloUsuario: boolean` a `SessaoTreino`
+      (`src/types/execucao-treino.ts`); `registrarSerieConcluida` passa a criar
+      sessões com `revisadaPeloUsuario: false` (`data-model.md`).
+- [X] T013 Implementar `obterUltimaSessaoConcluidaNaoRevisada` e
+      `marcarSessaoRevisada` em `src/services/sessao-treino-storage.ts`
+      (`contracts/treinoId-screen.md`). Depende de T012.
+- [X] T014 Ajustar o efeito de montagem em `src/app/treino/[treinoId].tsx` para
+      consultar `obterUltimaSessaoConcluidaNaoRevisada` quando não houver sessão em
+      andamento, hidratando a tela como concluída se encontrar uma. Depende de T013.
+- [X] T015 Chamar `marcarSessaoRevisada` em `handleNovaSessaoDeTreino` e
+      `handleFinalizarTreino`, antes de resetar o estado local. Depende de T013.
+- [X] T016 [P] Rodar `npx tsc --noEmit` e `npx eslint` sobre os arquivos alterados
+      — zero erros novos. Confirmado.
+- [X] T017 Validar via web (Playwright): concluir um treino, navegar para outra aba
+      e voltar (deve continuar tudo verde), depois apertar "Nova sessão de Treino"
+      e navegar/voltar de novo (deve continuar resetado). **Confirmado exatamente
+      como reportado pelo usuário** — falta reconfirmar em Android/iOS (junto com
+      T009).
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

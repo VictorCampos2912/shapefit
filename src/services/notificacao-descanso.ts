@@ -1,7 +1,13 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
-const CANAL_DESCANSO = 'descanso-v3';
+import { PADRAO_VIBRACAO_FIM_DESCANSO } from '@/constants/vibracao';
+
+// v4: alinha o padrão de vibração do canal ao mesmo usado pelo app em primeiro
+// plano (RF13) — canais do Android são efetivamente imutáveis depois de criados
+// num aparelho, então mudar só o vibrationPattern abaixo não bastaria sem também
+// mudar o id do canal.
+const CANAL_DESCANSO = 'descanso-v4';
 
 export function configurarNotificacoesDescanso(): void {
   Notifications.setNotificationHandler({
@@ -17,7 +23,7 @@ export function configurarNotificacoesDescanso(): void {
     Notifications.setNotificationChannelAsync(CANAL_DESCANSO, {
       name: 'Fim do descanso',
       importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
+      vibrationPattern: PADRAO_VIBRACAO_FIM_DESCANSO,
       enableVibrate: true,
       lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
     });

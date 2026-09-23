@@ -99,12 +99,17 @@ sistema) é idêntico ao que já existe hoje, sem vibração adicional perceptí
 - **FR-001**: O sistema DEVE disparar uma vibração do dispositivo no momento exato em
   que o cronômetro de descanso chega a zero, enquanto o app estiver em primeiro plano.
 - **FR-002**: O padrão de vibração desta feature DEVE ser perceptivelmente mais
-  intenso/longo do que o padrão de vibração já usado hoje pelo canal de notificação de
-  fim de descanso, de forma a ser identificável como um evento diferente.
-- **FR-003**: Esta feature NÃO DEVE alterar o comportamento já existente da
-  notificação do sistema operacional (conteúdo, agendamento, canal, vibração própria
-  dela) — a nova vibração é adicional, em primeiro plano, e não substitui a
-  notificação.
+  intenso/longo do que o padrão de vibração usado pelo canal de notificação de fim de
+  descanso **antes** desta feature (RF06 original), de forma a ser identificável como
+  um evento diferente ao ser introduzido.
+- **FR-003**: Esta feature NÃO DEVE alterar o conteúdo nem o agendamento da
+  notificação do sistema operacional já existente — a nova vibração em primeiro plano
+  não substitui a notificação. **Atualizado em 2026-09-23** (pedido do usuário após
+  testar as duas vibrações lado a lado e notar a diferença): o **padrão de vibração**
+  do canal de notificação (usado em segundo plano) passa a ser o mesmo padrão desta
+  feature (FR-002), para que a sensação seja igual independente de o app estar aberto
+  ou não — exige um novo id de canal Android, já que canais existentes num aparelho
+  não podem ter o `vibrationPattern` alterado in-place.
 - **FR-004**: A vibração NÃO DEVE ocorrer se o dispositivo estiver com a vibração
   desativada nas configurações do sistema — o app não deve tentar contornar essa
   configuração.
@@ -121,11 +126,12 @@ uma resposta sensorial local a um evento (fim do descanso) que já existe no sis
 
 ### Measurable Outcomes
 
-- **SC-001**: Em 100% das vezes em que o descanso termina com o app em primeiro
-  plano, o usuário sente uma vibração perceptivelmente diferente (mais forte) da
-  vibração padrão de notificação do aparelho.
-- **SC-002**: O comportamento de notificação/vibração em segundo plano permanece
-  idêntico ao existente antes desta feature, sem nenhuma regressão perceptível.
+- **SC-001**: Em 100% das vezes em que o descanso termina, o usuário sente o mesmo
+  padrão de vibração forte — com o app em primeiro plano ou em segundo plano
+  (notificação), sem diferença perceptível entre os dois casos.
+- **SC-002** (atualizado 2026-09-23): a notificação em segundo plano continua com o
+  mesmo conteúdo/agendamento de antes — só o padrão de vibração mudou (FR-003),
+  intencionalmente, não é uma regressão.
 
 ## Assumptions
 

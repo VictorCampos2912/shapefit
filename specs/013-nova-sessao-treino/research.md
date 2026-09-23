@@ -117,6 +117,38 @@ de "a sessão ainda estar em andamento" para operar, já que agora é um estado 
 tentar marcar o último exercício como concluído em uma sessão que acabou de ser
 finalizada no mesmo instante.
 
+## Decisão 6: persistir "revisada pelo usuário" para sobreviver a remounts (correção pós-teste, 2026-09-23)
+
+**Decision**: Novo campo persistido `revisadaPeloUsuario: boolean` em `SessaoTreino`
+(`src/types/execucao-treino.ts`), `false` por padrão. Nova função de serviço
+`obterUltimaSessaoConcluidaNaoRevisada(perfilId, treinoId, totalExercicios)` — busca,
+entre as sessões finalizadas do treino, a mais recente com todos os exercícios
+concluídos e `revisadaPeloUsuario !== true`. No efeito de montagem da tela
+(`src/app/treino/[treinoId].tsx`), quando não há sessão em andamento
+(`obterSessao` retorna `null`), a tela agora consulta essa função antes de cair no
+estado vazio padrão — se encontrar uma sessão concluída não revisada, hidrata a tela
+exatamente como se a sessão ainda estivesse "fresca" (todos os exercícios verdes,
+banner, botão "Nova sessão de Treino"). `handleNovaSessaoDeTreino` e
+`handleFinalizarTreino` chamam uma nova função `marcarSessaoRevisada(perfilId,
+sessaoId)` antes de resetar o estado local, gravando `revisadaPeloUsuario = true`.
+
+**Rationale**: bug real reportado pelo usuário depois de testar em Android e iOS —
+a primeira versão desta feature (Decisões 1-5) só resolvia o problema original
+(reset automático) **enquanto a tela continuava montada**. Sair da tela de execução
+(trocar de aba, por exemplo) e voltar disparava de novo o `useEffect` de montagem,
+que chamava só `obterSessao` (filtra por `finalizadaEm === null`) — como a sessão já
+tinha sido finalizada automaticamente, essa busca não a encontrava mais, e
+`estadosPorExercicio` era hidratado como `{}` (vazio), revertendo visualmente a tela
+para "pronto para começar" **sem o usuário ter apertado nada**. Exatamente o
+comportamento que a feature deveria evitar, só que via navegação em vez de via o
+antigo efeito automático.
+
+**Alternatives considered**: manter estado em memória (contexto React persistente
+entre navegações) em vez de gravar no `AsyncStorage` — rejeitado; não sobrevive a
+fechar/reabrir o app (o usuário testou justamente saindo e voltando, cenário comum
+o suficiente pra exigir persistência de verdade, não só estado de sessão de app em
+memória).
+
 ## Resumo das entidades técnicas afetadas
 
 - `src/app/treino/[treinoId].tsx`: novo estado `sessaoFinalizadaAutomaticamente`; o

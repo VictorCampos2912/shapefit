@@ -39,9 +39,10 @@ Validação manual em Android e iOS (Princípio III da constituição).
 4. Ir para a aba "Histórico" (RF08) e conferir que os registros desta sessão já
    aparecem.
 5. Voltar a abrir o mesmo treino.
-6. **Esperado**: a tela mostra o estado "pronto para começar" (mesmo comportamento já
-   existente de reabertura de um treino já concluído anteriormente) — não trava nem
-   mostra dado inconsistente.
+6. **Esperado (corrigido em 2026-09-23, FR-007)**: a tela continua mostrando o
+   treino como concluído (todos os exercícios verdes, banner, botão "Nova sessão de
+   Treino") — **não** reseta sozinha por ter navegado para longe e voltado. Só reseta
+   quando o usuário aperta "Nova sessão de Treino" explicitamente (ver Cenário 5).
 
 ## Cenário 4 — "Finalizar treino" continua funcionando antes de tudo concluído
 
@@ -52,6 +53,16 @@ Validação manual em Android e iOS (Princípio III da constituição).
 4. **Esperado**: comportamento idêntico ao já existente antes desta feature — sessão
    encerrada com os exercícios pendentes não registrados, tela volta ao estado
    inicial.
+
+## Cenário 5 — Reset só acontece com o botão, mesmo depois de navegar (FR-007)
+
+1. Repetir os passos 1-5 do Cenário 3 (treino concluído, navegado para longe e de
+   volta, ainda mostrando tudo verde).
+2. Apertar "Nova sessão de Treino".
+3. **Esperado**: a tela reseta (nenhum exercício concluído).
+4. Navegar para outra aba e voltar a abrir o mesmo treino de novo.
+5. **Esperado**: a tela continua no estado resetado — não volta a mostrar a sessão
+   anterior como concluída.
 
 ## Referências
 

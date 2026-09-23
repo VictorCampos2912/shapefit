@@ -105,3 +105,46 @@ Decisão 3 do `research.md`). **Não verificável sem aparelho físico** (falta 
 3. US2 → validação de não-regressão em segundo plano.
 4. Polish → type-check/lint, validação obrigatória nos dois aparelhos físicos,
    documentação.
+
+---
+
+## Fase 6: Correção pós-teste (2026-09-23)
+
+**Purpose**: Bug real reportado pelo usuário ao testar T004/T006 no iPhone —
+vibração forte disparava de novo ao reabrir o app depois do descanso ter zerado em
+segundo plano (violava US2/FR-003). Ver `research.md`, Decisão 5.
+
+- [X] T009 Adicionar `useRef` (`voltouDeSegundoPlanoRef`) e o parâmetro
+      `deveVibrar` em `handleDescansoConcluido`, suprimindo a vibração quando a
+      detecção do zero vem de uma retomada de segundo plano
+      (`contracts/treinoId-screen.md`).
+- [X] T010 Corrigir `handleFinalizarTreino` para chamar
+      `handleDescansoConcluido(false)` — efeito colateral encontrado durante T009
+      (finalizar o treino manualmente também disparava a vibração por engano).
+- [X] T011 [P] Rodar `npx tsc --noEmit` e `npx eslint` sobre
+      `src/app/treino/[treinoId].tsx` — zero erros novos. Confirmado.
+- [X] T012 Reconfirmar T004/T006 nos dois aparelhos após a correção (Cenário 3 e 5
+      do `quickstart.md` atualizado). **Confirmado pelo usuário**: sem vibração
+      dupla ao reabrir do segundo plano ou desbloquear.
+
+---
+
+## Fase 7: Unificar padrão de vibração entre app aberto e notificação (2026-09-23)
+
+**Purpose**: Pedido do usuário após comparar as duas vibrações lado a lado durante o
+teste — a da notificação (segundo plano) ainda usava o padrão simples antigo,
+diferente do padrão forte usado com o app aberto. Ver `research.md`, Decisão 6.
+
+- [X] T013 Criar `src/constants/vibracao.ts` com `PADRAO_VIBRACAO_FIM_DESCANSO`
+      compartilhado; remover a constante duplicada de
+      `src/app/treino/[treinoId].tsx`, importando da nova constante
+      (`contracts/treinoId-screen.md`).
+- [X] T014 Atualizar `src/services/notificacao-descanso.ts`: canal de notificação
+      passa a usar `PADRAO_VIBRACAO_FIM_DESCANSO`; id do canal muda de
+      `descanso-v3` para `descanso-v4` (canais Android não atualizam
+      `vibrationPattern` in-place — `contracts/notificacao-descanso.md`).
+- [X] T015 [P] Rodar `npx tsc --noEmit` e `npx eslint` sobre os arquivos alterados
+      — zero erros novos. Confirmado.
+- [ ] T016 Validar nos dois aparelhos: vibração em segundo plano (notificação) e em
+      primeiro plano devem sentir-se idênticas agora (Cenário 1 e 3 atualizados do
+      `quickstart.md`).

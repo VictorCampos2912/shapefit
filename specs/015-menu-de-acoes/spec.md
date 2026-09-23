@@ -137,11 +137,17 @@ introduzir ou alterar entidades de dados.
   já usado no projeto (`src/app/`), não um menu lateral (drawer) — decisão explícita do
   usuário para evitar adicionar uma dependência de navegação nova
   (`@react-navigation/drawer`) e o build nativo que isso provavelmente exigiria.
-- **Ícone no cabeçalho compartilhado**: como as três ações não são específicas da aba
-  "Treinos" (trocar perfil é relevante em qualquer contexto), o ícone de acesso fica no
-  cabeçalho compartilhado entre as abas (`app-tabs`), não duplicado em cada tela — a
-  posição exata (ao lado do nome do app, ou em outro canto do cabeçalho) fica a critério
-  da fase de planejamento/implementação, respeitando o layout já validado pelo usuário.
+- **Ícone visível e no mesmo lugar em cada tela de aba, não num cabeçalho
+  verdadeiramente compartilhado**: como as três ações não são específicas da aba
+  "Treinos" (trocar perfil é relevante em qualquer contexto), o ícone de acesso
+  precisa aparecer em todas as abas — mas a API de tabs nativas usada pelo projeto
+  (`NativeTabs`) não expõe nenhum slot de cabeçalho/ação customizável para colocar
+  esse ícone dentro do componente de tab bar (`app-tabs.tsx`/`app-tabs.web.tsx`).
+  Por isso, o ícone é renderizado individualmente na linha de título de cada tela de
+  aba, via um componente pequeno e reutilizável (`BotaoAcoes`) — não um cabeçalho
+  único compartilhado entre as abas. Decisão tomada durante o planejamento
+  (`research.md`, Decisão 1), que documenta o motivo técnico completo e as
+  alternativas descartadas.
 - **Sem mudança de fluxo de dados**: os handlers de importação continuam usando os
   mesmos serviços já existentes (`treino-storage`); a lista de treinos na aba "Treinos"
   continua se atualizando via o mesmo mecanismo de recarregamento ao focar a tela já

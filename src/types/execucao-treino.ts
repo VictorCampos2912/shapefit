@@ -46,6 +46,12 @@ export interface SessaoTreino extends SessaoRegistro {
   treinoId: string;
   iniciadaEm: string;
   execucoes: ExecucaoExercicio[];
+  /**
+   * Marca se o usuário já reconheceu a conclusão desta sessão (apertando "Nova
+   * sessão de Treino"). Enquanto false, reabrir o treino continua mostrando a
+   * sessão como concluída (spec 013) — mesmo depois de sair e voltar à tela.
+   */
+  revisadaPeloUsuario: boolean;
 }
 
 export type DescansoAtivo = {

@@ -121,9 +121,14 @@ o registro aparece no histórico (RF08).
 
 - O usuário conclui o último exercício, mas fecha o app (ou navega para outra tela)
   antes de apertar "Nova sessão de Treino" → a sessão já foi finalizada e persistida
-  (User Story 3); ao voltar para o treino depois, a tela deve mostrar o estado de
-  "pronto para começar" novamente (mesmo comportamento de reabertura já existente para
-  treinos concluídos anteriormente), sem exigir que o botão tenha sido apertado.
+  (User Story 3), **e a tela DEVE continuar mostrando o treino como concluído**
+  (todos os exercícios verdes, banner e botão "Nova sessão de Treino") ao voltar —
+  o reset para "pronto para começar" só acontece quando o usuário explicitamente
+  aperta esse botão, nunca por navegar para longe e voltar. **Correção
+  (2026-09-23)**: a primeira versão desta spec dizia o contrário (reabertura
+  resetaria a tela sozinha) — comportamento corrigido após teste real do usuário
+  no iPhone/Android mostrar que isso contradizia o próprio objetivo da feature
+  (dar controle ao usuário sobre quando resetar).
 - O usuário usa o botão "Finalizar treino" (já existente, para encerrar a sessão antes
   de concluir todos os exercícios) — esse botão continua existindo e seu comportamento
   não muda; ele não deve ser confundido com "Nova sessão de Treino", que só aparece
@@ -157,6 +162,10 @@ o registro aparece no histórico (RF08).
 - **FR-006**: O botão "Finalizar treino" já existente (para encerrar a sessão antes de
   todos os exercícios concluídos) DEVE continuar se comportando exatamente como hoje,
   sem alteração por esta feature.
+- **FR-007** (adicionado em 2026-09-23, correção pós-teste): o estado "concluído"
+  (FR-002/FR-005) DEVE sobreviver a navegação para fora e de volta à tela de execução
+  — sair para outra aba/tela e retornar ao mesmo treino NÃO é equivalente a apertar
+  "Nova sessão de Treino"; a tela só reseta com essa ação explícita.
 
 ### Key Entities
 

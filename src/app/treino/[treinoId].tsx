@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AppState, FlatList, Pressable, StyleSheet, Vibration } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -12,13 +12,16 @@ import { Button } from '@/components/ui/button';
 import { FinalizarIcon, VoltarIcon } from '@/components/ui/icons';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { Spacing } from '@/constants/theme';
+import { PADRAO_VIBRACAO_FIM_DESCANSO } from '@/constants/vibracao';
 import { useTheme } from '@/hooks/use-theme';
 import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
 import {
   atualizarSerieRealizada,
   finalizarSessao,
   marcarExercicioConcluido,
+  marcarSessaoRevisada,
   obterSessao,
+  obterUltimaSessaoConcluidaNaoRevisada,
   registrarSerieConcluida,
 } from '@/services/sessao-treino-storage';
 import {
@@ -35,8 +38,6 @@ import {
 } from '@/types/execucao-treino';
 import type { Treino } from '@/types/treino';
 import { ajustarFimEm, calcularSegundosRestantes } from '@/utils/cronometro-descanso';
-
-const PADRAO_VIBRACAO_FIM_DESCANSO = [0, 500, 200, 500, 200, 500];
 
 function estadoVisualDoExercicio(
   exercicioId: string,
@@ -98,6 +99,7 @@ export default function ExecucaoTreinoScreen() {
     fimEm: number;
   } | null>(null);
   const [tick, setTick] = useState(0);
+  const voltouDeSegundoPlanoRef = useRef(false);
 
   useEffect(() => {
     if (!perfilAtivo) return;
@@ -111,10 +113,20 @@ export default function ExecucaoTreinoScreen() {
       setTreino(encontrado);
 
       if (encontrado) {
-        const sessao = await obterSessao(perfilAtivo.id, encontrado.id);
+        let sessao = await obterSessao(perfilAtivo.id, encontrado.id);
+        let jaFinalizada = false;
+        if (!sessao) {
+          sessao = await obterUltimaSessaoConcluidaNaoRevisada(
+            perfilAtivo.id,
+            encontrado.id,
+            encontrado.exercicios.length,
+          );
+          jaFinalizada = sessao !== null;
+        }
         if (ativo) {
           setEstadosPorExercicio(estadosPorExercicioDaSessao(sessao, encontrado.exercicios));
           setSessaoAtualId(sessao?.id ?? null);
+          setSessaoFinalizadaAutomaticamente(jaFinalizada);
         }
       }
 
@@ -140,6 +152,7 @@ export default function ExecucaoTreinoScreen() {
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (novoEstado) => {
       if (novoEstado === 'active') {
+        voltouDeSegundoPlanoRef.current = true;
         setTick((atual) => atual + 1);
       }
     });
@@ -151,8 +164,12 @@ export default function ExecucaoTreinoScreen() {
   const segundosRestantes = descansoAtivo ? calcularSegundosRestantes(descansoAtivo.fimEm) : 0;
 
   useEffect(() => {
+    const vinhaDeSegundoPlano = voltouDeSegundoPlanoRef.current;
+    voltouDeSegundoPlanoRef.current = false;
     if (descansoAtivo && segundosRestantes === 0) {
-      handleDescansoConcluido();
+      // Se o app estava em segundo plano quando o descanso zerou, a notificação já
+      // vibrou (RF06) — não vibra de novo com o padrão do RF13 ao só reabrir o app.
+      handleDescansoConcluido(!vinhaDeSegundoPlano);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [descansoAtivo, tick]);
@@ -242,9 +259,11 @@ export default function ExecucaoTreinoScreen() {
     setEstadosPorExercicio((atual) => ({ ...atual, [novoEstado.exercicioId]: novoEstado }));
   }
 
-  function handleDescansoConcluido() {
+  function handleDescansoConcluido(deveVibrar: boolean = true) {
     setDescansoAtivo(null);
-    Vibration.vibrate(PADRAO_VIBRACAO_FIM_DESCANSO);
+    if (deveVibrar) {
+      Vibration.vibrate(PADRAO_VIBRACAO_FIM_DESCANSO);
+    }
     if (notificacaoAgendada) {
       cancelarNotificacaoDescanso(notificacaoAgendada.identificador);
       setNotificacaoAgendada(null);
@@ -302,8 +321,11 @@ export default function ExecucaoTreinoScreen() {
   async function handleFinalizarTreino() {
     if (!perfilAtivo || !sessaoAtualId) return;
 
-    handleDescansoConcluido();
+    // false: finalizar o treino manualmente não é "o descanso terminou" (RF13) —
+    // só limpa o cronômetro ativo, se houver, sem disparar a vibração do RF13.
+    handleDescansoConcluido(false);
     await finalizarSessao(perfilAtivo.id, sessaoAtualId);
+    await marcarSessaoRevisada(perfilAtivo.id, sessaoAtualId);
 
     setSessaoAtualId(null);
     setEstadosPorExercicio({});
@@ -311,7 +333,10 @@ export default function ExecucaoTreinoScreen() {
     setSessaoFinalizadaAutomaticamente(false);
   }
 
-  function handleNovaSessaoDeTreino() {
+  async function handleNovaSessaoDeTreino() {
+    if (perfilAtivo && sessaoAtualId) {
+      await marcarSessaoRevisada(perfilAtivo.id, sessaoAtualId);
+    }
     setSessaoAtualId(null);
     setEstadosPorExercicio({});
     setExercicioSelecionadoId(null);

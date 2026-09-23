@@ -1,0 +1,56 @@
+[
+  {
+    "nome": "Treino C - Ombros",
+    "exercicios": [
+      {
+        "id": "desenvolvimento-halteres",
+        "nome": "Desenvolvimento com halteres",
+        "series": 4,
+        "reps_alvo": "8-10",
+        "carga_sugerida_kg": 14,
+        "descanso_seg": 75
+      },
+      {
+        "id": "elevacao-lateral",
+        "nome": "Elevação lateral",
+        "series": 3,
+        "reps_alvo": "12-15",
+        "carga_sugerida_kg": 8,
+        "descanso_seg": 60
+      }
+    ]
+  },
+  {
+    "exercicios": [
+      {
+        "id": "remada-alta",
+        "nome": "Remada alta (barra)",
+        "series": 3,
+        "reps_alvo": "10-12",
+        "carga_sugerida_kg": 25,
+        "descanso_seg": 60
+      }
+    ]
+  },
+  {
+    "nome": "Treino D - Panturrilha/Abdômen",
+    "exercicios": [
+      {
+        "id": "panturrilha-em-pe",
+        "nome": "Panturrilha em pé",
+        "series": 4,
+        "reps_alvo": "15-20",
+        "carga_sugerida_kg": 30,
+        "descanso_seg": 45
+      },
+      {
+        "id": "abdominal-supra",
+        "nome": "Abdominal supra",
+        "series": 3,
+        "reps_alvo": "15-20",
+        "carga_sugerida_kg": 0,
+        "descanso_seg": 45
+      }
+    ]
+  }
+]

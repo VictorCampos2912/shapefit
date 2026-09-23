@@ -24,6 +24,43 @@ export async function obterSessao(perfilId: string, treinoId: string): Promise<S
   return sessoes.find((sessao) => sessao.treinoId === treinoId && sessao.finalizadaEm === null) ?? null;
 }
 
+/**
+ * Sessão mais recente do treino que terminou com todos os exercícios concluídos,
+ * mas cujo usuário ainda não apertou "Nova sessão de Treino" (spec 013) — usada
+ * para a tela de execução continuar mostrando o treino como concluído mesmo
+ * depois de o usuário sair da tela e voltar, sem resetar sozinha.
+ */
+export async function obterUltimaSessaoConcluidaNaoRevisada(
+  perfilId: string,
+  treinoId: string,
+  totalExercicios: number,
+): Promise<SessaoTreino | null> {
+  const sessoes = await getSessoes(perfilId);
+  const candidatas = sessoes.filter(
+    (sessao) =>
+      sessao.treinoId === treinoId &&
+      sessao.finalizadaEm !== null &&
+      !sessao.revisadaPeloUsuario &&
+      sessao.execucoes.length === totalExercicios &&
+      sessao.execucoes.every((execucao) => execucao.status === 'concluido'),
+  );
+  if (candidatas.length === 0) {
+    return null;
+  }
+  return candidatas.reduce((maisRecente, atual) =>
+    atual.finalizadaEm! > maisRecente.finalizadaEm! ? atual : maisRecente,
+  );
+}
+
+/** Marca que o usuário já reconheceu a conclusão da sessão (apertou "Nova sessão de Treino"). */
+export async function marcarSessaoRevisada(perfilId: string, sessaoId: string): Promise<void> {
+  const sessoes = await getSessoes(perfilId);
+  const sessao = sessoes.find((item) => item.id === sessaoId);
+  if (!sessao) return;
+  sessao.revisadaPeloUsuario = true;
+  await setSessoes(perfilId, sessoes);
+}
+
 export async function registrarSerieConcluida(params: {
   perfilId: string;
   treinoId: string;
@@ -43,6 +80,7 @@ export async function registrarSerieConcluida(params: {
       iniciadaEm: new Date().toISOString(),
       finalizadaEm: null,
       execucoes: [],
+      revisadaPeloUsuario: false,
     };
     sessoes.push(sessao);
   }

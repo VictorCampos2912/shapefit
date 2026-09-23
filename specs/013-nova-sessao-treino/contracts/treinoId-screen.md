@@ -48,6 +48,31 @@ function handleNovaSessaoDeTreino() {
   sessão só passa a existir de fato quando `registrarSerieConcluida` for chamado de
   novo (mesmo mecanismo já existente, sem alteração).
 
+## Efeito de montagem (ajustado — correção pós-teste, 2026-09-23)
+
+```ts
+let sessao = await obterSessao(perfilAtivo.id, encontrado.id);
+let jaFinalizada = false;
+if (!sessao) {
+  sessao = await obterUltimaSessaoConcluidaNaoRevisada(
+    perfilAtivo.id,
+    encontrado.id,
+    encontrado.exercicios.length,
+  );
+  jaFinalizada = sessao !== null;
+}
+setEstadosPorExercicio(estadosPorExercicioDaSessao(sessao, encontrado.exercicios));
+setSessaoAtualId(sessao?.id ?? null);
+setSessaoFinalizadaAutomaticamente(jaFinalizada);
+```
+
+- **Pré-condição**: nenhuma sessão em andamento para o treino (`obterSessao` retornou
+  `null`).
+- **Pós-condição**: se existir uma sessão finalizada, totalmente concluída e ainda
+  não revisada pelo usuário, a tela hidrata como se ela ainda estivesse "aberta" —
+  mesmo resultado visual de nunca ter saído da tela (`research.md`, Decisão 6).
+  Caso contrário, cai no estado vazio padrão (`{}`), como antes.
+
 ## `handleFinalizarTreino` (existente, ajustado)
 
 ```ts

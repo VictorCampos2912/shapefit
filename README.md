@@ -1,56 +1,88 @@
-# Welcome to your Expo app 👋
+# ShapeFit
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+App mobile pessoal/familiar de acompanhamento de treino de academia — importar um
+plano de treino, executar registrando carga e reps série a série, cronometrar o
+descanso automaticamente, e acompanhar a evolução ao longo do tempo. Multiplataforma
+(Android e iOS), 100% offline (sem backend, sem login remoto), com suporte a múltiplos
+perfis locais no mesmo aparelho.
 
-## Get started
+## Status
 
-1. Install dependencies
+**MVP (RF01–RF10) completo e validado** em Android (Redmi Note 12) e iOS
+(iPhone 16 Plus). **Quatro melhorias pós-MVP (RF11–RF14)** implementadas e em fase de
+validação nos aparelhos-alvo. Ver `docs/criterios-aceite.md` para o detalhe de cada
+requisito, marcado ou não como validado.
 
-   ```bash
-   npm install
-   ```
+| Requisito | O que faz |
+|---|---|
+| RF01–RF10 | Importar treino, executar série a série, cronômetro de descanso, notificação, histórico de evolução, perfis locais |
+| RF11 | Importar múltiplos treinos de um único arquivo |
+| RF12 | Conclusão explícita de sessão de treino (lista fica concluída até o usuário decidir começar de novo) |
+| RF13 | Vibração diferenciada ao fim do descanso |
+| RF14 | Tela separada para trocar perfil e importar treino |
 
-2. Start the app
+## Stack técnica
 
-   ```bash
-   npx expo start
-   ```
+- **React Native + Expo SDK 57**, TypeScript estrito
+- **Expo Router** (roteamento por arquivos, `src/app/`)
+- **AsyncStorage** como única persistência — sem backend, tudo local ao aparelho
+- `react-native-svg` (identidade visual, ícones), `expo-notifications` (aviso de fim
+  de descanso), `@expo-google-fonts/big-shoulders-display` (tipografia)
+- Ver `docs/PRD-app-treino.md`, seção 9, para a lista completa e a justificativa de
+  cada dependência
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Rodando o projeto
 
 ```bash
-npm run reset-project
+npm install
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+No terminal, escolha abrir via development build, emulador Android, simulador iOS, ou
+Expo Go — note que **o Expo Go puro trava no Android** por causa do
+`expo-notifications` (ver `docs/PRD-app-treino.md`, seção 9); no Android, use sempre
+um development build. No iOS, Expo Go funciona normalmente.
 
-### Other setup steps
+Para testar fora da rede local (ex.: em outro lugar sem estar perto do computador),
+use `npx expo start --tunnel`.
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+### Gerar um build standalone (sem depender do Metro/PC)
 
-## Learn more
+```bash
+npx eas-cli@latest build --profile preview --platform android
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Gera um `.apk` com o JavaScript já empacotado, instalável direto no aparelho, sem
+depender do computador depois de instalado. Ver `eas.json` para os perfis disponíveis
+(`development`, `preview`, `production`). iOS exige conta paga do Apple Developer
+Program para builds internos — sem ela, a alternativa é Expo Go (rede local ou
+túnel).
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Metodologia
 
-## Join the community
+Este projeto usa **Spec-Driven Development** (SDD) via
+[GitHub Spec Kit](https://github.com/github/spec-kit): cada funcionalidade nasce como
+uma spec em `specs/NNN-nome-da-feature/` (`spec.md` → `plan.md` → `tasks.md`), segue
+os princípios registrados em `.specify/memory/constitution.md`, e só é considerada
+pronta depois de validada manualmente em Android e iOS.
 
-Join our community of developers creating universal apps.
+- `docs/PRD-app-treino.md` — visão geral do produto, requisitos, stack, decisões
+- `docs/criterios-aceite.md` — critério de aceite de cada requisito (RF01–RF14),
+  usado como checklist de validação manual
+- `specs/` — spec, plano e tarefas de cada requisito, individualmente
+- `.specify/memory/constitution.md` — princípios não-negociáveis do projeto
+  (TypeScript estrito, simplicidade, validação em dois aparelhos, controle de
+  dependências, isolamento de dados por perfil)
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Estrutura do código
+
+```text
+src/
+├── app/                  # Telas (Expo Router — roteamento por arquivo)
+├── components/           # Componentes de UI reutilizáveis
+├── services/              # Acesso a dados (AsyncStorage) e regras de negócio
+├── types/                 # Tipos de domínio compartilhados
+└── utils/                 # Funções puras auxiliares
+docs/                      # PRD, critérios de aceite, exemplos de arquivo de treino
+specs/                     # Specs de cada requisito (SDD)
+```

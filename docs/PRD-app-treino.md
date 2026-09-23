@@ -218,6 +218,10 @@ prática, não só na teoria do contrato.
 4. Cronômetro de descanso
 5. Histórico de evolução por exercício (do perfil ativo)
 
+**Pós-MVP (RF14, 2026-09-22):** trocar de perfil e importar treino saíram da tela de
+lista de treinos e viraram uma 6ª tela própria ("Ações"), acessada por um ícone
+presente em todas as abas — ver `specs/015-menu-de-acoes/`.
+
 ## 11. Métricas de sucesso do MVP
 
 - O usuário consegue importar um treino e completar uma sessão inteira sem travar ou
@@ -260,12 +264,28 @@ prática, não só na teoria do contrato.
 
 ## 14. Abordagem de identidade visual
 
-Decisão registrada em 2026-09-15: a identidade visual (cores, tipografia, estilo, "cara"
-do app) será trabalhada **de forma incremental, requisito a requisito**, a partir do
-momento em que cada tela se tornar definitiva — não de uma vez só ao final do MVP, nem
-investida em telas explicitamente temporárias (ex: o ponto de entrada provisório do RF01
-em `(tabs)/index.tsx`, que será substituído no RF02). O template padrão do Expo
-("Welcome to Expo", boilerplate de exemplo) permanece como está por enquanto, sem
-prioridade de limpeza, enquanto o foco continua em funcionalidade. A primeira tela
-candidata a receber atenção visual de verdade é a lista de treinos (RF02), por ser a
-primeira tela permanente do fluxo principal do app.
+**Decisão original (2026-09-15), já superada:** a identidade visual seria trabalhada
+de forma incremental, tela a tela, a partir de quando cada uma se tornasse definitiva.
+
+**Status atual (atualizado em 2026-09-22):** identidade visual completa e aplicada em
+todas as telas do app, não mais incremental:
+
+- Ícone do app (halter, gradiente laranja) e conjunto de 10 ícones de interface
+  (`src/components/ui/icons.tsx`), em `react-native-svg`
+- Cor de marca laranja (`#FF6529` claro / `#FF7A45` escuro) aplicada em botões, links
+  e estados selecionados em todas as telas
+- Componente `Button` reutilizável (`src/components/ui/button.tsx`, variantes
+  primary/outline/success), substituindo os botões ad-hoc duplicados que existiam
+  antes
+- Tipografia de exibição custom (`@expo-google-fonts/big-shoulders-display`) em
+  títulos e subtítulos
+- Anel de progresso (`src/components/ui/progress-ring.tsx`) para estados de
+  carregamento
+- Boilerplate padrão do Expo ("Welcome to Expo") não existe mais em nenhuma tela —
+  todas as telas do fluxo principal (perfil, treinos, execução, histórico, ações)
+  são definitivas e têm identidade visual própria
+
+Feedback do usuário após aplicar essas mudanças: "gostei muito do layout, bote manter
+este nível" — esse é o padrão esperado para qualquer tela nova adicionada ao projeto
+(reaproveitar os tokens de tema, o componente `Button`, a tipografia já configurada
+em `ThemedText`, em vez de introduzir estilos ad-hoc novos).
