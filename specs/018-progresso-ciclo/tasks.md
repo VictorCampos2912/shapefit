@@ -164,7 +164,7 @@ máxima de 1 entre treinos) e que o `ProgressRing` de um treino "de 13" atinge
 
 ### Implementation for User Story 2
 
-- [ ] T008 [US2] Validar manualmente em Android e iOS (Princípio III)
+- [X] T008 [US2] Validar manualmente em Android e iOS (Princípio III)
       (`quickstart.md`, Cenário 2): importar um arquivo com 3 treinos válidos
       (nenhum ciclo ativo antes) e confirmar, por inspeção do estado/console
       durante o desenvolvimento (a cota individual não é exibida diretamente na
@@ -214,14 +214,14 @@ documentação.
       Continua visível em toda visita à tela enquanto `cicloAtual` for o mesmo;
       desaparece somente quando um novo ciclo é criado (FR-009). Depende de
       T004.
-- [ ] T011 Validar manualmente em Android e iOS (Princípio III)
+- [X] T011 Validar manualmente em Android e iOS (Princípio III)
       (`quickstart.md`, Cenário 3): com um ciclo em andamento, finalizar sessões
       até somar 40 no total do ciclo e confirmar que aparece o banner "Hora de
       trocar o treino — 40 sessões já realizadas" (FR-008); finalizar mais 1
       sessão (41ª) de qualquer treino do lote e confirmar que ela é registrada
       normalmente (RF07, sem bloqueio) e que o banner atualiza para "... 41
       sessões já realizadas". Depende de T009, T010.
-- [ ] T012 Validar manualmente em Android e iOS (Princípio III)
+- [X] T012 Validar manualmente em Android e iOS (Princípio III)
       (`quickstart.md`, Cenário 4): com um ciclo em andamento (< 40 sessões no
       total), tentar importar um novo arquivo de múltiplos treinos e confirmar
       que a importação é rejeitada com uma mensagem informando que já existe um
@@ -244,7 +244,7 @@ documentação.
       automático ao importar múltiplos treinos, 40 sessões esperadas
       distribuídas entre os treinos do lote, bloqueio de nova importação
       enquanto o ciclo estiver em andamento e aviso ao atingir 40 sessões.
-- [ ] T015 Atualizar `docs/criterios-aceite.md` (seção "Melhorias
+- [X] T015 Atualizar `docs/criterios-aceite.md` (seção "Melhorias
       pós-desenvolvimento") com os critérios de aceite do RF desta feature
       (mesma numeração confirmada em T014), e o cabeçalho **Status** de
       `specs/018-progresso-ciclo/spec.md` para "Implemented" após T007, T008,

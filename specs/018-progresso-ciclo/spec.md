@@ -4,13 +4,13 @@
 
 **Created**: 2026-09-23
 
-**Status**: Draft — esclarecimentos resolvidos em 2026-09-23, pronta para `/speckit.plan`
+**Status**: Implemented — validado em Android e iOS em 2026-09-24 (Princípio III)
 
 **Requisito**: RF15 (PRD, seção 6 — pós-MVP; número confirmado em 2026-09-23 ao
 registrar no PRD — era citado provisoriamente como "RF17" antes disso, já que
 016/017 ainda não tinham sido registradas; como esta spec chegou primeiro à etapa
-de registro, ficou com o próximo número livre real. RF15/RF16 continuam
-reservados — 016 e 017 serão renumeradas para RF16/RF17 quando forem registradas)
+de registro, ficou com o próximo número livre real. Spec 016 foi registrada em
+seguida como RF16; spec 017 ficará com RF17 quando for registrada)
 
 **Nota**: Melhoria pós-desenvolvimento — não fazia parte do escopo original do MVP.
 Ideia registrada durante os testes de campo do RF11-RF14 (ver roadmap pós-MVP), agora
