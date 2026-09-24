@@ -5,6 +5,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import treinoExemplo from '@/assets/exemplos/treino-exemplo.json';
 import { calcularProgressoCiclo, criarCiclo, obterCicloAtual } from '@/services/ciclo-treino-storage';
 import type {
+  CategoriaExercicio,
   ExercicioIgnorado,
   ExercicioPlanejado,
   ResultadoImportacao,
@@ -13,6 +14,8 @@ import type {
   TreinoImportadoComPendencias,
   TreinosPorPerfilState,
 } from '@/types/treino';
+
+const CATEGORIAS_VALIDAS: CategoriaExercicio[] = ['peso', 'tempo', 'distancia', 'repeticoes'];
 
 function treinosKey(perfilId: string): string {
   return `treinos:${perfilId}`;
@@ -63,6 +66,11 @@ function validarExercicio(
   if (typeof item.descanso_seg !== 'number') {
     return { ok: false, motivo: `Exercício ${indice}: campo "descanso_seg" deve ser numérico` };
   }
+  if (item.categoria !== undefined) {
+    if (typeof item.categoria !== 'string' || !CATEGORIAS_VALIDAS.includes(item.categoria as CategoriaExercicio)) {
+      return { ok: false, motivo: `Exercício ${indice}: campo "categoria" inválido` };
+    }
+  }
 
   return {
     ok: true,
@@ -73,6 +81,7 @@ function validarExercicio(
       repsAlvo: item.reps_alvo,
       cargaSugeridaKg: item.carga_sugerida_kg,
       descansoSeg: item.descanso_seg,
+      categoria: (item.categoria as CategoriaExercicio | undefined) ?? 'peso',
     },
   };
 }

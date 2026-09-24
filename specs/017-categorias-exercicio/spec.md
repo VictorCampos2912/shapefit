@@ -4,9 +4,12 @@
 
 **Created**: 2026-09-23
 
-**Status**: Draft
+**Status**: Implementado — validação em Android/iOS pendente (Princípio III)
 
-**Requisito**: RF16 (PRD, seção 6 — pós-MVP, a confirmar numeração ao registrar no PRD)
+**Requisito**: RF17 (PRD, seção 6 — pós-MVP; número confirmado em 2026-09-24 ao
+registrar no PRD — era citado provisoriamente como "RF16" antes disso, mas esse
+número já tinha sido ocupado por `specs/016-finalizado-em` quando chegou a vez desta
+spec de ser registrada)
 
 **Nota**: Melhoria pós-desenvolvimento — não fazia parte do escopo original do MVP.
 Pedido registrado durante os testes de campo do RF11-RF14 ("exercícios de cardio não

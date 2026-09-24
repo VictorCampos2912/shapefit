@@ -1,3 +1,5 @@
+import type { CategoriaExercicio } from '@/types/treino';
+
 export type RegistroHistorico = {
   data: string; // ISO 8601 — finalizadaEm da sessão de origem
   cargaKg: number;
@@ -5,6 +7,7 @@ export type RegistroHistorico = {
   sessaoId: string; // id da SessaoTreino de origem
   exercicioId: string; // id do exercício dentro do treino de origem
   serie: number; // número da série dentro da execução
+  categoria: CategoriaExercicio; // categoria do exercício de origem
 };
 
 export type EvolucaoExercicio = {

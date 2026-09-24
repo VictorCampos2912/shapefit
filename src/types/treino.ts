@@ -1,3 +1,5 @@
+export type CategoriaExercicio = 'peso' | 'tempo' | 'distancia' | 'repeticoes';
+
 export type ExercicioPlanejado = {
   id: string;
   nome: string;
@@ -5,6 +7,7 @@ export type ExercicioPlanejado = {
   repsAlvo: string;
   cargaSugeridaKg: number;
   descansoSeg: number;
+  categoria: CategoriaExercicio;
 };
 
 export type Treino = {

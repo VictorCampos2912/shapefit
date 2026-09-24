@@ -16,6 +16,7 @@ import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
 import { atualizarSerieDeSessaoFinalizada } from '@/services/sessao-treino-storage';
 import { obterHistoricoPorPerfil } from '@/services/historico-evolucao';
 import type { EvolucaoExercicio, HistoricoPerfil, RegistroHistorico } from '@/types/historico';
+import { ROTULO_CAMPO_PRINCIPAL, SUFIXO_VALOR, exibeCampoPrincipal } from '@/utils/categoria-exercicio';
 import { sanitizarCarga, sanitizarReps } from '@/utils/sanitizar-serie';
 
 type EdicaoRegistroEmAndamento = {
@@ -77,6 +78,7 @@ function SecaoExercicio({
   function handleSalvarEdicao() {
     if (!edicaoAtiva) return;
     const { sessaoId, exercicioId, serie, cargaKg, reps } = edicaoAtiva;
+    const registroOriginal = evolucao.registros.find((item) => chaveRegistro(item) === chaveRegistro(edicaoAtiva));
 
     Alert.alert('Confirmar alteração', `Confirma a alteração da série ${serie}?`, [
       { text: 'Cancelar', style: 'cancel' },
@@ -88,7 +90,9 @@ function SecaoExercicio({
               sessaoId,
               exercicioId,
               serie,
-              cargaKg: Number(cargaKg),
+              cargaKg: registroOriginal && exibeCampoPrincipal(registroOriginal.categoria)
+                ? Number(cargaKg)
+                : registroOriginal?.cargaKg ?? 0,
               reps: Number(reps),
             });
             setEdicaoAtiva(null);
@@ -105,11 +109,15 @@ function SecaoExercicio({
     ]);
   }
 
+  const registroEmEdicao = edicaoAtiva
+    ? evolucao.registros.find((item) => chaveRegistro(item) === chaveRegistro(edicaoAtiva))
+    : null;
   const podeSalvarEdicao =
     !!edicaoAtiva &&
-    edicaoAtiva.cargaKg.trim().length > 0 &&
+    (!registroEmEdicao ||
+      !exibeCampoPrincipal(registroEmEdicao.categoria) ||
+      (edicaoAtiva.cargaKg.trim().length > 0 && Number.isFinite(Number(edicaoAtiva.cargaKg)))) &&
     edicaoAtiva.reps.trim().length > 0 &&
-    Number.isFinite(Number(edicaoAtiva.cargaKg)) &&
     Number.isFinite(Number(edicaoAtiva.reps));
 
   return (
@@ -126,23 +134,25 @@ function SecaoExercicio({
               <ThemedView key={chaveRegistro(registro)} style={styles.itemRegistro}>
                 {emEdicao ? (
                   <ThemedView style={styles.edicaoRegistro}>
-                    <ThemedView style={styles.campo}>
-                      <ThemedText type="smallBold" themeColor="text">
-                        Carga (kg)
-                      </ThemedText>
-                      <TextInput
-                        value={edicaoAtiva?.cargaKg}
-                        onChangeText={handleAlterarCarga}
-                        keyboardType="decimal-pad"
-                        inputMode="decimal"
-                        style={[
-                          styles.input,
-                          { color: theme.text, borderColor: theme.text, backgroundColor: theme.background },
-                        ]}
-                        placeholder="0.0"
-                        placeholderTextColor={theme.textSecondary}
-                      />
-                    </ThemedView>
+                    {exibeCampoPrincipal(registro.categoria) && (
+                      <ThemedView style={styles.campo}>
+                        <ThemedText type="smallBold" themeColor="text">
+                          {ROTULO_CAMPO_PRINCIPAL[registro.categoria]}
+                        </ThemedText>
+                        <TextInput
+                          value={edicaoAtiva?.cargaKg}
+                          onChangeText={handleAlterarCarga}
+                          keyboardType="decimal-pad"
+                          inputMode="decimal"
+                          style={[
+                            styles.input,
+                            { color: theme.text, borderColor: theme.text, backgroundColor: theme.background },
+                          ]}
+                          placeholder="0.0"
+                          placeholderTextColor={theme.textSecondary}
+                        />
+                      </ThemedView>
+                    )}
                     <ThemedView style={styles.campo}>
                       <ThemedText type="smallBold" themeColor="text">
                         Repetições
@@ -178,7 +188,10 @@ function SecaoExercicio({
                 ) : (
                   <Pressable onPress={() => handleIniciarEdicao(registro)} style={styles.linhaRegistro}>
                     <ThemedText type="small">
-                      {formatarData(registro.data)} · {registro.cargaKg}kg · {registro.reps} reps
+                      {formatarData(registro.data)}
+                      {exibeCampoPrincipal(registro.categoria) &&
+                        ` · ${registro.cargaKg}${SUFIXO_VALOR[registro.categoria]}`}{' '}
+                      · {registro.reps} reps
                     </ThemedText>
                     <View style={styles.linhaComIconeEditar}>
                       <EditarIcon size={14} color={theme.accent} />

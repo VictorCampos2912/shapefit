@@ -90,6 +90,7 @@ e histórico separados. Perfis não são sincronizados entre aparelhos diferente
 | RF14 | Tela separada para trocar perfil e importar treino, acessada por ícone em cada aba (estende o RF02/RF10) | Média | `specs/015-menu-de-acoes/` |
 | RF15 | Progresso de um ciclo de 40 sessões (8 semanas) ao importar múltiplos treinos: criado automaticamente, cota distribuída por treino, indicador visual por treino em "Meus Treinos", bloqueio de nova importação enquanto o ciclo estiver em andamento e aviso ao atingir 40 sessões (estende o RF11) | Média | `specs/018-progresso-ciclo/` |
 | RF16 | Lista de treinos exibe "Finalizado em `<data>`"/"Nunca treinado" no lugar de "Importado em"; data de importação movida para dentro da tela do treino; desempate por data de importação preservado entre treinos homônimos com o mesmo texto de finalização (estende o RF02) | Média | `specs/016-finalizado-em/` |
+| RF17 | Categorias de unidade por exercício (peso/tempo/distância/repetições), campo opcional `categoria` no JSON de importação (default "peso"); telas de execução, histórico e edição (RF03/RF04/RF08/RF09a/RF09b) adaptam o campo de registro à unidade da categoria (estende o RF01/RF03/RF04/RF08/RF09a/RF09b) | Média | `specs/017-categorias-exercicio/` |
 
 ## 7. Requisitos não funcionais
 

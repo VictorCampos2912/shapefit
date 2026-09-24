@@ -9,6 +9,7 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { EstadoExecucaoExercicio, SerieRealizada } from '@/types/execucao-treino';
 import type { ExercicioPlanejado } from '@/types/treino';
+import { ROTULO_CAMPO_PRINCIPAL, SUFIXO_VALOR, exibeCampoPrincipal } from '@/utils/categoria-exercicio';
 import { sanitizarCarga, sanitizarReps } from '@/utils/sanitizar-serie';
 
 type ExercicioExecucaoProps = {
@@ -66,13 +67,18 @@ export function ExercicioExecucao({
   function handleSalvarEdicaoSerie() {
     if (!edicaoSerie) return;
     const { serie, cargaKg, reps } = edicaoSerie;
+    const serieOriginal = estado.seriesConcluidas.find((item) => item.serie === serie);
 
     Alert.alert('Confirmar alteração', `Confirma a alteração da série ${serie}?`, [
       { text: 'Cancelar', style: 'cancel' },
       {
         text: 'Salvar',
         onPress: async () => {
-          await onEditarSerie({ serie, cargaKg: Number(cargaKg), reps: Number(reps) });
+          await onEditarSerie({
+            serie,
+            cargaKg: exibeCampoPrincipal(exercicio.categoria) ? Number(cargaKg) : serieOriginal?.cargaKg ?? 0,
+            reps: Number(reps),
+          });
           setEdicaoSerie(null);
         },
       },
@@ -109,9 +115,13 @@ export function ExercicioExecucao({
     }
   }
 
-  const podeConcluirSerie = estado.cargaKg.trim().length > 0 && estado.repsFeitas.trim().length > 0;
+  const podeConcluirSerie =
+    (!exibeCampoPrincipal(exercicio.categoria) || estado.cargaKg.trim().length > 0) &&
+    estado.repsFeitas.trim().length > 0;
   const podeSalvarEdicao =
-    !!edicaoSerie && edicaoSerie.cargaKg.trim().length > 0 && edicaoSerie.reps.trim().length > 0;
+    !!edicaoSerie &&
+    (!exibeCampoPrincipal(exercicio.categoria) || edicaoSerie.cargaKg.trim().length > 0) &&
+    edicaoSerie.reps.trim().length > 0;
 
   function renderSeriesConcluidas() {
     if (estado.seriesConcluidas.length === 0) {
@@ -132,23 +142,25 @@ export function ExercicioExecucao({
                   <ThemedText type="smallBold" themeColor="text">
                     Série {serieRealizada.serie}
                   </ThemedText>
-                  <ThemedView style={styles.campo}>
-                    <ThemedText type="smallBold" themeColor="text">
-                      Carga (kg)
-                    </ThemedText>
-                    <TextInput
-                      value={edicaoSerie?.cargaKg}
-                      onChangeText={handleAlterarCargaEdicao}
-                      keyboardType="decimal-pad"
-                      inputMode="decimal"
-                      style={[
-                        styles.input,
-                        { color: theme.text, borderColor: theme.text, backgroundColor: theme.background },
-                      ]}
-                      placeholder="0.0"
-                      placeholderTextColor={theme.textSecondary}
-                    />
-                  </ThemedView>
+                  {exibeCampoPrincipal(exercicio.categoria) && (
+                    <ThemedView style={styles.campo}>
+                      <ThemedText type="smallBold" themeColor="text">
+                        {ROTULO_CAMPO_PRINCIPAL[exercicio.categoria]}
+                      </ThemedText>
+                      <TextInput
+                        value={edicaoSerie?.cargaKg}
+                        onChangeText={handleAlterarCargaEdicao}
+                        keyboardType="decimal-pad"
+                        inputMode="decimal"
+                        style={[
+                          styles.input,
+                          { color: theme.text, borderColor: theme.text, backgroundColor: theme.background },
+                        ]}
+                        placeholder="0.0"
+                        placeholderTextColor={theme.textSecondary}
+                      />
+                    </ThemedView>
+                  )}
                   <ThemedView style={styles.campo}>
                     <ThemedText type="smallBold" themeColor="text">
                       Repetições feitas
@@ -187,7 +199,10 @@ export function ExercicioExecucao({
                   style={styles.linhaSerieConcluida}
                 >
                   <ThemedText type="default">
-                    Série {serieRealizada.serie}: {serieRealizada.cargaKg}kg ×{' '}
+                    Série {serieRealizada.serie}:{' '}
+                    {exibeCampoPrincipal(exercicio.categoria)
+                      ? `${serieRealizada.cargaKg}${SUFIXO_VALOR[exercicio.categoria]} × `
+                      : ''}
                     {serieRealizada.reps} reps
                   </ThemedText>
                   <View style={styles.linhaComIcone}>
@@ -207,8 +222,10 @@ export function ExercicioExecucao({
     <ThemedView style={styles.container}>
       <ThemedText type="subtitle">{exercicio.nome}</ThemedText>
       <ThemedText type="small" themeColor="textSecondary">
-        {exercicio.series}x {exercicio.repsAlvo} · sugestão {exercicio.cargaSugeridaKg}kg ·{' '}
-        {exercicio.descansoSeg}s descanso
+        {exercicio.series}x {exercicio.repsAlvo}
+        {exibeCampoPrincipal(exercicio.categoria) &&
+          ` · sugestão ${exercicio.cargaSugeridaKg}${SUFIXO_VALOR[exercicio.categoria]}`}{' '}
+        · {exercicio.descansoSeg}s descanso
       </ThemedText>
 
       {!estado.iniciado && (
@@ -226,23 +243,25 @@ export function ExercicioExecucao({
             Série {estado.serieAtual} de {exercicio.series}
           </ThemedText>
 
-          <ThemedView style={styles.campo}>
-            <ThemedText type="smallBold" themeColor="text">
-              Carga (kg)
-            </ThemedText>
-            <TextInput
-              value={estado.cargaKg}
-              onChangeText={handleAlterarCarga}
-              keyboardType="decimal-pad"
-              inputMode="decimal"
-              style={[
-                styles.input,
-                { color: theme.text, borderColor: theme.text, backgroundColor: theme.background },
-              ]}
-              placeholder="0.0"
-              placeholderTextColor={theme.textSecondary}
-            />
-          </ThemedView>
+          {exibeCampoPrincipal(exercicio.categoria) && (
+            <ThemedView style={styles.campo}>
+              <ThemedText type="smallBold" themeColor="text">
+                {ROTULO_CAMPO_PRINCIPAL[exercicio.categoria]}
+              </ThemedText>
+              <TextInput
+                value={estado.cargaKg}
+                onChangeText={handleAlterarCarga}
+                keyboardType="decimal-pad"
+                inputMode="decimal"
+                style={[
+                  styles.input,
+                  { color: theme.text, borderColor: theme.text, backgroundColor: theme.background },
+                ]}
+                placeholder="0.0"
+                placeholderTextColor={theme.textSecondary}
+              />
+            </ThemedView>
+          )}
 
           <ThemedView style={styles.campo}>
             <ThemedText type="smallBold" themeColor="text">
