@@ -403,24 +403,29 @@ specs/009-salvar-sessao-treino/research.md (Decisões 7 e 10).
 
 RF01 a RF10 (incluindo RF09a e RF09b) concluídos e com todos os critérios de aceite
 validados em Android (Redmi Note 12) e iOS (iPhone 16 Plus) — atualizado em
-2026-09-22. RF11–RF14 (pós-MVP) implementados e com código validado via web, ainda
-pendentes de validação real nos dois aparelhos (ver seção "Melhorias
-pós-desenvolvimento" abaixo). Este documento, junto com o PRD v1.1, está pronto para
-ser usado como contexto no `/speckit.specify` de cada requisito.
+2026-09-22. RF11–RF14 (pós-MVP) implementados; RF16 ("Finalizado em" na lista de
+treinos) implementado e **validado em Android e iOS em 2026-09-24**; RF15 (progresso
+de ciclo de treinos) implementado e com código validado via web, ainda pendente de
+validação real nos dois aparelhos (ver seção "Melhorias pós-desenvolvimento" abaixo).
+Este documento, junto com o PRD v1.1, está pronto para ser usado como contexto no
+`/speckit.specify` de cada requisito.
 
 **Ordem recomendada de implementação:** RF10 → RF01 → RF02 → RF03 → RF04 → RF09a → RF05 →
 RF06 → RF07 → RF08 → RF09b.
 
 ---
 
-## Melhorias pós-desenvolvimento (RF11–RF14, fora do escopo original do MVP)
+## Melhorias pós-desenvolvimento (RF11–RF16, fora do escopo original do MVP)
 
 Os itens abaixo não fazem parte do PRD original (RF01–RF10) — foram pedidos pelo
 usuário depois do MVP estar completo e validado. Registrados na tabela de requisitos
-do PRD (seção 6) em 2026-09-22. Código implementado e validado via Expo web
-(Playwright) para RF11, RF12 e RF14; **RF13 não é verificável sem aparelho físico**
-(vibração não existe em navegador/emulador). Nenhum dos quatro tem validação real em
-Android/iOS ainda — os critérios abaixo continuam `[ ]` até essa validação acontecer.
+do PRD (seção 6) em 2026-09-22 (RF11-RF14) e 2026-09-23/24 (RF15/RF16). Código
+implementado e validado via Expo web (Playwright) para RF11, RF12, RF14, RF15 e RF16;
+**RF13 não é verificável sem aparelho físico** (vibração não existe em
+navegador/emulador). **RF16 já tem validação real confirmada em Android e iOS**
+(2026-09-24); os demais ainda não têm validação real completa nos dois aparelhos —
+os critérios seguem `[ ]` até essa validação acontecer, exceto onde já indicado
+`[X]` com a confirmação registrada.
 
 ---
 
@@ -508,3 +513,26 @@ físico com vibração habilitada — não verificável em emulador/web.**
       fluxo de importação, mesma navegação de troca de perfil)
 - [ ] A mensagem de estado vazio da lista de treinos orienta o usuário a usar o ícone
       de ações para importar um treino
+
+---
+
+### RF16 — "Finalizado em" na lista de treinos
+
+**Spec**: `specs/016-finalizado-em/` · estende o RF02. **Validado em Android e iOS —
+confirmado pelo usuário em 2026-09-24.**
+
+**Critérios de aceite:**
+- [X] Um treino sem nenhuma sessão finalizada mostra "Nunca treinado" na lista
+      "Meus Treinos"
+- [X] Ao finalizar a primeira sessão de um treino, o item passa a mostrar
+      "Finalizado em `<data e hora>`"
+- [X] A data exibida sempre acompanha a sessão finalizada mais recente — atualiza ao
+      finalizar uma nova sessão do mesmo treino
+- [X] A data de importação do treino não aparece mais na lista como texto principal
+      — passa a ficar visível dentro da tela do treino específico, como informação
+      secundária
+- [X] Dois treinos homônimos com "Finalizado em"/"Nunca treinado" diferentes entre si
+      continuam diferenciáveis sem precisar de nenhuma informação extra
+- [X] Dois treinos homônimos com o mesmo texto de "Finalizado em"/"Nunca treinado"
+      voltam a mostrar a data de importação como desempate, preservando a garantia
+      do RF02 de que treinos homônimos nunca ficam indistinguíveis na lista

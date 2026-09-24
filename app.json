@@ -9,11 +9,16 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "bundleIdentifier": "com.shapefit.app",
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.shapefit.app",
-      "permissions": ["SCHEDULE_EXACT_ALARM"],
+      "permissions": [
+        "SCHEDULE_EXACT_ALARM"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#FF6529",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

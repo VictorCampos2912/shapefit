@@ -4,9 +4,12 @@
 
 **Created**: 2026-09-23
 
-**Status**: Draft
+**Status**: Implemented — validado em Android e iOS em 2026-09-24 (Princípio III)
 
-**Requisito**: RF15 (PRD, seção 6 — pós-MVP, a confirmar numeração ao registrar no PRD)
+**Requisito**: RF16 (PRD, seção 6 — pós-MVP; número confirmado em 2026-09-24 ao
+registrar no PRD — era citado provisoriamente como "RF15" antes disso; a spec 018
+chegou primeiro à etapa de registro e ficou com o RF15, então esta ficou com o
+próximo número livre real, RF16)
 
 **Nota**: Melhoria pós-desenvolvimento — não fazia parte do escopo original do MVP.
 Pedido concreto registrado durante os testes de campo do RF11-RF14, para facilitar

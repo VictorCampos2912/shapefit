@@ -58,7 +58,7 @@ recente.
       `"Finalizado em " + formatarDataHora(dataFinalizacao)` quando `dataFinalizacao`
       não for `null`, ou `"Nunca treinado"` quando for `null` (FR-001, FR-002;
       `contracts/treino-list-item.md`). Depende de T002.
-- [ ] T004 [US1] Validar manualmente em Android e iOS (Princípio III)
+- [X] T004 [US1] Validar manualmente em Android e iOS (Princípio III)
       (`quickstart.md`, Cenários 1 e 2): confirmar "Nunca treinado" antes da
       primeira sessão finalizada de um treino, "Finalizado em `<data>`" logo
       após, e que a data exibida acompanha a sessão mais recente ao finalizar uma
@@ -101,7 +101,7 @@ ambos "Nunca treinado") mostram.
       `TreinoListItem` para passar `exibirDataImportacao={colidindo.has(item.id)}`
       no lugar do antigo `nomeDuplicado={nomesDuplicados.has(item.nome)}`
       (`contracts/treino-list-item.md`). Depende de T005, T006.
-- [ ] T008 [US3] Validar manualmente em Android e iOS (Princípio III)
+- [X] T008 [US3] Validar manualmente em Android e iOS (Princípio III)
       (`quickstart.md`, Cenários 4 e 5): confirmar que treinos homônimos com
       "Finalizado em"/"Nunca treinado" diferentes entre si NÃO mostram a data de
       importação (FR-006), e que treinos homônimos com o mesmo texto (ex.: os
@@ -132,7 +132,7 @@ principal de nenhum item.
       antes da lista de exercícios (FR-004; `research.md`, Decisão 4).
       Independente de US1/US3 — arquivo diferente, sem dependência de nenhum
       dado calculado por elas; pode ser feita em paralelo à Phase 1/2.
-- [ ] T010 [US2] Validar manualmente em Android e iOS (Princípio III)
+- [X] T010 [US2] Validar manualmente em Android e iOS (Princípio III)
       (`quickstart.md`, Cenário 3): confirmar que a data de importação aparece
       como texto secundário na tela do treino específico, e que nenhum item da
       lista "Meus Treinos" mostra mais "Importado em" como texto principal
@@ -149,7 +149,7 @@ principal de nenhum item.
       alterados (`src/services/sessao-treino-storage.ts`,
       `src/app/(tabs)/index.tsx`, `src/components/treino/treino-list-item.tsx`,
       `src/app/treino/[treinoId].tsx`) — zero erros novos.
-- [ ] T012 Atualizar `docs/criterios-aceite.md` (seção "Melhorias
+- [X] T012 Atualizar `docs/criterios-aceite.md` (seção "Melhorias
       pós-desenvolvimento") com os critérios de aceite do RF15, e o cabeçalho
       **Status** de `specs/016-finalizado-em/spec.md` para "Implemented" após
       T004, T008 e T010 confirmarem validação nos dois aparelhos.
