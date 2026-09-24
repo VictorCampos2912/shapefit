@@ -34,7 +34,11 @@ verificável via web/emulador** — exige aparelho físico com vibração
 sistema (RF06); não pode introduzir dependência nova nesta rodada (decisão do
 usuário)
 
-**Scale/Scope**: 1 arquivo de produção alterado (`src/app/treino/[treinoId].tsx`)
+**Scale/Scope**: originalmente 1 arquivo de produção alterado
+(`src/app/treino/[treinoId].tsx`). **Atualizado em 2026-09-23** (correções pós-teste,
+Decisões 5 e 6 do `research.md`): 3 arquivos — `[treinoId].tsx` (guarda de segundo
+plano), `src/constants/vibracao.ts` (novo, constante compartilhada) e
+`src/services/notificacao-descanso.ts` (canal de notificação usa a mesma constante).
 
 ## Constitution Check
 
@@ -57,11 +61,12 @@ Nenhuma violação — Complexity Tracking não se aplica.
 ```text
 specs/014-vibracao-fim-descanso/
 ├── plan.md              # Este arquivo
-├── research.md          # Fase 0 — decisões técnicas
+├── research.md          # Fase 0 — decisões técnicas (Decisões 5 e 6: correções pós-teste)
 ├── data-model.md         # Fase 1 — N/A, sem entidades
 ├── quickstart.md         # Fase 1 — roteiro de validação manual
 ├── contracts/
-│   └── treinoId-screen.md # Fase 1 — handleDescansoConcluido ajustado
+│   ├── treinoId-screen.md      # Fase 1 — handleDescansoConcluido ajustado
+│   └── notificacao-descanso.md # Adicionado 2026-09-23 — canal de notificação (Decisão 6)
 └── tasks.md              # Fase 2 (gerado por /speckit.tasks)
 ```
 
@@ -69,14 +74,25 @@ specs/014-vibracao-fim-descanso/
 
 ```text
 src/
-└── app/
-    └── treino/
-        └── [treinoId].tsx   # ALTERADO: import de Vibration, nova constante,
-                              #   handleDescansoConcluido chama Vibration.vibrate
+├── constants/
+│   └── vibracao.ts             # NOVO (2026-09-23): PADRAO_VIBRACAO_FIM_DESCANSO
+├── app/
+│   └── treino/
+│       └── [treinoId].tsx      # ALTERADO: import de Vibration e da constante
+│                                #   compartilhada; handleDescansoConcluido chama
+│                                #   Vibration.vibrate(deveVibrar); novo useRef
+│                                #   voltouDeSegundoPlanoRef (Decisão 5)
+└── services/
+    └── notificacao-descanso.ts # ALTERADO 2026-09-23: canal usa a constante
+                                 #   compartilhada; id v3 -> v4 (Decisão 6)
 ```
 
-**Structure Decision**: nenhum arquivo novo — mudança local a uma função já existente
-na mesma tela alterada pela spec 013.
+**Structure Decision**: na versão original, nenhum arquivo novo — mudança local a uma
+função já existente na mesma tela alterada pela spec 013. **Atualizado em 2026-09-23**:
+duas correções pós-teste (Decisões 5 e 6) introduziram um arquivo novo
+(`src/constants/vibracao.ts`) e passaram a alterar também
+`src/services/notificacao-descanso.ts`, para eliminar a vibração duplicada e unificar o
+padrão entre app aberto e notificação.
 
 ## Complexity Tracking
 

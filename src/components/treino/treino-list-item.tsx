@@ -2,13 +2,16 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { ProgressRing } from '@/components/ui/progress-ring';
 import { Spacing } from '@/constants/theme';
 import type { Treino } from '@/types/treino';
 
 type TreinoListItemProps = {
   treino: Treino;
-  nomeDuplicado?: boolean;
+  dataFinalizacao: string | null;
+  exibirDataImportacao?: boolean;
   qtdSessoesFinalizadas?: number;
+  progressoCiclo?: number | null;
   onPress: () => void;
 };
 
@@ -18,8 +21,10 @@ function formatarDataHora(iso: string): string {
 
 export function TreinoListItem({
   treino,
-  nomeDuplicado = false,
+  dataFinalizacao,
+  exibirDataImportacao = false,
   qtdSessoesFinalizadas = 0,
+  progressoCiclo = null,
   onPress,
 }: TreinoListItemProps) {
   return (
@@ -34,8 +39,12 @@ export function TreinoListItem({
               {qtdSessoesFinalizadas}
             </ThemedText>
           )}
+          {progressoCiclo != null && <ProgressRing progress={progressoCiclo} size={24} strokeWidth={3} />}
         </View>
-        {nomeDuplicado && (
+        <ThemedText type="small" themeColor="textSecondary">
+          {dataFinalizacao ? `Finalizado em ${formatarDataHora(dataFinalizacao)}` : 'Nunca treinado'}
+        </ThemedText>
+        {exibirDataImportacao && (
           <ThemedText type="small" themeColor="textSecondary">
             Importado em {formatarDataHora(treino.importadoEm)}
           </ThemedText>

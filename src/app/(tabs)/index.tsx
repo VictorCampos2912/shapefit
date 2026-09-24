@@ -10,8 +10,10 @@ import { ProgressRing } from '@/components/ui/progress-ring';
 import { TreinoListItem } from '@/components/treino/treino-list-item';
 import { Spacing } from '@/constants/theme';
 import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
-import { contarSessoesFinalizadas } from '@/services/sessao-treino-storage';
+import { calcularProgressoCiclo, cotaComoFracao, obterCicloAtual } from '@/services/ciclo-treino-storage';
+import { contarSessoesFinalizadas, obterDataUltimaSessaoFinalizada } from '@/services/sessao-treino-storage';
 import { listarTreinos } from '@/services/treino-storage';
+import type { CicloTreino } from '@/types/ciclo-treino';
 import type { Treino } from '@/types/treino';
 
 function calcularNomesDuplicados(treinos: Treino[]): Set<string> {
@@ -28,10 +30,41 @@ function calcularNomesDuplicados(treinos: Treino[]): Set<string> {
   return duplicados;
 }
 
+/**
+ * Treinos que devem exibir a data de importação como desempate adicional: têm
+ * nome duplicado E o texto "Finalizado em"/"Nunca treinado" também colidiria
+ * entre eles (spec 016, FR-005).
+ */
+function calcularChavesColidindo(
+  treinos: Treino[],
+  dataFinalizacaoPorTreino: Record<string, string | null>,
+): Set<string> {
+  const nomesDuplicados = calcularNomesDuplicados(treinos);
+  const grupos = new Map<string, string[]>();
+  for (const treino of treinos) {
+    if (!nomesDuplicados.has(treino.nome)) continue;
+    const chave = `${treino.nome}|${dataFinalizacaoPorTreino[treino.id] ?? 'nunca'}`;
+    grupos.set(chave, [...(grupos.get(chave) ?? []), treino.id]);
+  }
+  const colidindo = new Set<string>();
+  for (const ids of grupos.values()) {
+    if (ids.length > 1) {
+      ids.forEach((id) => colidindo.add(id));
+    }
+  }
+  return colidindo;
+}
+
 export default function TreinosScreen() {
   const { perfilAtivo } = usePerfilAtivo();
   const [treinos, setTreinos] = useState<Treino[]>([]);
   const [contagensPorTreino, setContagensPorTreino] = useState<Record<string, number>>({});
+  const [dataFinalizacaoPorTreino, setDataFinalizacaoPorTreino] = useState<Record<string, string | null>>({});
+  const [cicloAtual, setCicloAtual] = useState<CicloTreino | null>(null);
+  const [progressoCiclo, setProgressoCiclo] = useState<{
+    totalFinalizado: number;
+    porTreino: Record<string, number>;
+  } | null>(null);
   const [carregando, setCarregando] = useState(true);
 
   async function carregarContagens(perfilId: string, lista: Treino[]) {
@@ -41,11 +74,30 @@ export default function TreinosScreen() {
     setContagensPorTreino(Object.fromEntries(entradas));
   }
 
+  async function carregarDatasFinalizacao(perfilId: string, lista: Treino[]) {
+    const entradas = await Promise.all(
+      lista.map(
+        async (treino) => [treino.id, await obterDataUltimaSessaoFinalizada(perfilId, treino.id)] as const,
+      ),
+    );
+    setDataFinalizacaoPorTreino(Object.fromEntries(entradas));
+  }
+
+  async function carregarCicloAtual(perfilId: string) {
+    const ciclo = await obterCicloAtual(perfilId);
+    setCicloAtual(ciclo);
+    setProgressoCiclo(ciclo ? await calcularProgressoCiclo(perfilId, ciclo) : null);
+  }
+
   async function recarregarTreinos() {
     if (!perfilAtivo) return;
     const lista = await listarTreinos(perfilAtivo.id);
     setTreinos(lista);
-    await carregarContagens(perfilAtivo.id, lista);
+    await Promise.all([
+      carregarContagens(perfilAtivo.id, lista),
+      carregarDatasFinalizacao(perfilAtivo.id, lista),
+      carregarCicloAtual(perfilAtivo.id),
+    ]);
   }
 
   useEffect(() => {
@@ -58,7 +110,11 @@ export default function TreinosScreen() {
         setTreinos(lista);
         setCarregando(false);
       }
-      await carregarContagens(perfilAtivo.id, lista);
+      await Promise.all([
+        carregarContagens(perfilAtivo.id, lista),
+        carregarDatasFinalizacao(perfilAtivo.id, lista),
+        carregarCicloAtual(perfilAtivo.id),
+      ]);
     })();
     return () => {
       ativo = false;
@@ -77,7 +133,7 @@ export default function TreinosScreen() {
     router.push({ pathname: '/treino/[treinoId]', params: { treinoId: treino.id } });
   }
 
-  const nomesDuplicados = calcularNomesDuplicados(treinos);
+  const colidindo = calcularChavesColidindo(treinos, dataFinalizacaoPorTreino);
 
   return (
     <ThemedView style={styles.container}>
@@ -102,6 +158,14 @@ export default function TreinosScreen() {
           </ThemedView>
         )}
 
+        {cicloAtual && progressoCiclo && progressoCiclo.totalFinalizado >= 40 && (
+          <ThemedView type="warningBackground" style={styles.avisoTrocarTreino}>
+            <ThemedText type="smallBold" themeColor="warning">
+              Hora de trocar o treino — {progressoCiclo.totalFinalizado} sessões já realizadas
+            </ThemedText>
+          </ThemedView>
+        )}
+
         <FlatList
           data={treinos}
           keyExtractor={(treino) => treino.id}
@@ -109,8 +173,14 @@ export default function TreinosScreen() {
           renderItem={({ item }) => (
             <TreinoListItem
               treino={item}
-              nomeDuplicado={nomesDuplicados.has(item.nome)}
+              dataFinalizacao={dataFinalizacaoPorTreino[item.id] ?? null}
+              exibirDataImportacao={colidindo.has(item.id)}
               qtdSessoesFinalizadas={contagensPorTreino[item.id] ?? 0}
+              progressoCiclo={
+                cicloAtual?.treinoIds.includes(item.id)
+                  ? cotaComoFracao(progressoCiclo?.porTreino[item.id] ?? 0, cicloAtual.cotaPorTreinoId[item.id])
+                  : null
+              }
               onPress={() => handleSelecionarTreino(item)}
             />
           )}
@@ -143,6 +213,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.four,
     gap: Spacing.one,
+  },
+  avisoTrocarTreino: {
+    borderRadius: Spacing.two,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.three,
   },
   lista: {
     gap: Spacing.two,

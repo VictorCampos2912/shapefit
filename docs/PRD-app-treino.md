@@ -88,6 +88,7 @@ e histórico separados. Perfis não são sincronizados entre aparelhos diferente
 | RF12 | Conclusão explícita de sessão de treino — lista permanece concluída até o usuário iniciar uma nova sessão (estende o RF07) | Alta | `specs/013-nova-sessao-treino/` |
 | RF13 | Vibração diferenciada ao fim do descanso, mais intensa que a da notificação (estende o RF06) | Média | `specs/014-vibracao-fim-descanso/` |
 | RF14 | Tela separada para trocar perfil e importar treino, acessada por ícone em cada aba (estende o RF02/RF10) | Média | `specs/015-menu-de-acoes/` |
+| RF15 | Progresso de um ciclo de 40 sessões (8 semanas) ao importar múltiplos treinos: criado automaticamente, cota distribuída por treino, indicador visual por treino em "Meus Treinos", bloqueio de nova importação enquanto o ciclo estiver em andamento e aviso ao atingir 40 sessões (estende o RF11) | Média | `specs/018-progresso-ciclo/` |
 
 ## 7. Requisitos não funcionais
 

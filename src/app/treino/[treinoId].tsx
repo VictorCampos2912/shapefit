@@ -39,6 +39,10 @@ import {
 import type { Treino } from '@/types/treino';
 import { ajustarFimEm, calcularSegundosRestantes } from '@/utils/cronometro-descanso';
 
+function formatarDataHora(iso: string): string {
+  return new Date(iso).toLocaleString();
+}
+
 function estadoVisualDoExercicio(
   exercicioId: string,
   estadosPorExercicio: Record<string, EstadoExecucaoExercicio>,
@@ -403,6 +407,9 @@ export default function ExecucaoTreinoScreen() {
         ) : (
           <>
             <ThemedText type="subtitle">{treino.nome}</ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              Importado em {formatarDataHora(treino.importadoEm)}
+            </ThemedText>
             <FlatList
               data={treino.exercicios}
               keyExtractor={(exercicio) => exercicio.id}

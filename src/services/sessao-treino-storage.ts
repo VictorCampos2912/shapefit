@@ -160,6 +160,23 @@ export async function contarSessoesFinalizadas(perfilId: string, treinoId: strin
   return sessoes.filter((sessao) => sessao.treinoId === treinoId && sessao.finalizadaEm !== null).length;
 }
 
+/** Data (ISO 8601) da sessão finalizada mais recente do treino, ou `null` se nenhuma. */
+export async function obterDataUltimaSessaoFinalizada(
+  perfilId: string,
+  treinoId: string,
+): Promise<string | null> {
+  const sessoes = await getSessoes(perfilId);
+  const finalizadas = sessoes.filter(
+    (sessao) => sessao.treinoId === treinoId && sessao.finalizadaEm !== null,
+  );
+  if (finalizadas.length === 0) {
+    return null;
+  }
+  return finalizadas.reduce((maisRecente, atual) =>
+    atual.finalizadaEm! > maisRecente.finalizadaEm! ? atual : maisRecente,
+  ).finalizadaEm;
+}
+
 export async function listarSessoesFinalizadas(perfilId: string): Promise<SessaoTreino[]> {
   const sessoes = await getSessoes(perfilId);
   return sessoes.filter((sessao) => sessao.finalizadaEm !== null);

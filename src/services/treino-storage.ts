@@ -3,6 +3,7 @@ import * as Crypto from 'expo-crypto';
 import * as DocumentPicker from 'expo-document-picker';
 
 import treinoExemplo from '@/assets/exemplos/treino-exemplo.json';
+import { calcularProgressoCiclo, criarCiclo, obterCicloAtual } from '@/services/ciclo-treino-storage';
 import type {
   ExercicioIgnorado,
   ExercicioPlanejado,
@@ -159,6 +160,24 @@ async function processarConteudoArray(bruto: unknown[], perfilId: string): Promi
     return { treinos: [], treinosIgnorados: [], erro: 'O arquivo não contém nenhum treino.' };
   }
 
+  // Bloqueio por ciclo em andamento (RF17, FR-007) — checagem por tamanho bruto do
+  // array, antes de qualquer validação, para falhar rápido e não persistir nada
+  // (tudo ou nada) enquanto o ciclo atual do perfil ainda não atingiu 40 sessões.
+  if (bruto.length >= 2) {
+    const cicloAtual = await obterCicloAtual(perfilId);
+    if (cicloAtual) {
+      const { totalFinalizado } = await calcularProgressoCiclo(perfilId, cicloAtual);
+      if (totalFinalizado < 40) {
+        return {
+          treinos: [],
+          treinosIgnorados: [],
+          erro:
+            'Já existe um ciclo de treinos em andamento. Finalize as 40 sessões esperadas antes de importar um novo lote de múltiplos treinos.',
+        };
+      }
+    }
+  }
+
   const treinos: TreinoImportadoComPendencias[] = [];
   const treinosIgnorados: ResultadoImportacaoMultipla['treinosIgnorados'] = [];
 
@@ -176,6 +195,12 @@ async function processarConteudoArray(bruto: unknown[], perfilId: string): Promi
     await setTreinosState(perfilId, {
       treinos: [...state.treinos, ...treinos.map((item) => item.treino)],
     });
+
+    // Cria o ciclo de progresso (RF17, FR-001) só quando 2+ treinos de fato
+    // validaram — um array com só 1 treino válido não é um lote de múltiplos.
+    if (treinos.length >= 2) {
+      await criarCiclo(perfilId, treinos.map((item) => item.treino.id));
+    }
   }
 
   return { treinos, treinosIgnorados, erro: null };
