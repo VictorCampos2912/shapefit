@@ -160,3 +160,29 @@ crescer demais, mas não é o padrão já estabelecido ali hoje.
 - `src/app/(tabs)/explore.tsx`: estado `visao`; controle de alternância; novo
   sub-componente inline `SecaoDia`; `recarregarHistorico` carrega as duas visões em
   paralelo.
+
+## Nota de integração futura: `specs/017-categorias-exercicio`
+
+Esta spec (019) assume registros sempre em carga(kg)+reps (ver `spec.md`,
+Assumptions — "sem categorias de unidade, já que o RF16/categorias ainda não estava
+implementado quando esta spec foi escrita"). A spec separada
+`specs/017-categorias-exercicio` (categorias peso/tempo/distância/repetições, campo
+`categoria` por exercício) também altera como registros de série são exibidos —
+as duas visões do Histórico (RF08 "Por exercício" e esta, "Por data") precisam ficar
+consistentes entre si quanto a isso.
+
+**Se a 017 for implementada depois desta (019)**: quem implementar a 017 DEVE
+adicionar `categoria` também ao tipo intermediário desta spec
+(`RegistroBruto`/`BlocoSessao`/`RegistroExercicioNoDia`, ver Decisão 1/3 acima) e
+usar `src/utils/categoria-exercicio.ts` (`ROTULO_CAMPO_PRINCIPAL`, `SUFIXO_VALOR`,
+`exibeCampoPrincipal`, criados pela 017) na exibição de `SecaoDia` — não só na visão
+"Por exercício" já prevista no escopo original da 017.
+
+**Se a 017 já estiver implementada antes desta (019)**: o inverso se aplica — esta
+spec (019), ao construir `construirRegistrosBrutos`/`RegistroBruto`, já deve copiar
+`categoria` do `ExercicioPlanejado` de origem (mesmo padrão que a 017 já terá
+aplicado a `RegistroHistorico`) e `SecaoDia` já deve nascer usando o utilitário de
+rótulo por categoria, não assumindo carga(kg) fixo.
+
+Nenhuma decisão de produto nova aqui — mesma dependência de implementação descrita
+(em sentido espelhado) no `research.md` da spec 017.

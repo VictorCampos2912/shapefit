@@ -225,3 +225,27 @@ habilitar o botão de concluir/salvar.
   6 e 7).
 - `src/app/(tabs)/explore.tsx`: rótulos dinâmicos no histórico (RF08) e na edição de
   sessão finalizada (RF09b), mesmo padrão da Decisão 6/7.
+
+## Nota de integração futura: `specs/019-historico-por-data`
+
+Esta spec (017) só cobre a visão "Por exercício" do Histórico (RF08) — a visão "Por
+data" (`specs/019-historico-por-data`, spec separada, ainda não implementada) também
+exibe registros de série e precisa da mesma adaptação por categoria para as duas
+visões do Histórico não ficarem inconsistentes entre si (uma mostrando "12min",
+outra assumindo sempre kg para o mesmo registro).
+
+**Se a 019 for implementada depois desta (017)**: quem implementar a 019 DEVE
+reaproveitar `src/utils/categoria-exercicio.ts` (`ROTULO_CAMPO_PRINCIPAL`,
+`SUFIXO_VALOR`, `exibeCampoPrincipal`) na exibição de cada registro da visão "Por
+data" — mesmo padrão já aplicado aqui à visão "Por exercício" (Decisão 5, RF08). Isso
+exige que o tipo intermediário usado pela 019 (`RegistroBruto`/`BlocoSessao`, ver o
+`research.md` da 019) também carregue `categoria` por registro, do mesmo jeito que
+`RegistroHistorico.categoria` foi adicionado aqui.
+
+**Se a 019 já estiver implementada antes desta (017)**: o inverso se aplica — esta
+spec (017) precisa adicionar essa mesma integração na visão "Por data" como parte do
+próprio escopo desta feature, não deixar de fora só porque a 019 não previu
+categorias no momento em que foi escrita.
+
+Nenhuma decisão de produto nova aqui — só uma dependência de implementação entre
+duas specs que tocam a mesma tela (Histórico) em momentos possivelmente diferentes.
