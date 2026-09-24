@@ -34,12 +34,21 @@ export function TreinoListItem({
           <ThemedText type="smallBold" style={styles.titulo}>
             {treino.nome}
           </ThemedText>
-          {qtdSessoesFinalizadas > 0 && (
-            <ThemedText type="small" themeColor="textSecondary">
-              {qtdSessoesFinalizadas}
-            </ThemedText>
+          {progressoCiclo != null ? (
+            <ProgressRing progress={progressoCiclo} size={28} strokeWidth={3}>
+              {qtdSessoesFinalizadas > 0 && (
+                <ThemedText type="small" themeColor="textSecondary" style={styles.contadorNoAnel}>
+                  {qtdSessoesFinalizadas}
+                </ThemedText>
+              )}
+            </ProgressRing>
+          ) : (
+            qtdSessoesFinalizadas > 0 && (
+              <ThemedText type="small" themeColor="textSecondary">
+                {qtdSessoesFinalizadas}
+              </ThemedText>
+            )
           )}
-          {progressoCiclo != null && <ProgressRing progress={progressoCiclo} size={24} strokeWidth={3} />}
         </View>
         <ThemedText type="small" themeColor="textSecondary">
           {dataFinalizacao ? `Finalizado em ${formatarDataHora(dataFinalizacao)}` : 'Nunca treinado'}
@@ -69,5 +78,9 @@ const styles = StyleSheet.create({
   },
   titulo: {
     flex: 1,
+  },
+  contadorNoAnel: {
+    fontSize: 10,
+    lineHeight: 12,
   },
 });

@@ -137,7 +137,7 @@ finalizar sessões dele.
       mais novo) não recebem `ProgressRing` (mesmo comportamento visual de hoje).
       Importar `cotaComoFracao` de `@/services/ciclo-treino-storage`. Depende de
       T004, T005.
-- [ ] T007 [US1] Validar manualmente em Android e iOS (Princípio III)
+- [X] T007 [US1] Validar manualmente em Android e iOS (Princípio III)
       (`quickstart.md`, Cenários 1 e 5): confirmar que importar um arquivo com 5
       treinos válidos não pede nenhuma confirmação adicional e que, em "Meus
       Treinos", cada um dos 5 treinos mostra um `ProgressRing` a 0% ao lado do

@@ -405,10 +405,12 @@ RF01 a RF10 (incluindo RF09a e RF09b) concluídos e com todos os critérios de a
 validados em Android (Redmi Note 12) e iOS (iPhone 16 Plus) — atualizado em
 2026-09-22. RF11–RF14 (pós-MVP) implementados; RF16 ("Finalizado em" na lista de
 treinos) implementado e **validado em Android e iOS em 2026-09-24**; RF15 (progresso
-de ciclo de treinos) implementado e com código validado via web, ainda pendente de
-validação real nos dois aparelhos (ver seção "Melhorias pós-desenvolvimento" abaixo).
-Este documento, junto com o PRD v1.1, está pronto para ser usado como contexto no
-`/speckit.specify` de cada requisito.
+de ciclo de treinos) implementado, com validação real em Android/iOS **parcial** em
+2026-09-24 (criação automática do ciclo e bloqueio de nova importação confirmados;
+distribuição de cota, aviso ao atingir 40 sessões e liberação após 40 ainda pendentes
+— ver seção "Melhorias pós-desenvolvimento" abaixo). Este documento, junto com o PRD
+v1.1, está pronto para ser usado como contexto no `/speckit.specify` de cada
+requisito.
 
 **Ordem recomendada de implementação:** RF10 → RF01 → RF02 → RF03 → RF04 → RF09a → RF05 →
 RF06 → RF07 → RF08 → RF09b.
@@ -513,6 +515,32 @@ físico com vibração habilitada — não verificável em emulador/web.**
       fluxo de importação, mesma navegação de troca de perfil)
 - [ ] A mensagem de estado vazio da lista de treinos orienta o usuário a usar o ícone
       de ações para importar um treino
+
+---
+
+### RF15 — Progresso de ciclo de treinos (múltiplos treinos)
+
+**Spec**: `specs/018-progresso-ciclo/` · estende o RF11. Validação em andamento —
+atualizado em 2026-09-24 conforme o usuário testa cada cenário.
+
+**Critérios de aceite:**
+- [X] Ao importar um arquivo com múltiplos treinos, um ciclo de progresso começa a
+      contar automaticamente, sem nenhuma confirmação adicional — cada treino do
+      lote mostra um anel de progresso (0%) ao lado do contador de sessões
+- [ ] A expectativa de 40 sessões é distribuída entre os treinos do lote de forma
+      equilibrada (ex.: 3 treinos → 14/13/13); o anel de um treino atinge 100%
+      exatamente ao completar sua cota individual
+- [ ] Ao atingir 40 sessões no total do ciclo, aparece o aviso "Hora de trocar o
+      treino"; sessões continuam sendo registradas normalmente depois disso, sem
+      travar, e o aviso atualiza o total
+- [X] Uma nova importação de múltiplos treinos é bloqueada enquanto o ciclo atual
+      tiver menos de 40 sessões, com mensagem explicando o motivo — **confirmado
+      pelo usuário**
+- [ ] Depois que o ciclo atinge 40 sessões, uma nova importação de múltiplos
+      treinos volta a funcionar normalmente, criando um novo ciclo; os treinos do
+      ciclo anterior deixam de mostrar o anel de progresso
+- [X] Um treino importado sozinho (não em lote) nunca mostra anel de progresso,
+      mesmo depois de finalizar sessões dele — **confirmado pelo usuário**
 
 ---
 

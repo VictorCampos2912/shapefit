@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Animated, Easing } from 'react-native';
+import { useEffect, useState, type ReactNode } from 'react';
+import { Animated, Easing, StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
 import { useTheme } from '@/hooks/use-theme';
@@ -9,6 +9,8 @@ type ProgressRingProps = {
   progress?: number;
   size?: number;
   strokeWidth?: number;
+  /** Conteúdo opcional centralizado dentro do anel (ex.: um número curto). */
+  children?: ReactNode;
 };
 
 /**
@@ -17,7 +19,7 @@ type ProgressRingProps = {
  * Com `progress` (0-1): preenche o arco proporcionalmente — ex.: séries
  * concluídas de um exercício, ou sessões finalizadas de um treino.
  */
-export function ProgressRing({ progress, size = 40, strokeWidth = 5 }: ProgressRingProps) {
+export function ProgressRing({ progress, size = 40, strokeWidth = 5, children }: ProgressRingProps) {
   const theme = useTheme();
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -74,6 +76,14 @@ export function ProgressRing({ progress, size = 40, strokeWidth = 5 }: ProgressR
           origin={`${size / 2}, ${size / 2}`}
         />
       </Svg>
+      {children && <View style={[StyleSheet.absoluteFill, styles.conteudoCentralizado]}>{children}</View>}
     </Animated.View>
   );
 }
+
+const styles = StyleSheet.create({
+  conteudoCentralizado: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
