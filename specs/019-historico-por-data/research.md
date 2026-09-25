@@ -27,6 +27,7 @@ type RegistroBruto = {
   serie: number;
   cargaKg: number;
   reps: number;
+  categoria: CategoriaExercicio; // RF17 — copiado do ExercicioPlanejado de origem
 };
 
 function construirRegistrosBrutos(
@@ -85,6 +86,7 @@ não precisa de nenhuma lógica de formatação manual nova.
 // src/types/historico.ts
 export type RegistroExercicioNoDia = {
   exercicioNome: string;
+  categoria: CategoriaExercicio; // RF17 — mesma categoria do ExercicioPlanejado de origem
   registros: { serie: number; cargaKg: number; reps: number }[]; // ordenados por série
 };
 
