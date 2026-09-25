@@ -71,7 +71,7 @@ import { ROTULO_CAMPO_PRINCIPAL, SUFIXO_VALOR, exibeCampoPrincipal } from '@/uti
 function SecaoDia({ dia }: { dia: DiaHistorico }) {
   return (
     <ThemedView style={styles.diaHistorico}>
-      <ThemedText type="smallBold">{formatarData(dia.dataReferencia)}</ThemedText>
+      <ThemedText type="smallBold">{formatarSomenteData(dia.dataReferencia)}</ThemedText>
       {dia.blocos.map((bloco) => (
         <ThemedView key={bloco.sessaoId} style={styles.blocoSessao}>
           <ThemedText type="default">{bloco.treinoNome}</ThemedText>
@@ -94,11 +94,17 @@ function SecaoDia({ dia }: { dia: DiaHistorico }) {
 }
 ```
 
-- **Somente leitura** (spec, Assumptions) — nenhum `Pressable`/`TextInput`/edição;
-  reaproveita `formatarData` já existente no arquivo (`new Date(iso).toLocaleString()`).
+- **Somente leitura** (spec, Assumptions) — nenhum `Pressable`/`TextInput`/edição.
+- **Cabeçalho do dia mostra só a data, sem hora**: `formatarSomenteData` (`new
+  Date(iso).toLocaleDateString()`), nova função adicionada só para este cabeçalho —
+  não reaproveita `formatarData` (`toLocaleString()`, com hora) já usada pela visão
+  "Por exercício" em `SecaoExercicio`. Decisão do Victor após validação manual: a
+  hora do cabeçalho do dia não agregava informação útil (o dia já é a granularidade
+  da visão), então foi removida — `formatarData` (com hora) continua em
+  `SecaoExercicio`, sem mudança, já que RF08 já validou esse formato ali.
 - **`dia.dataReferencia`** (nunca `dia.chaveDia`) é o que é passado para
-  `formatarData` — evita o problema de fuso horário descrito em `research.md`,
-  Decisão 2.
+  `formatarSomenteData` — evita o problema de fuso horário descrito em
+  `research.md`, Decisão 2 (mesmo cuidado, independente de a hora ser exibida ou não).
 - **Unidade por categoria (RF17, `specs/017-categorias-exercicio/`, já
   implementada)**: `exercicio.categoria` (mesmo valor para todas as séries daquele
   exercício naquela sessão) decide o sufixo via `SUFIXO_VALOR` e se o valor

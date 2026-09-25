@@ -45,6 +45,10 @@ function formatarData(iso: string): string {
   return new Date(iso).toLocaleString();
 }
 
+function formatarSomenteData(iso: string): string {
+  return new Date(iso).toLocaleDateString();
+}
+
 function chaveRegistro(registro: Pick<RegistroHistorico, 'sessaoId' | 'exercicioId' | 'serie'>): string {
   return `${registro.sessaoId}:${registro.exercicioId}:${registro.serie}`;
 }
@@ -217,7 +221,7 @@ function SecaoExercicio({
 function SecaoDia({ dia }: { dia: DiaHistorico }) {
   return (
     <ThemedView style={styles.diaHistorico}>
-      <ThemedText type="smallBold">{formatarData(dia.dataReferencia)}</ThemedText>
+      <ThemedText type="smallBold">{formatarSomenteData(dia.dataReferencia)}</ThemedText>
       {dia.blocos.map((bloco) => (
         <ThemedView key={bloco.sessaoId} style={styles.blocoSessao}>
           <ThemedText type="default">{bloco.treinoNome}</ThemedText>

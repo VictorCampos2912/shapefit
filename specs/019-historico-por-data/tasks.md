@@ -118,6 +118,11 @@ UI. Validação funcional consolidada em T007 (ver nota "Organization").
       `categoria === 'repeticoes'`, mostra só `"{reps} reps"`, sem valor de
       carga/tempo/distância. Somente leitura, sem `Pressable`/edição
       (`contracts/explore-screen.md`). Depende de T001.
+      **Ajuste pós-validação manual (2026-09-25)**: o cabeçalho do dia passou a usar
+      `formatarSomenteData` (só data, sem hora) em vez de `formatarData` — pedido do
+      Victor durante o teste do Cenário 2/3, a hora não agregava informação útil
+      nesse nível de granularidade. `formatarData` (com hora) continua em
+      `SecaoExercicio`, sem mudança. Ver `contracts/explore-screen.md`.
 
 **Checkpoint**: código de User Story 1 completo — ainda não alcançável via UI real
 (nenhuma validação funcional própria nesta fase, ver nota "Organization"); segue
