@@ -54,7 +54,7 @@ refactor não pode alterar o comportamento já validado da visão "Por exercíci
 
 **⚠️ CRITICAL**: nenhuma User Story pode começar antes desta fase.
 
-- [ ] T001 [P] Em `src/types/historico.ts`, adicionar os tipos `RegistroExercicioNoDia`
+- [X] T001 [P] Em `src/types/historico.ts`, adicionar os tipos `RegistroExercicioNoDia`
       (`{ exercicioNome: string; categoria: CategoriaExercicio; registros: {
       serie: number; cargaKg: number; reps: number }[] }`), `BlocoSessao` (`{
       sessaoId: string; treinoNome: string; dataReferencia: string; exercicios:
@@ -63,7 +63,7 @@ refactor não pode alterar o comportamento já validado da visão "Por exercíci
       (união discriminada por `temSessoesFinalizadas`, mesmo padrão de
       `HistoricoPerfil`) — `data-model.md`; `research.md`, Decisões 2 e 3.
       Independente de T002 (arquivo diferente).
-- [ ] T002 [P] Em `src/services/historico-evolucao.ts`, extrair de
+- [X] T002 [P] Em `src/services/historico-evolucao.ts`, extrair de
       `obterHistoricoPorPerfil` a função interna (não exportada)
       `construirRegistrosBrutos(treinos, sessoesFinalizadas): RegistroBruto[]`
       (tipo `RegistroBruto` com `categoria: CategoriaExercicio`, copiada de
@@ -97,7 +97,7 @@ UI. Validação funcional consolidada em T007 (ver nota "Organization").
 
 ### Implementation for User Story 1
 
-- [ ] T004 [US1] Em `src/services/historico-evolucao.ts`, criar e exportar
+- [X] T004 [US1] Em `src/services/historico-evolucao.ts`, criar e exportar
       `obterHistoricoPorData(perfilId): Promise<HistoricoPorData>`
       (`contracts/historico-evolucao.md`): consome `construirRegistrosBrutos`
       (T002); agrupa por `sessaoId` → `BlocoSessao` (exercícios por
@@ -107,7 +107,7 @@ UI. Validação funcional consolidada em T007 (ver nota "Organization").
       `"YYYY-MM-DD"`, `research.md` Decisão 2) → `DiaHistorico`; ordena blocos
       dentro do dia por `data` desc e dias por `chaveDia` desc (FR-003, FR-004).
       Depende de T001, T002.
-- [ ] T005 [US1] Em `src/app/(tabs)/explore.tsx`, criar o sub-componente inline
+- [X] T005 [US1] Em `src/app/(tabs)/explore.tsx`, criar o sub-componente inline
       `SecaoDia({ dia }: { dia: DiaHistorico })` (mesmo nível que `SecaoExercicio`
       já existente no arquivo — `research.md`, Decisão 5): renderiza
       `formatarData(dia.dataReferencia)` (nunca `dia.chaveDia`, evita o problema
@@ -137,7 +137,7 @@ são alcançáveis na UI real.
 
 ### Implementation for User Story 2
 
-- [ ] T006 [US2] Em `src/app/(tabs)/explore.tsx` (`contracts/explore-screen.md`):
+- [X] T006 [US2] Em `src/app/(tabs)/explore.tsx` (`contracts/explore-screen.md`):
       adicionar estado `visao: 'exercicio' | 'data'` (default `'exercicio'`) e
       `historicoPorData: HistoricoPorData | null`; `recarregarHistorico` passa a
       chamar `obterHistoricoPorPerfil` e `obterHistoricoPorData` em paralelo
@@ -168,7 +168,7 @@ alcançável e funcional na UI real.
 
 ## Phase 4: Polish & Cross-Cutting Concerns
 
-- [ ] T008 [P] Rodar `npx tsc --noEmit` e `npx eslint` sobre os arquivos
+- [X] T008 [P] Rodar `npx tsc --noEmit` e `npx eslint` sobre os arquivos
       novos/alterados (`src/types/historico.ts`,
       `src/services/historico-evolucao.ts`, `src/app/(tabs)/explore.tsx`) —
       zero erros novos.

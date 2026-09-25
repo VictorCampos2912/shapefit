@@ -14,8 +14,14 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
 import { atualizarSerieDeSessaoFinalizada } from '@/services/sessao-treino-storage';
-import { obterHistoricoPorPerfil } from '@/services/historico-evolucao';
-import type { EvolucaoExercicio, HistoricoPerfil, RegistroHistorico } from '@/types/historico';
+import { obterHistoricoPorData, obterHistoricoPorPerfil } from '@/services/historico-evolucao';
+import type {
+  DiaHistorico,
+  EvolucaoExercicio,
+  HistoricoPerfil,
+  HistoricoPorData,
+  RegistroHistorico,
+} from '@/types/historico';
 import { ROTULO_CAMPO_PRINCIPAL, SUFIXO_VALOR, exibeCampoPrincipal } from '@/utils/categoria-exercicio';
 import { sanitizarCarga, sanitizarReps } from '@/utils/sanitizar-serie';
 
@@ -208,13 +214,45 @@ function SecaoExercicio({
   );
 }
 
+function SecaoDia({ dia }: { dia: DiaHistorico }) {
+  return (
+    <ThemedView style={styles.diaHistorico}>
+      <ThemedText type="smallBold">{formatarData(dia.dataReferencia)}</ThemedText>
+      {dia.blocos.map((bloco) => (
+        <ThemedView key={bloco.sessaoId} style={styles.blocoSessao}>
+          <ThemedText type="default">{bloco.treinoNome}</ThemedText>
+          {bloco.exercicios.map((exercicio) => (
+            <ThemedText key={exercicio.exercicioNome} type="small" themeColor="textSecondary">
+              {exercicio.exercicioNome}:{' '}
+              {exercicio.registros
+                .map((r) =>
+                  exibeCampoPrincipal(exercicio.categoria)
+                    ? `${r.cargaKg}${SUFIXO_VALOR[exercicio.categoria]}×${r.reps}`
+                    : `${r.reps} reps`,
+                )
+                .join(', ')}
+            </ThemedText>
+          ))}
+        </ThemedView>
+      ))}
+    </ThemedView>
+  );
+}
+
 export default function HistoricoScreen() {
   const { perfilAtivo } = usePerfilAtivo();
   const [historico, setHistorico] = useState<HistoricoPerfil | null>(null);
+  const [historicoPorData, setHistoricoPorData] = useState<HistoricoPorData | null>(null);
+  const [visao, setVisao] = useState<'exercicio' | 'data'>('exercicio');
 
   async function recarregarHistorico() {
     if (!perfilAtivo) return;
-    setHistorico(await obterHistoricoPorPerfil(perfilAtivo.id));
+    const [porExercicio, porData] = await Promise.all([
+      obterHistoricoPorPerfil(perfilAtivo.id),
+      obterHistoricoPorData(perfilAtivo.id),
+    ]);
+    setHistorico(porExercicio);
+    setHistoricoPorData(porData);
   }
 
   useEffect(() => {
@@ -274,13 +312,22 @@ export default function HistoricoScreen() {
           <BotaoAcoes />
         </View>
 
-        {historico === null && (
+        <View style={styles.linhaAlternanciaVisao}>
+          <Pressable onPress={() => setVisao('exercicio')}>
+            <ThemedText type={visao === 'exercicio' ? 'linkPrimary' : 'link'}>Por exercício</ThemedText>
+          </Pressable>
+          <Pressable onPress={() => setVisao('data')}>
+            <ThemedText type={visao === 'data' ? 'linkPrimary' : 'link'}>Por data</ThemedText>
+          </Pressable>
+        </View>
+
+        {(historico === null || historicoPorData === null) && (
           <ThemedView style={styles.estadoCarregando}>
             <ProgressRing />
           </ThemedView>
         )}
 
-        {historico !== null && !historico.temSessoesFinalizadas && (
+        {visao === 'exercicio' && historico !== null && !historico.temSessoesFinalizadas && (
           <ThemedView type="backgroundElement" style={styles.estadoVazio}>
             <ThemedText type="smallBold">Nenhum registro de treino finalizado ainda</ThemedText>
             <ThemedText type="small" themeColor="textSecondary">
@@ -290,7 +337,7 @@ export default function HistoricoScreen() {
           </ThemedView>
         )}
 
-        {historico !== null && historico.temSessoesFinalizadas && (
+        {visao === 'exercicio' && historico !== null && historico.temSessoesFinalizadas && (
           <FlatList
             data={historico.evolucoes}
             keyExtractor={(evolucao) => evolucao.nomeExibido}
@@ -298,6 +345,24 @@ export default function HistoricoScreen() {
             renderItem={({ item }) => (
               <SecaoExercicio evolucao={item} onEditarRegistro={handleEditarRegistro} />
             )}
+          />
+        )}
+
+        {visao === 'data' && historicoPorData !== null && !historicoPorData.temSessoesFinalizadas && (
+          <ThemedView type="backgroundElement" style={styles.estadoVazio}>
+            <ThemedText type="smallBold">Nenhum registro de treino finalizado ainda</ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              Assim que você finalizar uma sessão de treino, o histórico por data aparece aqui.
+            </ThemedText>
+          </ThemedView>
+        )}
+
+        {visao === 'data' && historicoPorData !== null && historicoPorData.temSessoesFinalizadas && (
+          <FlatList
+            data={historicoPorData.dias}
+            keyExtractor={(dia) => dia.chaveDia}
+            contentContainerStyle={styles.lista}
+            renderItem={({ item }) => <SecaoDia dia={item} />}
           />
         )}
       </SafeAreaView>
@@ -318,6 +383,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  linhaAlternanciaVisao: {
+    flexDirection: 'row',
+    gap: Spacing.three,
+  },
+  diaHistorico: {
+    gap: Spacing.two,
+  },
+  blocoSessao: {
+    gap: Spacing.half,
   },
   estadoCarregando: {
     paddingVertical: Spacing.six,
