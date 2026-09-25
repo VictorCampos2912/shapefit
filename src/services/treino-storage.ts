@@ -35,7 +35,16 @@ async function setTreinosState(perfilId: string, state: TreinosPorPerfilState): 
 
 export async function listarTreinos(perfilId: string): Promise<Treino[]> {
   const state = await getTreinosState(perfilId);
-  return state.treinos;
+  // Treinos importados antes da RF17 (categorias) não têm `categoria` persistida —
+  // normaliza para o mesmo default já aplicado na importação ('peso'), sem exigir
+  // migração de dados nem reescrever o storage.
+  return state.treinos.map((treino) => ({
+    ...treino,
+    exercicios: treino.exercicios.map((exercicio) => ({
+      ...exercicio,
+      categoria: exercicio.categoria ?? 'peso',
+    })),
+  }));
 }
 
 function validarExercicio(
