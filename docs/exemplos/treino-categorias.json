@@ -1,0 +1,41 @@
+{
+  "nome": "Treino Categorias",
+  "exercicios": [
+    {
+      "id": "supino-reto",
+      "nome": "Supino reto (barra)",
+      "series": 3,
+      "reps_alvo": "8-10",
+      "carga_sugerida_kg": 40,
+      "descanso_seg": 60,
+      "categoria": "peso"
+    },
+    {
+      "id": "esteira",
+      "nome": "Esteira",
+      "series": 1,
+      "reps_alvo": "1",
+      "carga_sugerida_kg": 20,
+      "descanso_seg": 0,
+      "categoria": "tempo"
+    },
+    {
+      "id": "corrida-externa",
+      "nome": "Corrida externa",
+      "series": 1,
+      "reps_alvo": "1",
+      "carga_sugerida_kg": 5,
+      "descanso_seg": 0,
+      "categoria": "distancia"
+    },
+    {
+      "id": "flexao-de-braco",
+      "nome": "Flexão de braço",
+      "series": 3,
+      "reps_alvo": "10-15",
+      "carga_sugerida_kg": 0,
+      "descanso_seg": 45,
+      "categoria": "repeticoes"
+    }
+  ]
+}
