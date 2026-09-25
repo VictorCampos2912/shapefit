@@ -13,6 +13,18 @@ Union de 4 literais — mesmo estilo de tipo de domínio já usado no projeto (e
 sempre tem uma categoria resolvida (default `'peso'` aplicado na importação, nunca
 propagado como ausente).
 
+**Correção aplicada durante a validação manual (2026-09-25)**: o default acima só
+era aplicado no momento da *importação* (`validarExercicio`) — treinos que já
+estavam persistidos em `AsyncStorage` antes desta feature existir não têm o campo
+`categoria` salvo, e `listarTreinos()` os devolvia como estavam, com
+`categoria: undefined` em runtime (violando a garantia "nunca ausente" descrita
+acima, e causando "undefined" na tela em vez de "kg"). Corrigido normalizando
+também na **leitura**: `listarTreinos()` (`src/services/treino-storage.ts`) agora
+aplica `categoria ?? 'peso'` a cada exercício antes de devolver os treinos — sem
+migrar/reescrever o dado salvo, só garantindo a mesma invariante também para dados
+pré-existentes. A garantia "sempre resolvido" descrita acima agora vale de fato em
+todos os pontos de leitura, não só na importação.
+
 ## `ExercicioPlanejado` (já existe, `src/types/treino.ts`) — campo novo
 
 | Campo | Tipo | Obrigatório | Regras de validação |

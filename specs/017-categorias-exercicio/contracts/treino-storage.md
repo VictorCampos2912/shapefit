@@ -48,3 +48,26 @@ return {
 - **Compatibilidade** (FR-002/SC-003): qualquer arquivo JSON existente antes desta
   feature (sem `categoria` em nenhum exercício) continua validando exatamente como
   antes, com todo exercício resultando em `categoria: 'peso'`.
+
+## `listarTreinos` — normalização adicional (correção pós-validação, 2026-09-25)
+
+O default acima só cobre exercícios importados **depois** desta feature existir.
+Treinos já persistidos em `AsyncStorage` antes dela não têm `categoria` salva —
+`listarTreinos()` agora normaliza isso também na leitura:
+
+```ts
+export async function listarTreinos(perfilId: string): Promise<Treino[]> {
+  const state = await getTreinosState(perfilId);
+  return state.treinos.map((treino) => ({
+    ...treino,
+    exercicios: treino.exercicios.map((exercicio) => ({
+      ...exercicio,
+      categoria: exercicio.categoria ?? 'peso',
+    })),
+  }));
+}
+```
+
+Sem migração/reescrita do dado salvo — só garante que todo consumidor de
+`listarTreinos` (execução, histórico, tela de treinos) sempre recebe `categoria`
+resolvida, igual à garantia já dada por `validarExercicio` na importação.

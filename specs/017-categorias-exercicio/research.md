@@ -226,13 +226,21 @@ habilitar o botão de concluir/salvar.
 - `src/app/(tabs)/explore.tsx`: rótulos dinâmicos no histórico (RF08) e na edição de
   sessão finalizada (RF09b), mesmo padrão da Decisão 6/7.
 
-## Nota de integração futura: `specs/019-historico-por-data`
+## Nota de integração futura: `specs/019-historico-por-data` (RESOLVIDA em 2026-09-25)
 
 Esta spec (017) só cobre a visão "Por exercício" do Histórico (RF08) — a visão "Por
-data" (`specs/019-historico-por-data`, spec separada, ainda não implementada) também
-exibe registros de série e precisa da mesma adaptação por categoria para as duas
-visões do Histórico não ficarem inconsistentes entre si (uma mostrando "12min",
-outra assumindo sempre kg para o mesmo registro).
+data" (`specs/019-historico-por-data`) também exibe registros de série e precisa da
+mesma adaptação por categoria para as duas visões do Histórico não ficarem
+inconsistentes entre si (uma mostrando "12min", outra assumindo sempre kg para o
+mesmo registro).
+
+**Resolução**: a spec 019 foi implementada depois desta (017) e já nasceu com a
+integração — `SecaoDia` (`src/app/(tabs)/explore.tsx`) reaproveita
+`src/utils/categoria-exercicio.ts` (`ROTULO_CAMPO_PRINCIPAL`, `SUFIXO_VALOR`,
+`exibeCampoPrincipal`) na visão "Por data", mesmo padrão desta spec na visão "Por
+exercício" — confirmado nas duas visões durante a validação manual de 2026-09-25
+(RF18, Cenário 6). Nenhuma ação pendente. Texto original da nota preservado abaixo
+como registro histórico da dependência entre as duas specs.
 
 **Se a 019 for implementada depois desta (017)**: quem implementar a 019 DEVE
 reaproveitar `src/utils/categoria-exercicio.ts` (`ROTULO_CAMPO_PRINCIPAL`,
