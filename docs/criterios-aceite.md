@@ -563,3 +563,73 @@ confirmado pelo usuário em 2026-09-24.**
 - [X] Dois treinos homônimos com o mesmo texto de "Finalizado em"/"Nunca treinado"
       voltam a mostrar a data de importação como desempate, preservando a garantia
       do RF02 de que treinos homônimos nunca ficam indistinguíveis na lista
+
+### RF17 — Categorias de unidade por exercício
+
+**Spec**: `specs/017-categorias-exercicio/` · estende o RF01/RF03/RF04/RF08/RF09a/
+RF09b. **Validado em Android e iOS — confirmado pelo usuário em 2026-09-25.**
+
+**Critérios de aceite:**
+- [X] Exercício de categoria "peso": campos de registro são carga (kg) + reps,
+      comportamento idêntico ao anterior à feature
+- [X] Exercício de categoria "tempo": campo principal rotulado "Tempo (min)" no
+      lugar de "Carga (kg)"; campo de reps continua presente
+- [X] Exercício de categoria "distância": campo principal rotulado "Distância (km)"
+      no lugar de "Carga (kg)"; campo de reps continua presente
+- [X] Exercício de categoria "repetições": nenhum campo principal (carga/tempo/
+      distância) aparece — só o campo de reps
+- [X] Valor sugerido do exercício (execução) aparece na unidade correta da
+      categoria, não sempre em kg
+- [X] Arquivo de treino sem o campo `categoria` em um exercício — esse exercício é
+      tratado como categoria "peso" (compatibilidade retroativa)
+- [X] Arquivo de treino com `categoria` inválida em um exercício — só esse
+      exercício é descartado (com motivo indicado ao usuário), os demais do mesmo
+      treino são importados normalmente
+- [X] Histórico (RF08) e as duas telas de edição (RF09a, sessão em andamento; RF09b,
+      sessão finalizada) mostram/editam cada registro na unidade correta da sua
+      categoria, incluindo o caso "repetições" (só reps, sem carga/tempo/distância)
+- [X] Treinos importados antes desta feature (sem `categoria` persistida) também
+      exibem corretamente na unidade "peso" — sem "undefined" na tela (bug
+      encontrado e corrigido durante a validação: `listarTreinos` agora normaliza
+      `categoria` ausente para `'peso'` na leitura, sem exigir migração de dados)
+
+### RF18 — Histórico por data
+
+**Spec**: `specs/019-historico-por-data/` · estende o RF08/RF17. **Validado em
+Android e iOS — confirmado pelo usuário em 2026-09-25.**
+
+**Critérios de aceite:**
+- [X] A visão "Por exercício" (RF08) já existente continua com comportamento e
+      dados idênticos após o refactor interno desta feature — sem regressão
+- [X] Sessões finalizadas em dias diferentes aparecem como grupos de dia distintos,
+      ordenados do mais recente para o mais antigo
+- [X] Cada dia mostra o nome do treino e, para cada exercício, as séries
+      registradas naquele dia, na unidade correta da categoria (RF17)
+- [X] Perfil sem nenhuma sessão finalizada mostra mensagem explícita de "sem
+      registros" na visão "Por data"
+- [X] Duas sessões finalizadas no mesmo dia de calendário aparecem como 2 blocos
+      distintos sob o mesmo cabeçalho de dia, nunca mesclados
+- [X] Alternar entre "Por exercício" e "Por data" (e vice-versa) nunca navega para
+      outra rota — só troca o conteúdo exibido na mesma tela
+- [X] Trocar de perfil ativo (RF10) enquanto na visão "Por data" atualiza
+      imediatamente para os dados do novo perfil, sem registros residuais do
+      perfil anterior
+- [X] Cabeçalho de cada dia mostra só a data, sem hora (ajuste pedido pelo usuário
+      durante a validação — a hora não agregava informação útil nesse nível de
+      granularidade e causava confusão)
+
+### RF19 — Catálogo interno de exercícios
+
+**Spec**: `specs/020-catalogo-exercicios/`. **Validado em Android e iOS —
+confirmado pelo usuário em 2026-09-25.**
+
+**Critérios de aceite:**
+- [X] Catálogo (30 exercícios, 6 grupos musculares) consultável por código, com
+      nome, grupo muscular e mídia completos em cada item
+- [X] Catálogo funciona normalmente com o aparelho em modo avião — nenhuma
+      requisição de rede em runtime (dado 100% estático, embutido no bundle)
+- [X] Importar um treino (RF01) cujo(s) exercício(s) não existem no catálogo
+      curado não muda em nada o comportamento da importação — sem erro, aviso ou
+      referência ao catálogo
+- [X] Item "Créditos do catálogo de exercícios" visível na tela "Ações" (RF14); ao
+      tocar, mostra o texto de atribuição (wger project, CC-BY-SA)

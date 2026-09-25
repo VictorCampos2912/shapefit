@@ -74,7 +74,7 @@ refactor não pode alterar o comportamento já validado da visão "Por exercíci
       essa função, **sem nenhuma mudança de assinatura nem de formato de
       retorno** (`HistoricoPerfil`) — `contracts/historico-evolucao.md`;
       `research.md`, Decisão 1. Independente de T001 (arquivo diferente).
-- [ ] T003 Validar manualmente em Android e iOS (Princípio III) (`quickstart.md`,
+- [X] T003 Validar manualmente em Android e iOS (Princípio III) (`quickstart.md`,
       Cenário 0): confirmar que a visão "Por exercício" (RF08) continua com
       comportamento e dados idênticos aos já validados antes desta feature — mesmos
       grupos por exercício, mesma ordenação, edição (RF09b) continua funcionando.
@@ -155,7 +155,7 @@ são alcançáveis na UI real.
       `historicoPorData.dias` com `SecaoDia` quando `visao === 'data'`, mensagem
       de "sem registros" quando `!historicoPorData.temSessoesFinalizadas`
       (FR-001, FR-006). Depende de T004, T005.
-- [ ] T007 [US2] Validar manualmente em Android e iOS (Princípio III) — validação
+- [X] T007 [US2] Validar manualmente em Android e iOS (Princípio III) — validação
       funcional consolidada de US1 e US2 (`quickstart.md`, Cenários 1, 2, 3, 4 e
       5): controle de alternância visível; trocar entre as duas visões não navega
       para outra rota; dias agrupados do mais recente ao mais antigo; mensagem de
@@ -177,12 +177,12 @@ alcançável e funcional na UI real.
       novos/alterados (`src/types/historico.ts`,
       `src/services/historico-evolucao.ts`, `src/app/(tabs)/explore.tsx`) —
       zero erros novos.
-- [ ] T009 [P] Atualizar `docs/PRD-app-treino.md` (seção 6, "Requisitos
+- [X] T009 [P] Atualizar `docs/PRD-app-treino.md` (seção 6, "Requisitos
       funcionais") registrando o RF desta feature — confirmar o próximo número
       livre real da tabela no momento de aplicar esta tarefa (a spec cita "RF18"
       provisoriamente; confirmar contra a tabela do PRD, não presumir — mesmo
       cuidado já tomado nas specs 016/017/018).
-- [ ] T010 Atualizar `docs/criterios-aceite.md` (seção "Melhorias
+- [X] T010 Atualizar `docs/criterios-aceite.md` (seção "Melhorias
       pós-desenvolvimento") com os critérios de aceite do RF desta feature (mesma
       numeração confirmada em T009), e o cabeçalho **Status** de
       `specs/019-historico-por-data/spec.md` para "Implemented" após T003 e T007

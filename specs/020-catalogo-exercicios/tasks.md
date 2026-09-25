@@ -85,7 +85,7 @@ completos por exercício.
       `exercicios.json` é único, todo `fonteAtribuicao` é não vazio, e todo
       `midia.arquivo` corresponde a um arquivo real em
       `assets/catalogo/imagens/` (SC-001). Depende de T003.
-- [ ] T006 [US1] Validar manualmente em Android e iOS (Princípio III), com o
+- [X] T006 [US1] Validar manualmente em Android e iOS (Princípio III), com o
       aparelho em modo avião (`quickstart.md`, Cenário 1): confirmar que
       `listarCatalogo()` retorna nome, grupo muscular e mídia de qualquer
       exercício do catálogo, sem nenhuma tentativa de acesso à rede (SC-002).
@@ -106,7 +106,7 @@ desta feature.
 
 ### Implementation for User Story 2
 
-- [ ] T007 [US2] Validar manualmente em Android e iOS (Princípio III)
+- [X] T007 [US2] Validar manualmente em Android e iOS (Princípio III)
       (`quickstart.md`, Cenário 3): importar um treino (RF01) cujo(s)
       exercício(s) não correspondem a nenhum item de `exercicios.json` (T003) e
       confirmar que a importação funciona sem nenhuma mudança de comportamento,
@@ -129,17 +129,17 @@ licença) mais fechamento de qualidade e documentação.
       CC-BY-SA 3.0 (FR-007, `contracts/tela-creditos.md`) — mesmo padrão visual
       (`Pressable` + ícone + `ThemedText type="link"`) já usado pelos itens
       existentes dessa tela.
-- [ ] T009 Validar manualmente em Android e iOS (`quickstart.md`, Cenário 4):
+- [X] T009 Validar manualmente em Android e iOS (`quickstart.md`, Cenário 4):
       abrir o item de créditos em "Ações" e confirmar que o texto de atribuição
       (wger project + CC-BY-SA 3.0) aparece. Depende de T008.
 - [X] T010 [P] Rodar `npx tsc --noEmit` e `npx eslint` sobre os arquivos
       novos/alterados (`src/types/catalogo-exercicios.ts`,
       `src/services/catalogo-exercicios.ts`, `src/app/acoes.tsx`) — zero erros
       novos.
-- [ ] T011 Atualizar `docs/PRD-app-treino.md` (seção 6) registrando RF19
+- [X] T011 Atualizar `docs/PRD-app-treino.md` (seção 6) registrando RF19
       (catálogo interno de exercícios) e a fonte de dados escolhida (wger
       project, CC-BY-SA 3.0).
-- [ ] T012 Atualizar `docs/criterios-aceite.md` (seção "Melhorias
+- [X] T012 Atualizar `docs/criterios-aceite.md` (seção "Melhorias
       pós-desenvolvimento") com os critérios de aceite do RF19, e o cabeçalho
       **Status** de `specs/020-catalogo-exercicios/spec.md` para "Implemented"
       após T006/T007/T009 confirmarem validação nos dois aparelhos.

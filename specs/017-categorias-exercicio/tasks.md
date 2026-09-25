@@ -97,7 +97,7 @@ das 4 categorias na execução e confirmar o campo/rótulo/valor sugerido corret
       exibição (somente leitura) de uma série já concluída dentro do exercício em
       andamento, usar `SUFIXO_VALOR[categoria]` (ou omitir o valor, para
       `repeticoes`) no lugar de "kg" fixo. Depende de T001, T003.
-- [ ] T005 [US1] Validar manualmente em Android e iOS (Princípio III)
+- [X] T005 [US1] Validar manualmente em Android e iOS (Princípio III)
       (`quickstart.md`, Cenários 1 e 2): confirmar os 4 campos/rótulos corretos
       (peso, tempo, distância, repetições) e o valor sugerido na unidade certa —
       requer importar um arquivo com exercícios já marcados com `categoria`, o que
@@ -119,13 +119,13 @@ exercício (só esse é descartado).
 
 ### Implementation for User Story 2
 
-- [ ] T006 [US2] Validar manualmente em Android e iOS (Princípio III)
+- [X] T006 [US2] Validar manualmente em Android e iOS (Princípio III)
       (`quickstart.md`, Cenário 3): importar `docs/exemplos/treino-exemplo.json`
       (ou qualquer exemplo já existente, sem `categoria`) e confirmar importação e
       execução idênticas ao comportamento anterior a esta feature (FR-002, SC-003).
       **Nenhuma alteração de código é esperada** — comportamento já garantido por
       T002. Depende de T002.
-- [ ] T007 [US2] Validar manualmente em Android e iOS (Princípio III)
+- [X] T007 [US2] Validar manualmente em Android e iOS (Princípio III)
       (`quickstart.md`, Cenário 4): importar um arquivo com `"categoria":
       "invalida"` em um exercício e confirmar que só esse exercício é descartado
       (com motivo indicado), os demais do mesmo treino importam normalmente
@@ -180,7 +180,7 @@ unidade correta.
       existente) para `atualizarSerieDeSessaoFinalizada`
       (`contracts/historico-e-edicao.md`; `research.md`, Decisão 6). Depende de
       T009, T003, T011 (mesmo arquivo — aplicar depois).
-- [ ] T013 [US3] Validar manualmente em Android e iOS (Princípio III)
+- [X] T013 [US3] Validar manualmente em Android e iOS (Princípio III)
       (`quickstart.md`, Cenário 5): registrar séries das 4 categorias, finalizar a
       sessão, e confirmar que o histórico (RF08) e as duas telas de edição (RF09a
       e RF09b) mostram/editam cada registro na unidade correta, incluindo o caso
@@ -205,7 +205,7 @@ unidade correta.
       provisoriamente, mas já foi ocupado por `specs/016-finalizado-em`; o número
       real só se confirma na tabela do PRD, não no texto da spec — mesmo cuidado
       já tomado nas specs 015/016/018).
-- [ ] T016 Atualizar `docs/criterios-aceite.md` (seção "Melhorias
+- [X] T016 Atualizar `docs/criterios-aceite.md` (seção "Melhorias
       pós-desenvolvimento") com os critérios de aceite do RF desta feature (mesma
       numeração confirmada em T015), e o cabeçalho **Status** de
       `specs/017-categorias-exercicio/spec.md` para "Implemented" após T005, T006,

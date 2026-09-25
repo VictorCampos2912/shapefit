@@ -4,7 +4,7 @@
 
 **Created**: 2026-09-23
 
-**Status**: Implementado — validação em Android/iOS pendente (Princípio III)
+**Status**: Implemented — validado em Android e iOS em 2026-09-25 (Princípio III)
 
 **Requisito**: RF17 (PRD, seção 6 — pós-MVP; número confirmado em 2026-09-24 ao
 registrar no PRD — era citado provisoriamente como "RF16" antes disso, mas esse
