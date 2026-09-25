@@ -1,12 +1,15 @@
-import { useState } from 'react';
-import { Alert, Keyboard, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { Alert, Image, Keyboard, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import type { ImageSourcePropType } from 'react-native';
 
+import { IMAGENS_CATALOGO } from '@/assets/catalogo/imagens-index';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
 import { ConcluirIcon, EditarIcon } from '@/components/ui/icons';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { buscarNoCatalogo } from '@/services/catalogo-exercicios';
 import type { EstadoExecucaoExercicio, SerieRealizada } from '@/types/execucao-treino';
 import type { ExercicioPlanejado } from '@/types/treino';
 import { ROTULO_CAMPO_PRINCIPAL, SUFIXO_VALOR, exibeCampoPrincipal } from '@/utils/categoria-exercicio';
@@ -43,6 +46,7 @@ export function ExercicioExecucao({
 }: ExercicioExecucaoProps) {
   const theme = useTheme();
   const [edicaoSerie, setEdicaoSerie] = useState<EdicaoSerieEmAndamento | null>(null);
+  const correspondencia = useMemo(() => buscarNoCatalogo(exercicio.nome), [exercicio.nome]);
 
   function handleIniciarEdicaoSerie(serieRealizada: SerieRealizada) {
     setEdicaoSerie({
@@ -228,6 +232,15 @@ export function ExercicioExecucao({
         · {exercicio.descansoSeg}s descanso
       </ThemedText>
 
+      {correspondencia && (
+        <Image
+          source={IMAGENS_CATALOGO[correspondencia.midia.arquivo] as ImageSourcePropType}
+          style={styles.imagemExercicio}
+          resizeMode="contain"
+          accessibilityLabel={`Demonstração do exercício ${correspondencia.nome}`}
+        />
+      )}
+
       {!estado.iniciado && (
         <Button onPress={handleIniciarExercicio} style={styles.botaoIniciar}>
           Iniciar exercício
@@ -344,6 +357,11 @@ export function ExercicioExecucao({
 const styles = StyleSheet.create({
   container: {
     gap: Spacing.three,
+  },
+  imagemExercicio: {
+    width: '100%',
+    height: 180,
+    borderRadius: Spacing.two,
   },
   botaoIniciar: {
     alignSelf: 'flex-start',
