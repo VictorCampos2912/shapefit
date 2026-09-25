@@ -188,8 +188,15 @@ mantém o usuário na mesma tela (Histórico), sem navegação para uma rota sep
 - **Dia civil no fuso horário do aparelho**: o agrupamento por "dia" usa a mesma
   representação de data/hora local já usada em todo o app (`toLocaleString()`/data do
   aparelho), sem tratamento especial de fuso horário além do que já existe hoje.
-- **Sem categorias de unidade**: como o RF16 (categorias de exercício — peso, tempo,
-  distância, repetições) ainda não está implementado, esta feature exibe os registros
-  sempre como carga (kg) + reps, igual ao RF08 hoje; se o RF16 for implementado antes
-  desta feature, a visão "Por data" deve seguir a mesma adaptação por categoria
-  definida lá, sem necessidade de revisar esta spec.
+- **Categorias de unidade** (atualizado em 2026-09-25): o RF17 (categorias de
+  exercício — peso, tempo, distância, repetições, `specs/017-categorias-exercicio/`)
+  **já está implementado** — esta assumption, escrita quando o RF17 ainda não
+  existia, previa exatamente este cenário ("se o RF16/17 for implementado antes
+  desta feature, a visão 'Por data' deve seguir a mesma adaptação"). Essa integração
+  já foi incorporada ao escopo real desta spec: `data-model.md`
+  (`RegistroExercicioNoDia.categoria`), `contracts/historico-evolucao.md`
+  (`RegistroBruto.categoria`) e `contracts/explore-screen.md` (`SecaoDia` usa
+  `src/utils/categoria-exercicio.ts`) já refletem isso, e `quickstart.md` tem um
+  cenário próprio (Cenário 5) equivalente ao já validado na visão "Por exercício".
+  A visão "Por data" nunca mostra carga(kg) fixo para todas as categorias — segue a
+  mesma unidade por categoria já aplicada em todas as outras telas pelo RF17.

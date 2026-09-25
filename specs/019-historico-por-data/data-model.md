@@ -12,7 +12,8 @@ mesmas sessões finalizadas (RF07) e treinos importados (RF01) já usados pelo R
 | Campo | Tipo | Descrição |
 |-------|------|------------|
 | `exercicioNome` | `string` | Nome do exercício, resolvido do treino de origem (mesmo cruzamento já usado pelo RF08) |
-| `registros` | `{ serie: number; cargaKg: number; reps: number }[]` | Séries daquele exercício, dentro da mesma sessão — nunca agregadas (mesma regra do RF08, FR-008) |
+| `categoria` | `CategoriaExercicio` | Categoria do exercício de origem (RF17, `specs/017-categorias-exercicio/`) — determina a unidade de exibição de `registros` (kg, minutos, km, ou nenhuma para "repeticoes"), via `src/utils/categoria-exercicio.ts` |
+| `registros` | `{ serie: number; cargaKg: number; reps: number }[]` | Séries daquele exercício, dentro da mesma sessão — nunca agregadas (mesma regra do RF08, FR-008); `cargaKg` reinterpretado conforme `categoria`, mesmo padrão já aplicado a `RegistroHistorico.cargaKg` pela RF17 |
 
 ### `BlocoSessao`
 
@@ -49,6 +50,10 @@ Mesmo padrão de união discriminada já usado por `HistoricoPerfil` (RF08).
 - **`Treino`** (`src/types/treino.ts`): fonte de `nome` (→ `treinoNome`) e dos
   nomes de exercício (→ `exercicioNome`, via `exercicioId`) — sem nenhuma mudança
   de schema.
+- **`CategoriaExercicio`** (`src/types/treino.ts`, RF17): fonte de
+  `RegistroExercicioNoDia.categoria`, via `ExercicioPlanejado.categoria` do
+  exercício de origem — mesmo campo já usado por `RegistroHistorico.categoria`
+  (RF08/RF17), sem nenhuma mudança de schema adicional.
 - **Tipo intermediário `RegistroBruto`** (interno a `historico-evolucao.ts`, não
   exportado — `research.md`, Decisão 1): compartilhado entre `obterHistoricoPorPerfil`
   (RF08, agrupa por exercício) e `obterHistoricoPorData` (esta feature, agrupa por

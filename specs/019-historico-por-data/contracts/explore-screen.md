@@ -66,6 +66,8 @@ ao mesmo tempo, nunca nenhum.)
 ## `SecaoDia` (novo, inline — `research.md`, Decisão 5)
 
 ```tsx
+import { ROTULO_CAMPO_PRINCIPAL, SUFIXO_VALOR, exibeCampoPrincipal } from '@/utils/categoria-exercicio';
+
 function SecaoDia({ dia }: { dia: DiaHistorico }) {
   return (
     <ThemedView style={styles.diaHistorico}>
@@ -76,7 +78,13 @@ function SecaoDia({ dia }: { dia: DiaHistorico }) {
           {bloco.exercicios.map((exercicio) => (
             <ThemedText key={exercicio.exercicioNome} type="small" themeColor="textSecondary">
               {exercicio.exercicioNome}:{' '}
-              {exercicio.registros.map((r) => `${r.cargaKg}kg×${r.reps}`).join(', ')}
+              {exercicio.registros
+                .map((r) =>
+                  exibeCampoPrincipal(exercicio.categoria)
+                    ? `${r.cargaKg}${SUFIXO_VALOR[exercicio.categoria]}×${r.reps}`
+                    : `${r.reps} reps`,
+                )
+                .join(', ')}
             </ThemedText>
           ))}
         </ThemedView>
@@ -91,10 +99,21 @@ function SecaoDia({ dia }: { dia: DiaHistorico }) {
 - **`dia.dataReferencia`** (nunca `dia.chaveDia`) é o que é passado para
   `formatarData` — evita o problema de fuso horário descrito em `research.md`,
   Decisão 2.
-- **Formato de cada linha de exercício**: um `cargaKg`/`reps` por série, sem
-  agregar (FR-005) — o exemplo acima junta várias séries numa linha só por
-  compacidade visual (`"40kg×10, 40kg×10, 35kg×8"`), mas cada valor individual
-  continua visível, não resumido/calculado (média, por exemplo).
+- **Unidade por categoria (RF17, `specs/017-categorias-exercicio/`, já
+  implementada)**: `exercicio.categoria` (mesmo valor para todas as séries daquele
+  exercício naquela sessão) decide o sufixo via `SUFIXO_VALOR` e se o valor
+  principal aparece via `exibeCampoPrincipal` — mesmo utilitário
+  (`src/utils/categoria-exercicio.ts`) já reaproveitado pela visão "Por exercício"
+  (RF08) e pelas telas de execução/edição (RF03/04, RF09a, RF09b) pela RF17; esta
+  visão ("Por data") **não** tinha essa integração no escopo original da spec 019 —
+  adicionada agora porque a RF17 já está implementada. Para `categoria ===
+  'repeticoes'`, a linha mostra só `"{reps} reps"`, sem nenhum valor de
+  carga/tempo/distância — mesmo comportamento das outras telas.
+- **Formato de cada linha de exercício**: um valor por série, sem agregar (FR-005)
+  — o exemplo acima junta várias séries numa linha só por compacidade visual
+  (`"40kg×10, 40kg×10, 35kg×8"` para peso, ou `"12 reps, 10 reps"` para
+  repetições), mas cada valor individual continua visível, não resumido/calculado
+  (média, por exemplo).
 
 ## Sem mudança de assinatura pública
 

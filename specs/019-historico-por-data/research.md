@@ -161,11 +161,19 @@ crescer demais, mas não é o padrão já estabelecido ali hoje.
   sub-componente inline `SecaoDia`; `recarregarHistorico` carrega as duas visões em
   paralelo.
 
-## Nota de integração futura: `specs/017-categorias-exercicio`
+## Nota de integração: `specs/017-categorias-exercicio` (RESOLVIDA em 2026-09-25)
 
-Esta spec (019) assume registros sempre em carga(kg)+reps (ver `spec.md`,
-Assumptions — "sem categorias de unidade, já que o RF16/categorias ainda não estava
-implementado quando esta spec foi escrita"). A spec separada
+**Atualização 2026-09-25**: a RF17 (categorias) foi implementada primeiro — o
+cenário do segundo bloco abaixo ("Se a 017 já estiver implementada antes desta")
+se concretizou. A integração já foi aplicada: `data-model.md`,
+`contracts/historico-evolucao.md` e `contracts/explore-screen.md` já refletem
+`categoria` em `RegistroBruto`/`RegistroExercicioNoDia` e `SecaoDia` já usa
+`src/utils/categoria-exercicio.ts`; `quickstart.md` ganhou o Cenário 5
+correspondente. Esta nota permanece como registro histórico da decisão, não como
+pendência.
+
+Esta spec (019) assumia originalmente registros sempre em carga(kg)+reps (ver
+`spec.md`, Assumptions — texto também já atualizado). A spec separada
 `specs/017-categorias-exercicio` (categorias peso/tempo/distância/repetições, campo
 `categoria` por exercício) também altera como registros de série são exibidos —
 as duas visões do Histórico (RF08 "Por exercício" e esta, "Por data") precisam ficar

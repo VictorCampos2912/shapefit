@@ -55,6 +55,28 @@ Validação via web (Playwright ou navegador) e confirmação manual em Android 
 4. **Esperado**: a visão atualiza para mostrar exclusivamente os dados do novo
    perfil ativo, mesma garantia já validada pelo RF08.
 
+## Cenário 5 — Unidade por categoria também na visão "Por data" (RF17)
+
+Equivalente ao Cenário 5 de `specs/017-categorias-exercicio/quickstart.md`, mas
+verificado nesta visão em vez de "Por exercício" — RF17 já está implementada, então
+esta integração faz parte do escopo desta spec (não é mais uma nota para o futuro).
+
+1. Registrar pelo menos uma série de cada uma das 4 categorias (peso, tempo,
+   distância, repetições — usar o mesmo arquivo de teste de
+   `specs/017-categorias-exercicio/quickstart.md`, ou qualquer treino com
+   exercícios das 4 categorias).
+2. Finalizar a sessão.
+3. Abrir "Histórico" e tocar em "Por data".
+4. **Esperado**: no bloco da sessão desse dia, cada exercício mostra o valor na
+   unidade correta da sua categoria — "Xkg" para peso, "Xmin" para tempo, "Xkm"
+   para distância — e o exercício de categoria "repetições" mostra só a contagem
+   de reps, sem nenhum valor de carga/tempo/distância (mesmo comportamento já
+   validado na visão "Por exercício", `specs/017-categorias-exercicio/quickstart.md`
+   Cenário 5).
+5. Repetir a checagem na visão "Por exercício" (alternando pelo controle da tela,
+   sem sair dela) e confirmar que a mesma sessão aparece com a mesma unidade nas
+   duas visões — nenhuma inconsistência entre elas.
+
 ## Referências
 
 - Contratos: [`contracts/historico-evolucao.md`](./contracts/historico-evolucao.md),

@@ -17,6 +17,7 @@ type RegistroBruto = {
   serie: number;
   cargaKg: number;
   reps: number;
+  categoria: CategoriaExercicio; // RF17 — copiado do ExercicioPlanejado de origem
 };
 
 function construirRegistrosBrutos(
@@ -33,7 +34,13 @@ function construirRegistrosBrutos(
   `finalizadaEm !== null` (mesmo contrato de `listarSessoesFinalizadas` já
   existente); `treinos` já filtrados por perfil (mesmo contrato de `listarTreinos`).
 - **Pós-condição**: um item por série registrada em qualquer sessão finalizada,
-  com nome do exercício e nome do treino já resolvidos.
+  com nome do exercício, nome do treino e `categoria` (RF17) já resolvidos.
+- **`categoria`** (RF17, `specs/017-categorias-exercicio/`, já implementada):
+  copiada de `exercicio.categoria` no mesmo ponto onde `exercicioNome` já é
+  resolvido — a implementação atual de `obterHistoricoPorPerfil` (RF08) já faz
+  exatamente isso ao montar `ItemDeTrabalho`/`RegistroHistorico.categoria`; a
+  extração de `construirRegistrosBrutos` (Decisão 1) precisa preservar essa cópia,
+  só movendo-a para o local compartilhado, sem alterar de onde o valor vem.
 - **Tratamento defensivo (RF08, FR-013/FR-014, reaproveitado por FR-008 da spec
   019)**: quando o treino ou o exercício de origem de uma execução não é
   encontrado, esse registro específico é omitido da lista retornada, com um
@@ -69,7 +76,8 @@ export async function obterHistoricoPorData(perfilId: string): Promise<Historico
 
   const registrosBrutos = construirRegistrosBrutos(treinos, sessoesFinalizadas);
 
-  // Agrupa por sessaoId -> BlocoSessao (exercícios por exercicioId, série ordenada);
+  // Agrupa por sessaoId -> BlocoSessao (exercícios por exercicioId, série ordenada,
+  // categoria copiada de registrosBrutos para RegistroExercicioNoDia.categoria);
   // agrupa BlocoSessao por chaveDia (local, YYYY-MM-DD, research.md Decisão 2);
   // ordena blocos dentro do dia por `data` desc; ordena dias por `chaveDia` desc.
 
@@ -80,7 +88,8 @@ export async function obterHistoricoPorData(perfilId: string): Promise<Historico
 - **Pós-condição**: `dias` ordenados do mais recente para o mais antigo (FR-003);
   dentro de cada dia, `blocos` (um por sessão) ordenados do mais recente para o
   mais antigo (FR-004); um `BlocoSessao` nunca mescla registros de duas sessões
-  diferentes, mesmo do mesmo treino no mesmo dia.
+  diferentes, mesmo do mesmo treino no mesmo dia; cada `RegistroExercicioNoDia`
+  carrega `categoria` (RF17), copiada de `registrosBrutos` sem transformação.
 - **Isolamento por perfil (Princípio V)**: mesmo `perfilId` usado para
   `listarTreinos`/`listarSessoesFinalizadas`, já filtrados internamente — nenhuma
   leitura cross-perfil.
