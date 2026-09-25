@@ -77,11 +77,12 @@ specs/021-imagens-exercicios/
 ### Source Code (repository root)
 
 ```text
+assets/                              # raiz do repo (@/assets/* no tsconfig), não src/
+└── catalogo/
+    └── imagens-index.ts        # NOVO — mapa estático nome-de-arquivo → require()
+                                  #   (necessário pelo Metro, ver research.md)
+
 src/
-├── assets/
-│   └── catalogo/
-│       └── imagens-index.ts        # NOVO — mapa estático nome-de-arquivo → require()
-│                                     #   (necessário pelo Metro, ver research.md)
 ├── services/
 │   └── catalogo-exercicios.ts      # ALTERADO (arquivo já criado pela spec 020):
 │                                     #   ganha buscarNoCatalogo(nome), sem tocar em
@@ -91,6 +92,11 @@ src/
         └── exercicio-execucao.tsx  # ALTERADO: busca e exibe a imagem/GIF quando
                                       #   há correspondência (FR-001-FR-005)
 ```
+
+**Correção aplicada durante o `/speckit.implement` da spec 020**: este documento
+citava originalmente `src/assets/catalogo/...` — corrigido para `assets/catalogo/`
+(raiz do repo), mesmo motivo documentado em `specs/020-catalogo-exercicios/plan.md`
+e `specs/020-catalogo-exercicios/research.md`.
 
 **Structure Decision**: nenhum tipo novo, nenhum serviço novo — `buscarNoCatalogo`
 é adicionada ao mesmo arquivo de serviço já criado pela spec 020

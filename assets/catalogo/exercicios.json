@@ -1,0 +1,302 @@
+[
+  {
+    "id": "rosca-direta-barra",
+    "nome": "Rosca direta com barra",
+    "grupoMuscular": "braços",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "rosca-direta-barra.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Everkinetic, CC-BY-SA 3.0"
+  },
+  {
+    "id": "rosca-direta-halteres",
+    "nome": "Rosca direta com halteres",
+    "grupoMuscular": "braços",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "rosca-direta-halteres.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Everkinetic, CC-BY-SA 3.0"
+  },
+  {
+    "id": "rosca-martelo",
+    "nome": "Rosca martelo",
+    "grupoMuscular": "braços",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "rosca-martelo.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Everkinetic, CC-BY-SA 3.0"
+  },
+  {
+    "id": "triceps-polia",
+    "nome": "Tríceps na polia",
+    "grupoMuscular": "braços",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "triceps-polia.jpg"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — anto.kreegyr, CC-BY-SA 4.0"
+  },
+  {
+    "id": "triceps-testa-barra-w",
+    "nome": "Tríceps testa (barra W)",
+    "grupoMuscular": "braços",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "triceps-testa-barra-w.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Everkinetic, CC-BY-SA 3.0"
+  },
+  {
+    "id": "abdominal-supra",
+    "nome": "Abdominal supra (crunch)",
+    "grupoMuscular": "core",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "abdominal-supra.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de), CC-BY-SA 3.0"
+  },
+  {
+    "id": "elevacao-pernas-deitado",
+    "nome": "Elevação de pernas (deitado)",
+    "grupoMuscular": "core",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "elevacao-pernas-deitado.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Everkinetic, CC-BY-SA 3.0"
+  },
+  {
+    "id": "prancha",
+    "nome": "Prancha (plank)",
+    "grupoMuscular": "core",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "prancha.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — utkb, CC-BY-SA 4.0"
+  },
+  {
+    "id": "rolete-abdominal",
+    "nome": "Rolete abdominal (ab wheel rollout)",
+    "grupoMuscular": "core",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "rolete-abdominal.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de), CC-BY-SA 4.0"
+  },
+  {
+    "id": "torcao-russa",
+    "nome": "Torção russa",
+    "grupoMuscular": "core",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "torcao-russa.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — lion, CC-BY-SA 4.0"
+  },
+  {
+    "id": "barra-fixa-pronada",
+    "nome": "Barra fixa (pegada pronada)",
+    "grupoMuscular": "costas",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "barra-fixa-pronada.jpg"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Imobard, CC-BY-SA 4.0"
+  },
+  {
+    "id": "barra-fixa-supinada",
+    "nome": "Barra fixa (pegada supinada)",
+    "grupoMuscular": "costas",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "barra-fixa-supinada.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Everkinetic, CC-BY-SA 3.0"
+  },
+  {
+    "id": "levantamento-terra",
+    "nome": "Levantamento terra",
+    "grupoMuscular": "costas",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "levantamento-terra.jpeg"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — philip, CC-BY-SA 4.0"
+  },
+  {
+    "id": "remada-cavalinho",
+    "nome": "Remada cavalinho (T-bar)",
+    "grupoMuscular": "costas",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "remada-cavalinho.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Everkinetic, CC-BY-SA 3.0"
+  },
+  {
+    "id": "remada-curvada",
+    "nome": "Remada curvada",
+    "grupoMuscular": "costas",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "remada-curvada.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Everkinetic, CC-BY-SA 3.0"
+  },
+  {
+    "id": "desenvolvimento-barra",
+    "nome": "Desenvolvimento com barra",
+    "grupoMuscular": "ombros",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "desenvolvimento-barra.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Everkinetic, CC-BY-SA 3.0"
+  },
+  {
+    "id": "desenvolvimento-halteres",
+    "nome": "Desenvolvimento com halteres",
+    "grupoMuscular": "ombros",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "desenvolvimento-halteres.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Everkinetic, CC-BY-SA 3.0"
+  },
+  {
+    "id": "elevacao-frontal",
+    "nome": "Elevação frontal",
+    "grupoMuscular": "ombros",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "elevacao-frontal.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — philip, CC-BY-SA 4.0"
+  },
+  {
+    "id": "elevacao-lateral",
+    "nome": "Elevação lateral",
+    "grupoMuscular": "ombros",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "elevacao-lateral.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Everkinetic, CC-BY-SA 3.0"
+  },
+  {
+    "id": "encolhimento-barra",
+    "nome": "Encolhimento com barra (shrug)",
+    "grupoMuscular": "ombros",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "encolhimento-barra.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Everkinetic, CC-BY-SA 3.0"
+  },
+  {
+    "id": "crucifixo-cabo",
+    "nome": "Crucifixo no cabo",
+    "grupoMuscular": "peito",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "crucifixo-cabo.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Everkinetic, CC-BY-SA 3.0"
+  },
+  {
+    "id": "mergulho-paralelas",
+    "nome": "Mergulho nas paralelas (dips)",
+    "grupoMuscular": "peito",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "mergulho-paralelas.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — cshep442, CC-BY-SA 4.0"
+  },
+  {
+    "id": "supino-inclinado-barra",
+    "nome": "Supino inclinado (barra)",
+    "grupoMuscular": "peito",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "supino-inclinado-barra.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Everkinetic, CC-BY-SA 3.0"
+  },
+  {
+    "id": "supino-reto-barra",
+    "nome": "Supino reto (barra)",
+    "grupoMuscular": "peito",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "supino-reto-barra.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Everkinetic, CC-BY-SA 3.0"
+  },
+  {
+    "id": "supino-reto-halteres",
+    "nome": "Supino reto (halteres)",
+    "grupoMuscular": "peito",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "supino-reto-halteres.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Everkinetic, CC-BY-SA 3.0"
+  },
+  {
+    "id": "afundo",
+    "nome": "Afundo (lunge)",
+    "grupoMuscular": "pernas",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "afundo.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Franpol, CC-BY-SA 4.0"
+  },
+  {
+    "id": "agachamento-frontal",
+    "nome": "Agachamento frontal",
+    "grupoMuscular": "pernas",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "agachamento-frontal.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Everkinetic, CC-BY-SA 3.0"
+  },
+  {
+    "id": "cadeira-extensora",
+    "nome": "Cadeira extensora",
+    "grupoMuscular": "pernas",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "cadeira-extensora.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Franpol, CC-BY-SA 4.0"
+  },
+  {
+    "id": "leg-press",
+    "nome": "Leg press",
+    "grupoMuscular": "pernas",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "leg-press.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de), CC-BY-SA 4.0"
+  },
+  {
+    "id": "mesa-flexora-deitado",
+    "nome": "Mesa flexora (deitado)",
+    "grupoMuscular": "pernas",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "mesa-flexora-deitado.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Everkinetic, CC-BY-SA 3.0"
+  }
+]

@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { ImportarIcon, PerfilIcon, VoltarIcon } from '@/components/ui/icons';
+import { ImportarIcon, InfoIcon, PerfilIcon, VoltarIcon } from '@/components/ui/icons';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
@@ -79,6 +79,14 @@ function exibirResultadoImportacao(resultado: ResultadoImportacao | ResultadoImp
   Alert.alert('Treino importado', `O treino "${resultado.treino?.nome}" foi importado com sucesso.`);
 }
 
+function handleAbrirCreditos() {
+  Alert.alert(
+    'Créditos',
+    'Dados e imagens de exercícios: wger project (wger.de), licenciados sob ' +
+      'Creative Commons Attribution-ShareAlike (CC-BY-SA).',
+  );
+}
+
 export default function AcoesScreen() {
   const { perfilAtivo } = usePerfilAtivo();
   const theme = useTheme();
@@ -132,6 +140,11 @@ export default function AcoesScreen() {
           <Pressable onPress={handleImportarTreinoExemplo} disabled={importando} style={styles.linhaComIcone}>
             <ImportarIcon size={16} color={theme.accent} />
             <ThemedText type="link">Importar treino de exemplo</ThemedText>
+          </Pressable>
+
+          <Pressable onPress={handleAbrirCreditos} style={styles.linhaComIcone}>
+            <InfoIcon size={16} color={theme.accent} />
+            <ThemedText type="link">Créditos do catálogo de exercícios</ThemedText>
           </Pressable>
         </ThemedView>
       </SafeAreaView>

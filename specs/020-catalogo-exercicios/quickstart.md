@@ -8,8 +8,8 @@ Android e iOS (Princípio III).
 
 ## Pré-requisitos
 
-- Catálogo curado já gerado (`src/assets/catalogo/exercicios.json` +
-  `src/assets/catalogo/imagens/*`) — processo de curadoria (`research.md`, Decisão
+- Catálogo curado já gerado (`assets/catalogo/exercicios.json` +
+  `assets/catalogo/imagens/*`) — processo de curadoria (`research.md`, Decisão
   2), fora do escopo de execução deste quickstart (é um passo de preparo de dados,
   não uma ação do usuário no app).
 
@@ -26,7 +26,7 @@ Android e iOS (Princípio III).
 1. Rodar o script/teste de verificação de integridade (`contracts/catalogo-exercicios.md`).
 2. **Esperado**: todo item de `exercicios.json` tem `id` único, `nome`,
    `grupoMuscular` (um dos 6 valores válidos), `midia.arquivo` apontando para um
-   arquivo real em `src/assets/catalogo/imagens/`, e `fonteAtribuicao` não vazio
+   arquivo real em `assets/catalogo/imagens/`, e `fonteAtribuicao` não vazio
    (SC-001).
 
 ## Cenário 3 — RF01 (importação de treino) não é afetado

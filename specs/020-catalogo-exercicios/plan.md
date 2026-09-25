@@ -81,21 +81,33 @@ specs/020-catalogo-exercicios/
 ### Source Code (repository root)
 
 ```text
+assets/                          # raiz do repo (@/assets/* no tsconfig), não src/
+└── catalogo/
+    ├── exercicios.json      # NOVO: catálogo curado (dados estáticos)
+    ├── imagens/             # NOVO: mídia curada (imagens/GIFs estáticos)
+    └── imagens-index.ts     # NOVO (ver nota abaixo): mapa estático de
+                              #   require() por arquivo — gerado pelo mesmo
+                              #   processo de curadoria
+
 src/
 ├── types/
 │   └── catalogo-exercicios.ts   # NOVO: ExercicioCatalogo, GrupoMuscular
-├── assets/
-│   └── catalogo/
-│       ├── exercicios.json      # NOVO: catálogo curado (dados estáticos)
-│       ├── imagens/             # NOVO: mídia curada (imagens/GIFs estáticos)
-│       └── imagens-index.ts     # NOVO (ver nota abaixo): mapa estático de
-│                                 #   require() por arquivo — gerado pelo mesmo
-│                                 #   processo de curadoria
 ├── services/
 │   └── catalogo-exercicios.ts   # NOVO: leitura pura do JSON embutido
 └── app/
     └── acoes.tsx                 # ALTERADO: novo item/seção de créditos (FR-007)
 ```
+
+**Correção aplicada durante o `/speckit.implement`**: os documentos desta spec
+(este `plan.md`, `data-model.md`, `contracts/catalogo-exercicios.md`,
+`quickstart.md`, `tasks.md`) citavam originalmente `src/assets/catalogo/...`,
+mas o projeto já usa `assets/` na raiz do repo para dado estático embutido
+(alias `@/assets/*` → `./assets/*` em `tsconfig.json`, mesmo caminho de
+`assets/exemplos/treino-exemplo.json`, já existente para RF01) — `src/assets/`
+não existia e o `tsc` falha ao resolver `@/assets/catalogo/exercicios.json` a
+partir de `src/`. Corrigido nos documentos e no código durante a implementação;
+`specs/021-imagens-exercicios/research.md` (Decisão 2) também corrigido pelo
+mesmo motivo.
 
 **Nota adicionada em 2026-09-23** (durante o `/speckit.plan` da spec 021, primeira
 feature a efetivamente carregar uma imagem do catálogo): o processo de curadoria

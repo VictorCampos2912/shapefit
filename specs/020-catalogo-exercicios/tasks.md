@@ -23,16 +23,16 @@ na spec (adicionado depois, durante a pesquisa de licença em `/speckit.plan`).
 
 ## Path Conventions
 
-Caminhos conforme `plan.md` (Project Structure): `src/types/`, `src/assets/catalogo/`,
+Caminhos conforme `plan.md` (Project Structure): `src/types/`, `assets/catalogo/`,
 `src/services/`, `src/app/acoes.tsx`.
 
 ---
 
 ## Phase 1: Setup
 
-- [ ] T001 [P] Criar a estrutura de diretórios `src/assets/catalogo/` e
-      `src/assets/catalogo/imagens/`.
-- [ ] T002 [P] Criar `src/types/catalogo-exercicios.ts` com `GrupoMuscular`
+- [X] T001 [P] Criar a estrutura de diretórios `assets/catalogo/` e
+      `assets/catalogo/imagens/`.
+- [X] T002 [P] Criar `src/types/catalogo-exercicios.ts` com `GrupoMuscular`
       (`'peito' | 'costas' | 'pernas' | 'ombros' | 'braços' | 'core'`) e
       `ExercicioCatalogo` (`{ id: string; nome: string; grupoMuscular:
       GrupoMuscular; midia: { tipo: 'imagem' | 'gif'; arquivo: string };
@@ -43,16 +43,22 @@ Caminhos conforme `plan.md` (Project Structure): `src/types/`, `src/assets/catal
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-- [ ] T003 Executar o processo de curadoria (`research.md`, Decisões 1 e 2):
+- [X] T003 Executar o processo de curadoria (`research.md`, Decisões 1 e 2):
       consultar a API pública do wger (`https://wger.de/api/v2/`, dados
-      licenciados CC-BY-SA 3.0) e gerar `src/assets/catalogo/exercicios.json` +
-      os arquivos de mídia correspondentes em `src/assets/catalogo/imagens/`,
+      licenciados CC-BY-SA 3.0) e gerar `assets/catalogo/exercicios.json` +
+      os arquivos de mídia correspondentes em `assets/catalogo/imagens/`,
       cobrindo os grupos musculares peito, costas, pernas, ombros, braços e core
       (`data-model.md`, SC-004). Cada entrada de `exercicios.json` DEVE ter `id`
       único dentro do catálogo, `nome`, `grupoMuscular`, `midia: { tipo, arquivo }`
       e `fonteAtribuicao` nunca vazio (invariantes de `data-model.md`); excluir da
       curadoria qualquer exercício sem mídia disponível na fonte (`spec.md`, Edge
-      Cases). Depende de T001 (diretórios já existentes).
+      Cases). O mesmo processo também gera `assets/catalogo/imagens-index.ts`
+      (`data-model.md`, seção "Arquivo de índice"; `plan.md`, nota de
+      2026-09-23) — um `require()` literal por imagem, uma entrada por item de
+      `exercicios.json`, chaveado por `midia.arquivo`; limitação do Metro com
+      `require()` dinâmico (`specs/021-imagens-exercicios/research.md`, Decisão
+      2), não consumido por nenhuma função desta feature. Depende de T001
+      (diretórios já existentes).
 
 **Checkpoint**: dados curados e diretórios prontos — as duas User Stories podem
 começar.
@@ -69,16 +75,16 @@ completos por exercício.
 
 ### Implementation for User Story 1
 
-- [ ] T004 [US1] Criar `src/services/catalogo-exercicios.ts` com
+- [X] T004 [US1] Criar `src/services/catalogo-exercicios.ts` com
       `listarCatalogo(): ExercicioCatalogo[]`, importando `exercicios.json` (T003)
       estaticamente e tipando o resultado como `ExercicioCatalogo[]` (T002) —
       função síncrona, sem I/O (`contracts/catalogo-exercicios.md`). Depende de
       T002, T003.
-- [ ] T005 [P] [US1] Escrever um script de verificação de integridade dos dados
+- [X] T005 [P] [US1] Escrever um script de verificação de integridade dos dados
       curados (`contracts/catalogo-exercicios.md`): confirma que todo `id` de
       `exercicios.json` é único, todo `fonteAtribuicao` é não vazio, e todo
       `midia.arquivo` corresponde a um arquivo real em
-      `src/assets/catalogo/imagens/` (SC-001). Depende de T003.
+      `assets/catalogo/imagens/` (SC-001). Depende de T003.
 - [ ] T006 [US1] Validar manualmente em Android e iOS (Princípio III), com o
       aparelho em modo avião (`quickstart.md`, Cenário 1): confirmar que
       `listarCatalogo()` retorna nome, grupo muscular e mídia de qualquer
@@ -118,7 +124,7 @@ desta feature.
 escolhida — sem User Story própria em `spec.md`, adicionado depois da pesquisa de
 licença) mais fechamento de qualidade e documentação.
 
-- [ ] T008 [P] Adicionar um item "Créditos do catálogo de exercícios" em
+- [X] T008 [P] Adicionar um item "Créditos do catálogo de exercícios" em
       `src/app/acoes.tsx`, exibindo atribuição ao wger project e à licença
       CC-BY-SA 3.0 (FR-007, `contracts/tela-creditos.md`) — mesmo padrão visual
       (`Pressable` + ícone + `ThemedText type="link"`) já usado pelos itens
@@ -126,7 +132,7 @@ licença) mais fechamento de qualidade e documentação.
 - [ ] T009 Validar manualmente em Android e iOS (`quickstart.md`, Cenário 4):
       abrir o item de créditos em "Ações" e confirmar que o texto de atribuição
       (wger project + CC-BY-SA 3.0) aparece. Depende de T008.
-- [ ] T010 [P] Rodar `npx tsc --noEmit` e `npx eslint` sobre os arquivos
+- [X] T010 [P] Rodar `npx tsc --noEmit` e `npx eslint` sobre os arquivos
       novos/alterados (`src/types/catalogo-exercicios.ts`,
       `src/services/catalogo-exercicios.ts`, `src/app/acoes.tsx`) — zero erros
       novos.
@@ -157,7 +163,7 @@ licença) mais fechamento de qualidade e documentação.
 
 ```bash
 # Setup (podem rodar juntos):
-Task: "Criar src/assets/catalogo/ e src/assets/catalogo/imagens/ (T001)"
+Task: "Criar assets/catalogo/ e assets/catalogo/imagens/ (T001)"
 Task: "Criar src/types/catalogo-exercicios.ts (T002)"
 
 # Dentro da User Story 1, depois de T002+T003 prontos:

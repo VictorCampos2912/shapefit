@@ -30,11 +30,26 @@ export function listarCatalogo(): ExercicioCatalogo[] {
   implementar, será a primeira a chamar esta função) — a função existe para o
   catálogo já ter uma forma de leitura pronta, mesmo sem UI própria ainda (FR-006).
 
+## `imagens-index.ts` (gerado por esta spec, não consumido por ela)
+
+O mesmo processo de curadoria que gera `exercicios.json` também gera
+`assets/catalogo/imagens-index.ts` (`data-model.md`, seção "Arquivo de
+índice") — um mapa estático `IMAGENS_CATALOGO: Record<string,
+ReturnType<typeof require>>` com um `require()` literal por imagem, necessário
+por uma limitação do Metro com `require()` dinâmico
+(`specs/021-imagens-exercicios/research.md`, Decisão 2).
+
+Nenhuma função desta feature importa ou consome `imagens-index.ts` —
+`listarCatalogo()` só devolve os metadados de `exercicios.json` (incluindo
+`midia.arquivo`, o nome do arquivo), nunca a imagem resolvida. O índice é gerado
+aqui, junto com o resto da curadoria, para que a spec 021 possa consumi-lo
+diretamente sem precisar repetir o processo de curadoria.
+
 ## Verificação de integridade dos dados (dev-time, não runtime)
 
 Recomendado (não obrigatório pela spec, mas mitiga risco de dado malformado
 silencioso): um teste/script simples, rodado durante o desenvolvimento, que
 verifica que `exercicios.json` satisfaz as invariantes de `data-model.md` (`id`
 único, `fonteAtribuicao` nunca vazio, todo `midia.arquivo` correspondendo a um
-arquivo real em `src/assets/catalogo/imagens/`) — evita que um erro de curadoria
+arquivo real em `assets/catalogo/imagens/`) — evita que um erro de curadoria
 (ex.: caminho de imagem quebrado) só seja percebido em runtime, numa tela real.

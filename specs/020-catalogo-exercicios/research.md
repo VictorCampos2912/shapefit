@@ -73,7 +73,7 @@ implementação, já que envolve conteúdo redistribuído publicamente num app.
 **Decision**: o consumo da API do wger acontece **uma única vez, durante o
 desenvolvimento** (um script/processo manual de extração, documentado mas não
 incluído no app), gerando os arquivos estáticos finais
-(`src/assets/catalogo/exercicios.json` + `src/assets/catalogo/imagens/*`) que são
+(`assets/catalogo/exercicios.json` + `assets/catalogo/imagens/*`) que são
 commitados no repositório e embutidos no bundle — o app em produção nunca faz uma
 requisição HTTP para `wger.de`.
 
@@ -101,7 +101,7 @@ export type ExercicioCatalogo = {
   grupoMuscular: GrupoMuscular;
   midia: {
     tipo: 'imagem' | 'gif';
-    arquivo: string;    // caminho relativo dentro de src/assets/catalogo/imagens/
+    arquivo: string;    // caminho relativo dentro de assets/catalogo/imagens/
   };
   fonteAtribuicao: string; // texto de crédito específico deste item (wger, CC-BY-SA 3.0)
 };
@@ -145,9 +145,9 @@ estabelecido no projeto e resolve em tempo de build (Metro), sem I/O em runtime.
 ## Resumo das entidades técnicas afetadas
 
 - `src/types/catalogo-exercicios.ts` (novo): `GrupoMuscular`, `ExercicioCatalogo`.
-- `src/assets/catalogo/exercicios.json` (novo, dado curado — gerado pelo processo
+- `assets/catalogo/exercicios.json` (novo, dado curado — gerado pelo processo
   de curadoria da Decisão 2, não gerado por código do app).
-- `src/assets/catalogo/imagens/*` (novo, mídia curada).
+- `assets/catalogo/imagens/*` (novo, mídia curada).
 - `src/services/catalogo-exercicios.ts` (novo): `listarCatalogo`.
 - `src/app/acoes.tsx`: novo item de créditos/atribuição (FR-007,
   `tela-creditos.md`).

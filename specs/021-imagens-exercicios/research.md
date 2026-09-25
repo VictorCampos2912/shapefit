@@ -41,7 +41,7 @@ lugar (Princípio II).
 ## Decisão 2: resolução de imagem local — limitação real do Metro (bundler)
 
 **Decision**: gerar, junto com `exercicios.json` (spec 020, mesmo processo de
-curadoria), um arquivo adicional `src/assets/catalogo/imagens-index.ts` — um mapa
+curadoria), um arquivo adicional `assets/catalogo/imagens-index.ts` — um mapa
 estático de nome de arquivo para o resultado de `require(...)`, com uma entrada
 `require()` **literal** por imagem:
 
@@ -111,6 +111,6 @@ resultado.
 - `src/services/catalogo-exercicios.ts` (já existe, spec 020): ganha
   `buscarNoCatalogo` (Decisão 1) — `ExercicioCatalogo`/`listarCatalogo`
   inalterados.
-- `src/assets/catalogo/imagens-index.ts` (novo): `IMAGENS_CATALOGO` (Decisão 2).
+- `assets/catalogo/imagens-index.ts` (novo): `IMAGENS_CATALOGO` (Decisão 2).
 - `src/components/treino/exercicio-execucao.tsx`: `useMemo` com
   `buscarNoCatalogo`; renderização condicional de `<Image source={IMAGENS_CATALOGO[...]}>`.

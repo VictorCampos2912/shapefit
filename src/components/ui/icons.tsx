@@ -143,3 +143,13 @@ export function NotificacaoIcon({ size = defaults.size, color = defaults.color, 
     </Svg>
   );
 }
+
+export function InfoIcon({ size = defaults.size, color = defaults.color, strokeWidth = defaults.strokeWidth }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx={12} cy={12} r={9} stroke={color} strokeWidth={strokeWidth} />
+      <Path d="M12 11v6" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" />
+      <Circle cx={12} cy={7.5} r={1} fill={color} />
+    </Svg>
+  );
+}
