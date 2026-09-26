@@ -1,0 +1,279 @@
+[
+  {
+    "nome": "A - Pernas completo",
+    "exercicios": [
+      {
+        "id": "agachamento-frontal",
+        "nome": "Agachamento frontal",
+        "series": 4,
+        "reps_alvo": "6-8",
+        "carga_sugerida_kg": 50,
+        "descanso_seg": 120,
+        "categoria": "peso"
+      },
+      {
+        "id": "leg-press",
+        "nome": "Leg press",
+        "series": 3,
+        "reps_alvo": "10-12",
+        "carga_sugerida_kg": 120,
+        "descanso_seg": 90,
+        "categoria": "peso"
+      },
+      {
+        "id": "mesa-flexora",
+        "nome": "Mesa flexora (deitado)",
+        "series": 3,
+        "reps_alvo": "12-15",
+        "carga_sugerida_kg": 30,
+        "descanso_seg": 60,
+        "categoria": "peso"
+      },
+      {
+        "id": "cadeira-extensora",
+        "nome": "Cadeira extensora",
+        "series": 3,
+        "reps_alvo": "12-15",
+        "carga_sugerida_kg": 35,
+        "descanso_seg": 60,
+        "categoria": "peso"
+      },
+      {
+        "id": "afundo",
+        "nome": "Afundo (lunge)",
+        "series": 3,
+        "reps_alvo": "10-12 cada perna",
+        "carga_sugerida_kg": 16,
+        "descanso_seg": 75,
+        "categoria": "peso"
+      }
+    ]
+  },
+  {
+    "nome": "B - Costas e Bíceps",
+    "exercicios": [
+      {
+        "id": "levantamento-terra",
+        "nome": "Levantamento terra",
+        "series": 4,
+        "reps_alvo": "6-8",
+        "carga_sugerida_kg": 70,
+        "descanso_seg": 120,
+        "categoria": "peso"
+      },
+      {
+        "id": "barra-fixa-pronada",
+        "nome": "Barra fixa (pegada pronada)",
+        "series": 4,
+        "reps_alvo": "8-10",
+        "carga_sugerida_kg": 0,
+        "descanso_seg": 90,
+        "categoria": "peso"
+      },
+      {
+        "id": "remada-curvada",
+        "nome": "Remada curvada",
+        "series": 3,
+        "reps_alvo": "8-10",
+        "carga_sugerida_kg": 50,
+        "descanso_seg": 90,
+        "categoria": "peso"
+      },
+      {
+        "id": "remada-cavalinho",
+        "nome": "Remada cavalinho (T-bar)",
+        "series": 3,
+        "reps_alvo": "10-12",
+        "carga_sugerida_kg": 40,
+        "descanso_seg": 75,
+        "categoria": "peso"
+      },
+      {
+        "id": "rosca-direta-barra",
+        "nome": "Rosca direta com barra",
+        "series": 3,
+        "reps_alvo": "10-12",
+        "carga_sugerida_kg": 25,
+        "descanso_seg": 60,
+        "categoria": "peso"
+      },
+      {
+        "id": "rosca-martelo",
+        "nome": "Rosca martelo",
+        "series": 3,
+        "reps_alvo": "12",
+        "carga_sugerida_kg": 12,
+        "descanso_seg": 60,
+        "categoria": "peso"
+      }
+    ]
+  },
+  {
+    "nome": "C - Cardio",
+    "exercicios": [
+      {
+        "id": "esteira",
+        "nome": "Esteira",
+        "series": 1,
+        "reps_alvo": "1",
+        "carga_sugerida_kg": 25,
+        "descanso_seg": 0,
+        "categoria": "tempo"
+      },
+      {
+        "id": "bicicleta-ergometrica",
+        "nome": "Bicicleta ergométrica",
+        "series": 1,
+        "reps_alvo": "1",
+        "carga_sugerida_kg": 15,
+        "descanso_seg": 60,
+        "categoria": "tempo"
+      },
+      {
+        "id": "remoergometro",
+        "nome": "Remo (remoergômetro)",
+        "series": 1,
+        "reps_alvo": "1",
+        "carga_sugerida_kg": 10,
+        "descanso_seg": 60,
+        "categoria": "tempo"
+      },
+      {
+        "id": "prancha",
+        "nome": "Prancha (plank)",
+        "series": 3,
+        "reps_alvo": "1",
+        "carga_sugerida_kg": 0.5,
+        "descanso_seg": 30,
+        "categoria": "tempo"
+      },
+      {
+        "id": "abdominal-supra",
+        "nome": "Abdominal supra (crunch)",
+        "series": 3,
+        "reps_alvo": "20",
+        "carga_sugerida_kg": 0,
+        "descanso_seg": 30,
+        "categoria": "repeticoes"
+      },
+      {
+        "id": "torcao-russa",
+        "nome": "Torção russa",
+        "series": 3,
+        "reps_alvo": "20 cada lado",
+        "carga_sugerida_kg": 0,
+        "descanso_seg": 30,
+        "categoria": "repeticoes"
+      }
+    ]
+  },
+  {
+    "nome": "D - Peito e Tríceps",
+    "exercicios": [
+      {
+        "id": "supino-reto-barra",
+        "nome": "Supino reto (barra)",
+        "series": 4,
+        "reps_alvo": "6-8",
+        "carga_sugerida_kg": 60,
+        "descanso_seg": 120,
+        "categoria": "peso"
+      },
+      {
+        "id": "supino-inclinado-barra",
+        "nome": "Supino inclinado (barra)",
+        "series": 3,
+        "reps_alvo": "8-10",
+        "carga_sugerida_kg": 50,
+        "descanso_seg": 90,
+        "categoria": "peso"
+      },
+      {
+        "id": "crucifixo-cabo",
+        "nome": "Crucifixo no cabo",
+        "series": 3,
+        "reps_alvo": "12-15",
+        "carga_sugerida_kg": 15,
+        "descanso_seg": 60,
+        "categoria": "peso"
+      },
+      {
+        "id": "mergulho-paralelas",
+        "nome": "Mergulho nas paralelas (dips)",
+        "series": 3,
+        "reps_alvo": "10-12",
+        "carga_sugerida_kg": 0,
+        "descanso_seg": 90,
+        "categoria": "peso"
+      },
+      {
+        "id": "triceps-polia",
+        "nome": "Tríceps na polia",
+        "series": 3,
+        "reps_alvo": "12-15",
+        "carga_sugerida_kg": 25,
+        "descanso_seg": 60,
+        "categoria": "peso"
+      },
+      {
+        "id": "triceps-testa-barra-w",
+        "nome": "Tríceps testa (barra W)",
+        "series": 3,
+        "reps_alvo": "10-12",
+        "carga_sugerida_kg": 20,
+        "descanso_seg": 60,
+        "categoria": "peso"
+      }
+    ]
+  },
+  {
+    "nome": "E - Perna/Funcional",
+    "exercicios": [
+      {
+        "id": "terra-romeno",
+        "nome": "Levantamento terra romeno (RDL)",
+        "series": 4,
+        "reps_alvo": "8-10",
+        "carga_sugerida_kg": 50,
+        "descanso_seg": 90,
+        "categoria": "peso"
+      },
+      {
+        "id": "elevacao-pelvica",
+        "nome": "Elevação pélvica (hip thrust)",
+        "series": 3,
+        "reps_alvo": "10-12",
+        "carga_sugerida_kg": 60,
+        "descanso_seg": 75,
+        "categoria": "peso"
+      },
+      {
+        "id": "passada-halteres",
+        "nome": "Passada com halteres (walking lunge)",
+        "series": 3,
+        "reps_alvo": "12 cada perna",
+        "carga_sugerida_kg": 12,
+        "descanso_seg": 75,
+        "categoria": "peso"
+      },
+      {
+        "id": "panturrilha-em-pe",
+        "nome": "Panturrilha em pé",
+        "series": 4,
+        "reps_alvo": "15",
+        "carga_sugerida_kg": 40,
+        "descanso_seg": 45,
+        "categoria": "peso"
+      },
+      {
+        "id": "prancha-lateral",
+        "nome": "Prancha lateral",
+        "series": 3,
+        "reps_alvo": "1 cada lado",
+        "carga_sugerida_kg": 0.5,
+        "descanso_seg": 30,
+        "categoria": "tempo"
+      }
+    ]
+  }
+]
