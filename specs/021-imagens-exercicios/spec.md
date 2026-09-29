@@ -4,7 +4,7 @@
 
 **Created**: 2026-09-23
 
-**Status**: Draft — depende de `specs/020-catalogo-exercicios` estar implementada
+**Status**: Implemented — validado em Android e iOS em 2026-09-29 (Princípio III)
 
 **Requisito**: RF20 (PRD, seção 6 — pós-MVP, a confirmar numeração ao registrar no PRD)
 

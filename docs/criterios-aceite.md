@@ -633,3 +633,25 @@ confirmado pelo usuário em 2026-09-25.**
       referência ao catálogo
 - [X] Item "Créditos do catálogo de exercícios" visível na tela "Ações" (RF14); ao
       tocar, mostra o texto de atribuição (wger project, CC-BY-SA)
+
+### RF20 — Imagem do exercício na execução
+
+**Spec**: `specs/021-imagens-exercicios/` · estende o RF03/RF04/RF19. **Validado em
+Android e iOS — confirmado pelo usuário em 2026-09-29.**
+
+**Critérios de aceite:**
+- [X] Exercício cujo nome corresponde exatamente (após normalização — espaço/
+      maiúsculas ignorados) a um item do catálogo (RF19): a imagem/GIF
+      correspondente aparece na execução, acima do botão "Iniciar exercício"
+- [X] Com a imagem visível, os campos de carga/reps e o botão "Concluir série"
+      continuam funcionando normalmente — a imagem não bloqueia nem atrasa o
+      fluxo de registro de série
+- [X] Exercício sem correspondência no catálogo: nenhuma imagem, nenhum espaço
+      reservado vazio, nenhuma UI relacionada ao catálogo — tela idêntica à
+      versão anterior a esta feature
+- [X] Nome com variação de espaço/maiúsculas em relação ao catálogo ainda
+      corresponde (mesma normalização do RF08); nome parecido mas não idêntico
+      (ex.: "Tríceps corda (polia)" vs. "Tríceps na polia" do catálogo)
+      corretamente NÃO corresponde — nunca aproxima nomes só parecidos
+- [X] Imagem resolve corretamente nos 3 bundlers (web, Android, iOS) — mapa
+      estático de `require()` (`imagens-index.ts`, RF19) funciona igual nos três

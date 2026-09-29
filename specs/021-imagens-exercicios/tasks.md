@@ -93,7 +93,7 @@ de registro de série (SC-003).
       placeholder, sem espaço reservado — cobre FR-005/US2 na mesma implementação,
       ver nota "Organization"). Adicionar `imagemExercicio` ao `StyleSheet.create`
       já existente no arquivo. Depende de T001.
-- [ ] T003 [US1] Validar manualmente em Android e iOS (Princípio III)
+- [X] T003 [US1] Validar manualmente em Android e iOS (Princípio III)
       (`quickstart.md`, Cenário 1): abrir, na execução, o exercício com nome
       correspondente ao catálogo; confirmar que a imagem aparece acima da área de
       registro de série, e que os campos de carga/reps e o botão "Concluir série"
@@ -120,12 +120,12 @@ confirmar que a tela é idêntica à versão anterior a esta feature.
 Nenhuma — o mesmo condicional de T002 já cobre o caso `correspondencia === null`
 (FR-005). Ver nota "Organization" no topo deste arquivo.
 
-- [ ] T004 [US2] Validar manualmente em Android e iOS (Princípio III)
+- [X] T004 [US2] Validar manualmente em Android e iOS (Princípio III)
       (`quickstart.md`, Cenário 2): abrir, na execução, o exercício sem
       correspondência no catálogo; confirmar que nenhuma imagem, espaço vazio ou
       UI relacionada ao catálogo aparece — tela idêntica à versão anterior a esta
       feature (FR-005, SC-002). Depende de T002.
-- [ ] T005 [US2] Validar manualmente em Android e iOS (Princípio III)
+- [X] T005 [US2] Validar manualmente em Android e iOS (Princípio III)
       (`quickstart.md`, Cenário 3 — normalização sem aproximação, US1/US2):
       (a) exercício no treino com nome variando só em espaço/maiúsculas em
       relação ao catálogo (ex.: treino "supino  reto", catálogo "Supino Reto") —
@@ -142,7 +142,7 @@ tanto com quanto sem correspondência, incluindo o limite de normalização.
 
 ## Phase 4: Polish & Cross-Cutting Concerns
 
-- [ ] T006 [P] Validar manualmente em Android e iOS, e também via
+- [X] T006 [P] Validar manualmente em Android e iOS, e também via
       `npx expo start` (web) (Princípio III) (`quickstart.md`, Cenário 4 —
       validação técnica): confirmar que a imagem do Cenário 1 carrega sem erro
       de import/404 nos 3 bundlers (web, Android, iOS) — confirma que
@@ -152,12 +152,12 @@ tanto com quanto sem correspondência, incluindo o limite de normalização.
 - [X] T007 [P] Rodar `npx tsc --noEmit` e `npx eslint` sobre os arquivos
       novos/alterados (`src/services/catalogo-exercicios.ts`,
       `src/components/treino/exercicio-execucao.tsx`) — zero erros novos.
-- [ ] T008 [P] Atualizar `docs/PRD-app-treino.md` (seção 6, "Requisitos
+- [X] T008 [P] Atualizar `docs/PRD-app-treino.md` (seção 6, "Requisitos
       funcionais") registrando o RF desta feature — confirmar o próximo número
       livre real da tabela no momento de aplicar esta tarefa (a spec cita "RF20"
       provisoriamente; confirmar contra a tabela do PRD, não presumir — mesmo
       cuidado já tomado nas specs 016-020).
-- [ ] T009 Atualizar `docs/criterios-aceite.md` (seção "Melhorias
+- [X] T009 Atualizar `docs/criterios-aceite.md` (seção "Melhorias
       pós-desenvolvimento") com os critérios de aceite do RF desta feature (mesma
       numeração confirmada em T008), e o cabeçalho **Status** de
       `specs/021-imagens-exercicios/spec.md` para "Implemented" após T003, T004,
