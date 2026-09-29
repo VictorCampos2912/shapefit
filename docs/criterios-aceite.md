@@ -418,57 +418,58 @@ RF06 → RF07 → RF08 → RF09b.
 
 Os itens abaixo não fazem parte do PRD original (RF01–RF10) — foram pedidos pelo
 usuário depois do MVP estar completo e validado. Registrados na tabela de requisitos
-do PRD (seção 6) em 2026-09-22 (RF11-RF14) e 2026-09-23/24 (RF15/RF16). Código
-implementado e validado via Expo web (Playwright) para RF11, RF12, RF14, RF15 e RF16;
-**RF13 não é verificável sem aparelho físico** (vibração não existe em
-navegador/emulador). **RF16 já tem validação real confirmada em Android e iOS**
-(2026-09-24); os demais ainda não têm validação real completa nos dois aparelhos —
-os critérios seguem `[ ]` até essa validação acontecer, exceto onde já indicado
-`[X]` com a confirmação registrada.
+do PRD (seção 6) em 2026-09-22 (RF11-RF14) e 2026-09-23/24 (RF15/RF16). **RF11, RF12,
+RF14, RF15 e RF16 têm validação real confirmada em Android e iOS** (RF11/RF12/RF14 em
+2026-09-29; RF15/RF16 em 2026-09-24). **RF13 permanece parcialmente pendente**: alguns
+critérios já confirmados pelo usuário em Android, mas 3 seguem sem confirmação
+explícita (ajuste -15s, "Finalizar treino" não vibrar, intensidade igual entre 1º/2º
+plano) — ver detalhe abaixo.
 
 ---
 
 ### RF11 — Importar múltiplos treinos de um único arquivo
 
-**Spec**: `specs/012-importar-multiplos-treinos/` · estende o RF01.
+**Spec**: `specs/012-importar-multiplos-treinos/` · estende o RF01. **Validado em
+Android e iOS — confirmado pelo usuário em 2026-09-29.**
 
 **Critérios de aceite:**
-- [ ] Um arquivo cujo elemento raiz é um array com dois ou mais treinos válidos
+- [X] Um arquivo cujo elemento raiz é um array com dois ou mais treinos válidos
       importa todos eles de uma vez, cada um aparecendo na lista de treinos do perfil
       ativo
-- [ ] Cada treino importado exibe exatamente os próprios exercícios, sem mistura com
+- [X] Cada treino importado exibe exatamente os próprios exercícios, sem mistura com
       os de outro treino do mesmo arquivo
-- [ ] Um arquivo cujo elemento raiz é um único objeto de treino continua funcionando
+- [X] Um arquivo cujo elemento raiz é um único objeto de treino continua funcionando
       exatamente como antes (RF01 inalterado)
-- [ ] Um treino inválido dentro do array não invalida os demais — os válidos são
+- [X] Um treino inválido dentro do array não invalida os demais — os válidos são
       importados, e o usuário é informado de quais foram ignorados e o motivo
-- [ ] Um array vazio (`[]`) é tratado como arquivo inválido, nenhum treino é importado
-- [ ] Ao final de uma importação múltipla, o usuário vê uma única mensagem resumindo
+- [X] Um array vazio (`[]`) é tratado como arquivo inválido, nenhum treino é importado
+- [X] Ao final de uma importação múltipla, o usuário vê uma única mensagem resumindo
       quantos treinos foram importados — nunca uma mensagem por treino
 
 ---
 
 ### RF12 — Conclusão explícita de sessão de treino
 
-**Spec**: `specs/013-nova-sessao-treino/` · estende o RF07.
+**Spec**: `specs/013-nova-sessao-treino/` · estende o RF07. **Validado em Android e
+iOS — confirmado pelo usuário em 2026-09-29.**
 
 **Critérios de aceite:**
-- [ ] Ao concluir o último exercício de um treino, a lista de exercícios permanece
+- [X] Ao concluir o último exercício de um treino, a lista de exercícios permanece
       com todos marcados como concluídos (verde), de forma estável — sem reverter
       sozinha
-- [ ] Isso continua verdade mesmo saindo da tela (outra aba, por exemplo) e voltando
+- [X] Isso continua verdade mesmo saindo da tela (outra aba, por exemplo) e voltando
       a abrir o mesmo treino — o reset só acontece ao apertar "Nova sessão de
       Treino" (FR-007, corrigido em 2026-09-23 após teste real do usuário)
-- [ ] O botão "Finalizar treino" desaparece assim que todos os exercícios estão
+- [X] O botão "Finalizar treino" desaparece assim que todos os exercícios estão
       concluídos
-- [ ] Um botão "Nova sessão de Treino" aparece só quando todos os exercícios estão
+- [X] Um botão "Nova sessão de Treino" aparece só quando todos os exercícios estão
       concluídos
-- [ ] Ao apertar "Nova sessão de Treino", a tela volta ao estado inicial (nenhum
+- [X] Ao apertar "Nova sessão de Treino", a tela volta ao estado inicial (nenhum
       exercício marcado como concluído), pronta para uma nova execução
-- [ ] O contador de sessões finalizadas (RF07) e o histórico (RF08) atualizam
+- [X] O contador de sessões finalizadas (RF07) e o histórico (RF08) atualizam
       corretamente assim que o último exercício é concluído, mesmo sem o usuário
       apertar "Nova sessão de Treino"
-- [ ] O botão "Finalizar treino" (encerramento manual antecipado, antes de todos os
+- [X] O botão "Finalizar treino" (encerramento manual antecipado, antes de todos os
       exercícios concluídos) continua se comportando exatamente como antes
 
 ---
@@ -501,16 +502,19 @@ físico com vibração habilitada — não verificável em emulador/web.**
 
 ### RF14 — Tela separada para trocar perfil e importar treino
 
-**Spec**: `specs/015-menu-de-acoes/` · estende o RF02/RF10.
+**Spec**: `specs/015-menu-de-acoes/` · estende o RF02/RF10. **Validado em Android e
+iOS — confirmado pelo usuário em 2026-09-29.**
 
 **Critérios de aceite:**
-- [ ] A tela "Treinos" não mostra mais os atalhos de trocar perfil, importar treino
+- [X] A tela "Treinos" não mostra mais os atalhos de trocar perfil, importar treino
       ou importar treino de exemplo — só título, ícone de ações e lista/estado vazio
-- [ ] Um ícone de ações, visível e no mesmo lugar em qualquer aba (Treinos e
-      Histórico), abre uma tela dedicada com as três ações
-- [ ] As três ações, a partir dessa tela, se comportam exatamente como antes (mesmo
+- [X] Um ícone de ações, visível e no mesmo lugar em qualquer aba (Treinos e
+      Histórico), abre uma tela dedicada com as três ações (implementado como um
+      ícone de três pontos no canto superior direito de cada aba — `AcoesIcon`,
+      `src/components/ui/icons.tsx`)
+- [X] As três ações, a partir dessa tela, se comportam exatamente como antes (mesmo
       fluxo de importação, mesma navegação de troca de perfil)
-- [ ] A mensagem de estado vazio da lista de treinos orienta o usuário a usar o ícone
+- [X] A mensagem de estado vazio da lista de treinos orienta o usuário a usar o ícone
       de ações para importar um treino
 
 ---

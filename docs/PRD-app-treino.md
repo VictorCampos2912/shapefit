@@ -263,10 +263,11 @@ presente em todas as abas — ver `specs/015-menu-de-acoes/`.
   dois aparelhos-alvo (Redmi Note 12/Android e iPhone 16 Plus/iOS). RF10 já validado
   desde sua implementação original. Não há dívida de validação pendente no MVP original
   (RF01–RF10).
-- **Pendência atual (2026-09-22):** RF11–RF14 (pós-MVP, ver seção 6) estão com código
-  implementado e validados via web (Expo web + Playwright), mas **ainda não validados
-  nos dois aparelhos-alvo** — RF13 (vibração) em particular só é verificável em
-  aparelho físico. Critérios de aceite detalhados em `docs/criterios-aceite.md`.
+- **Atualizado em 2026-09-29:** RF11, RF12 e RF14 (pós-MVP, ver seção 6) validados
+  nos dois aparelhos-alvo (confirmado pelo usuário). RF13 (vibração) segue
+  **parcialmente pendente** — 3 critérios específicos ainda sem confirmação
+  explícita (ajuste -15s, "Finalizar treino" não vibrar, intensidade igual entre
+  1º/2º plano). Critérios de aceite detalhados em `docs/criterios-aceite.md`.
 
 ## 14. Abordagem de identidade visual
 

@@ -4,7 +4,7 @@
 
 **Created**: 2026-09-22
 
-**Status**: Implemented (código pronto, validado via web; pendente validação real em Android/iOS)
+**Status**: Implemented — validado em Android e iOS (confirmado pelo usuário em 2026-09-29)
 
 **Requisito**: RF14 (PRD, seção 6 — pós-MVP)
 
