@@ -3,11 +3,11 @@ import { Platform } from 'react-native';
 
 import { PADRAO_VIBRACAO_FIM_DESCANSO } from '@/constants/vibracao';
 
-// v4: alinha o padrão de vibração do canal ao mesmo usado pelo app em primeiro
-// plano (RF13) — canais do Android são efetivamente imutáveis depois de criados
-// num aparelho, então mudar só o vibrationPattern abaixo não bastaria sem também
-// mudar o id do canal.
-const CANAL_DESCANSO = 'descanso-v4';
+// v5: encurta o padrão de vibração pra caber no limite de duração que o Android
+// parece truncar em canais de notificação (~1200-1400ms) — canais são efetivamente
+// imutáveis depois de criados num aparelho, então mudar só o vibrationPattern não
+// bastaria sem também mudar o id do canal.
+const CANAL_DESCANSO = 'descanso-v5';
 
 export function configurarNotificacoesDescanso(): void {
   Notifications.setNotificationHandler({

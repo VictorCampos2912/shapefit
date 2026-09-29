@@ -125,6 +125,33 @@ aplicada antes, daí o canal já estar em "v3").
 rejeitado, risco de um dos dois ser alterado no futuro sem o outro acompanhar,
 reintroduzindo a assimetria que o usuário acabou de pedir para eliminar.
 
+## Decisão 7: encurtar o padrão para caber num possível limite de duração do Android (2026-09-29)
+
+**Decision**: `PADRAO_VIBRACAO_FIM_DESCANSO` muda de `[0, 500, 200, 500, 200, 500]`
+(1900ms totais) para `[0, 350, 150, 350, 150, 350]` (1350ms totais) — id do canal
+Android muda de `descanso-v4` para `descanso-v5`.
+
+**Rationale**: teste real em Android (Redmi Note 12) com todas as permissões/opções
+de notificação habilitadas mostrou um padrão determinístico: em primeiro plano
+(`Vibration.vibrate`, sem intermediação do SO) as 3 vibrações tocavam sempre; disparado
+pelo canal de notificação (segundo plano ou aparelho bloqueado), só 2 das 3 tocavam,
+de forma consistente — inclusive com o aparelho no silencioso. Isso descarta
+sobreposição de configuração do fabricante (MIUI) como causa, já que seria
+inconsistente; a hipótese mais provável é o Android truncar a duração de vibração de
+notificações por volta de ~1200-1400ms, cortando a 3ª vibração do padrão original
+(que só começaria aos 1200ms). Reduzir a duração total do padrão para 1350ms é uma
+tentativa direta de caber dentro desse limite hipotético.
+
+**Ainda não confirmado em aparelho** — precisa de um novo build (bloqueado por cota
+EAS esgotada no momento desta decisão) para validar se o ajuste realmente resolve o
+comportamento em segundo plano. Se não resolver, a causa é outra e este ajuste deve
+ser revertido/revisto.
+
+**Alternatives considered**: manter o padrão original e aceitar a diferença como
+limitação de plataforma sem tentar corrigir — rejeitado por ora porque a hipótese do
+limite de duração é testável sem custo adicional (o build já estava bloqueado de
+qualquer forma; não há razão para não deixar o ajuste pronto para o próximo build).
+
 ## Resumo das entidades técnicas afetadas
 
 - `src/constants/vibracao.ts` (novo): `PADRAO_VIBRACAO_FIM_DESCANSO`, compartilhado

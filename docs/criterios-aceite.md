@@ -493,19 +493,22 @@ físico com vibração habilitada — não verificável em emulador/web.**
 - [X] Apertar "Finalizar treino" com um descanso ativo não dispara a vibração forte
       do descanso (corrigido em 2026-09-23, efeito colateral encontrado durante a
       correção acima) — **confirmado pelo usuário em Android, 2026-09-29**
-- [ ] **FALHA CONFIRMADA (2026-09-29, Android/Redmi Note 12)**: a vibração em
-      segundo plano (notificação) e em primeiro plano **não** têm a mesma
-      intensidade — usuário reporta que a notificação em segundo plano continua
-      com o padrão simples do sistema, diferente das 3 vibrações fortes do
-      primeiro plano. O código já unifica os dois padrões desde 2026-09-23
-      (`PADRAO_VIBRACAO_FIM_DESCANSO` compartilhado, canal `descanso-v4` —
-      `src/constants/vibracao.ts`, `src/services/notificacao-descanso.ts`) e
-      nunca mudou desde então — a causa mais provável é a MIUI (Redmi Note 12)
-      sobrescrever/ignorar o `vibrationPattern` do canal por padrão, exigindo
-      customização manual em Ajustes > Apps > ShapeFit > Notificações > canal
-      "Fim do descanso" no aparelho. Precisa ser verificado no aparelho antes de
-      mexer em código — não é claro ainda se é bug nosso ou comportamento do
-      fabricante fora do nosso controle.
+- [ ] **FALHA CONFIRMADA (2026-09-29, Android/Redmi Note 12), correção aplicada
+      mas AINDA NÃO VALIDADA em aparelho**: a vibração em segundo plano
+      (notificação) e em primeiro plano não tinham a mesma intensidade — com
+      todas as configurações de notificação habilitadas (inclusive som
+      personalizado funcionando normalmente), o padrão era determinístico: 3
+      vibrações em primeiro plano, sempre 2 em segundo plano/aparelho bloqueado
+      (mesmo no silencioso) — descarta sobreposição de configuração do
+      fabricante (MIUI), que seria inconsistente. Hipótese: Android trunca a
+      duração de vibração de notificações por volta de ~1200-1400ms, cortando a
+      3ª vibração do padrão original de 1900ms. **Correção aplicada**: padrão
+      encurtado de `[0, 500, 200, 500, 200, 500]` para
+      `[0, 350, 150, 350, 150, 350]` (1350ms), canal Android bump `descanso-v4`
+      → `descanso-v5` (`src/constants/vibracao.ts`,
+      `src/services/notificacao-descanso.ts`, Decisão 7 do
+      `specs/014-vibracao-fim-descanso/research.md`). Precisa de build novo
+      (bloqueado por cota EAS no momento) para confirmar se resolve.
 - [X] Se a vibração estiver desativada nas configurações do aparelho, nenhuma
       vibração ocorre (comportamento padrão do sistema, sem código contornando
       isso) — **confirmado pelo usuário em Android, 2026-09-29**
