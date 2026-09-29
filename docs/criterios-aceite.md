@@ -482,21 +482,33 @@ físico com vibração habilitada — não verificável em emulador/web.**
 **Critérios de aceite:**
 - [X] Ao fim do descanso, com o app em primeiro plano, o aparelho vibra com um padrão
       forte (3 vibrações longas) — **confirmado pelo usuário em Android**
-- [ ] Um ajuste manual (-15s) que leva o tempo restante a zero também dispara a
-      vibração, sem esperar a contagem regressiva natural
+- [X] Um ajuste manual (-15s) que leva o tempo restante a zero também dispara a
+      vibração, sem esperar a contagem regressiva natural — **confirmado pelo
+      usuário em Android, 2026-09-29**
 - [X] Com o app em segundo plano, a vibração da notificação ocorre — **confirmado
       pelo usuário em Android**
 - [X] Reabrir o app depois disso **não** dispara a vibração forte de novo (corrigido
       em 2026-09-23 — bug relatado pelo usuário no iPhone: vibrava 3x ao reabrir;
       **correção confirmada pelo usuário em Android**)
-- [ ] Apertar "Finalizar treino" com um descanso ativo não dispara a vibração forte
+- [X] Apertar "Finalizar treino" com um descanso ativo não dispara a vibração forte
       do descanso (corrigido em 2026-09-23, efeito colateral encontrado durante a
-      correção acima)
-- [ ] A vibração em segundo plano (notificação) e em primeiro plano têm a **mesma
-      intensidade** (atualizado em 2026-09-23 — antes desta mudança a notificação
-      usava um padrão mais simples; pedido do usuário após comparar as duas)
-- [ ] Se a vibração estiver desativada nas configurações do aparelho, nenhuma
-      vibração ocorre (comportamento padrão do sistema, sem código contornando isso)
+      correção acima) — **confirmado pelo usuário em Android, 2026-09-29**
+- [ ] **FALHA CONFIRMADA (2026-09-29, Android/Redmi Note 12)**: a vibração em
+      segundo plano (notificação) e em primeiro plano **não** têm a mesma
+      intensidade — usuário reporta que a notificação em segundo plano continua
+      com o padrão simples do sistema, diferente das 3 vibrações fortes do
+      primeiro plano. O código já unifica os dois padrões desde 2026-09-23
+      (`PADRAO_VIBRACAO_FIM_DESCANSO` compartilhado, canal `descanso-v4` —
+      `src/constants/vibracao.ts`, `src/services/notificacao-descanso.ts`) e
+      nunca mudou desde então — a causa mais provável é a MIUI (Redmi Note 12)
+      sobrescrever/ignorar o `vibrationPattern` do canal por padrão, exigindo
+      customização manual em Ajustes > Apps > ShapeFit > Notificações > canal
+      "Fim do descanso" no aparelho. Precisa ser verificado no aparelho antes de
+      mexer em código — não é claro ainda se é bug nosso ou comportamento do
+      fabricante fora do nosso controle.
+- [X] Se a vibração estiver desativada nas configurações do aparelho, nenhuma
+      vibração ocorre (comportamento padrão do sistema, sem código contornando
+      isso) — **confirmado pelo usuário em Android, 2026-09-29**
 
 ---
 
