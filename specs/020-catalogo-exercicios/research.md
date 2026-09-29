@@ -93,7 +93,7 @@ runtime).
 ```ts
 // src/types/catalogo-exercicios.ts
 export type GrupoMuscular =
-  | 'peito' | 'costas' | 'pernas' | 'ombros' | 'braços' | 'core';
+  | 'peito' | 'costas' | 'pernas' | 'ombros' | 'braços' | 'core' | 'cardio';
 
 export type ExercicioCatalogo = {
   id: string;           // slug estável (ex.: "supino-reto-barra")
@@ -117,6 +117,17 @@ referência exata, evitando ter que re-derivar isso depois.
 (atribuição por obra é a prática mais segura para CC-BY-SA, especialmente se o
 catálogo crescer/for editado no futuro e for preciso saber a origem exata de cada
 item).
+
+**Ampliação em 2026-09-29**: adicionado `'cardio'` ao union de `GrupoMuscular` —
+pedido do Victor depois de ver que exercícios de cardio (esteira, bicicleta
+ergométrica) do seu programa de treino real (`docs/exemplos/treino-abcde-completo.json`)
+não tinham correspondência no catálogo original (que cobria só peito/costas/
+pernas/ombros/braços/core, categoria "Cardio" da API do wger — id 15 — havia sido
+deixada de fora da curadoria inicial). 5 novos itens curados da mesma fonte
+(Esteira, Bicicleta ergométrica, Polichinelo, Elevação de joelhos em salto, Step
+jack), mesmo padrão de atribuição por item. `ExercicioCatalogo` e `listarCatalogo`
+não mudam de formato — só mais um valor possível em `grupoMuscular` e mais itens
+no array.
 
 ## Decisão 4: leitura do catálogo — função pura, sem estado
 

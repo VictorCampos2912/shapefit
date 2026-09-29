@@ -10,11 +10,15 @@ bundle (JSON + imagens), sem associação a perfil (FR-005 da spec).
 ### `GrupoMuscular`
 
 ```ts
-export type GrupoMuscular = 'peito' | 'costas' | 'pernas' | 'ombros' | 'braços' | 'core';
+export type GrupoMuscular = 'peito' | 'costas' | 'pernas' | 'ombros' | 'braços' | 'core' | 'cardio';
 ```
 
 União fixa de literais — lista definida nesta fase (`research.md`, Decisão 3),
 cobrindo os principais grupos musculares de treino de academia (SC-004 da spec).
+**`'cardio'` adicionado em 2026-09-29** (pedido do Victor, depois de ver que
+exercícios de esteira/bicicleta do seu programa de treino real não tinham
+correspondência no catálogo original de 6 grupos) — mesmo raciocínio de
+"subconjunto curado, não exaustivo" da Decisão 3, só ampliando a curadoria.
 
 ### `ExercicioCatalogo`
 
@@ -22,7 +26,7 @@ cobrindo os principais grupos musculares de treino de academia (SC-004 da spec).
 |-------|------|-------------|--------|
 | `id` | `string` | sim | Slug estável, único dentro do catálogo (ex.: `"supino-reto-barra"`) |
 | `nome` | `string` | sim | Nome de exibição do exercício |
-| `grupoMuscular` | `GrupoMuscular` | sim | Um dos 6 valores fixos |
+| `grupoMuscular` | `GrupoMuscular` | sim | Um dos 7 valores fixos |
 | `midia` | `{ tipo: 'imagem' \| 'gif'; arquivo: string }` | sim | `arquivo` é o caminho relativo dentro de `assets/catalogo/imagens/` (SC-001: todo exercício do catálogo tem mídia) |
 | `fonteAtribuicao` | `string` | sim | Texto de crédito por item (fonte + licença — CC-BY-SA 3.0, wger project), consumido pela tela de créditos (FR-007) |
 

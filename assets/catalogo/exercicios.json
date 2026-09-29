@@ -298,5 +298,55 @@
       "arquivo": "mesa-flexora-deitado.png"
     },
     "fonteAtribuicao": "wger project (wger.de) — Everkinetic, CC-BY-SA 3.0"
+  },
+  {
+    "id": "esteira-cardio",
+    "nome": "Esteira",
+    "grupoMuscular": "cardio",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "esteira-cardio.jpg"
+    },
+    "fonteAtribuicao": "wger project (wger.de), CC-BY-SA 4.0"
+  },
+  {
+    "id": "bicicleta-ergometrica",
+    "nome": "Bicicleta ergométrica",
+    "grupoMuscular": "cardio",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "bicicleta-ergometrica.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de), CC-BY-SA 4.0"
+  },
+  {
+    "id": "polichinelo",
+    "nome": "Polichinelo",
+    "grupoMuscular": "cardio",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "polichinelo.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de), CC-BY-SA 4.0"
+  },
+  {
+    "id": "elevacao-joelhos-salto",
+    "nome": "Elevação de joelhos em salto",
+    "grupoMuscular": "cardio",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "elevacao-joelhos-salto.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de), CC-BY-SA 4.0"
+  },
+  {
+    "id": "step-jack",
+    "nome": "Step jack",
+    "grupoMuscular": "cardio",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "step-jack.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de), CC-BY-SA 4.0"
   }
 ]

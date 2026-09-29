@@ -13,7 +13,7 @@ const root = process.cwd();
 const catalogoPath = path.join(root, "assets/catalogo/exercicios.json");
 const imagensDir = path.join(root, "assets/catalogo/imagens");
 
-const GRUPOS_VALIDOS = ["peito", "costas", "pernas", "ombros", "braços", "core"];
+const GRUPOS_VALIDOS = ["peito", "costas", "pernas", "ombros", "braços", "core", "cardio"];
 
 const catalogo = JSON.parse(fs.readFileSync(catalogoPath, "utf8"));
 

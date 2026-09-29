@@ -621,11 +621,15 @@ Android e iOS — confirmado pelo usuário em 2026-09-25.**
 ### RF19 — Catálogo interno de exercícios
 
 **Spec**: `specs/020-catalogo-exercicios/`. **Validado em Android e iOS —
-confirmado pelo usuário em 2026-09-25.**
+confirmado pelo usuário em 2026-09-25. Ampliado em 2026-09-29** (30 → 35
+exercícios, +categoria "cardio") — mesmos critérios abaixo continuam válidos,
+sem necessidade de revalidar o que já passou; a ampliação em si é só mais dado
+curado, sem mudança de comportamento.
 
 **Critérios de aceite:**
-- [X] Catálogo (30 exercícios, 6 grupos musculares) consultável por código, com
-      nome, grupo muscular e mídia completos em cada item
+- [X] Catálogo (35 exercícios, 7 grupos musculares — peito, costas, pernas,
+      ombros, braços, core, cardio) consultável por código, com nome, grupo
+      muscular e mídia completos em cada item
 - [X] Catálogo funciona normalmente com o aparelho em modo avião — nenhuma
       requisição de rede em runtime (dado 100% estático, embutido no bundle)
 - [X] Importar um treino (RF01) cujo(s) exercício(s) não existem no catálogo

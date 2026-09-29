@@ -96,8 +96,8 @@ estão disponíveis, sem nenhuma tentativa de acesso à rede.
    feita para acessar o catálogo.
 3. **Given** o catálogo é um subconjunto curado (Decisão de Arquitetura acima),
    **When** ele é definido, **Then** cobre os principais grupos musculares usados em
-   treinos de academia (ex.: peito, costas, pernas, ombros, braços, core), sem
-   pretender ser exaustivo.
+   treinos de academia (ex.: peito, costas, pernas, ombros, braços, core, cardio),
+   sem pretender ser exaustivo.
 
 ---
 
@@ -170,8 +170,8 @@ comportamento diferente por causa do catálogo.
   AsyncStorage nem associado a nenhum perfil — mesmo conceito para todos os usuários
   do aparelho.
 - **Grupo Muscular** (novo, atributo do Exercício de Catálogo): categoria fixa usada
-  para organizar o catálogo (ex.: peito, costas, pernas, ombros, braços, core) — lista
-  exata de grupos fica a cargo do `/speckit.plan`.
+  para organizar o catálogo (ex.: peito, costas, pernas, ombros, braços, core,
+  cardio) — lista exata de grupos fica a cargo do `/speckit.plan`.
 
 ## Success Criteria *(mandatory)*
 
