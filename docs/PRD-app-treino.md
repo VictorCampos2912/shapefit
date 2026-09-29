@@ -264,10 +264,12 @@ presente em todas as abas — ver `specs/015-menu-de-acoes/`.
   desde sua implementação original. Não há dívida de validação pendente no MVP original
   (RF01–RF10).
 - **Atualizado em 2026-09-29:** RF11, RF12 e RF14 (pós-MVP, ver seção 6) validados
-  nos dois aparelhos-alvo (confirmado pelo usuário). RF13 (vibração) segue
-  **parcialmente pendente** — 3 critérios específicos ainda sem confirmação
-  explícita (ajuste -15s, "Finalizar treino" não vibrar, intensidade igual entre
-  1º/2º plano). Critérios de aceite detalhados em `docs/criterios-aceite.md`.
+  nos dois aparelhos-alvo (confirmado pelo usuário). RF13 (vibração): 6 dos 7
+  critérios confirmados em Android; achamos 1 bug real (vibração da notificação
+  em segundo plano truncada, só 2 das 3 vibrações tocavam) — correção aplicada
+  no código, mas **ainda não validada em aparelho** (precisa de build novo,
+  bloqueado por cota EAS no momento). Critérios de aceite detalhados em
+  `docs/criterios-aceite.md`.
 
 ## 14. Abordagem de identidade visual
 

@@ -4,7 +4,7 @@
 
 **Created**: 2026-09-22
 
-**Status**: Implemented (código pronto; não verificável sem aparelho físico, pendente validação real em Android/iOS)
+**Status**: Implemented — 6/7 critérios validados em Android (confirmado pelo usuário em 2026-09-29); 1 bug real encontrado (vibração da notificação em 2º plano truncada) com correção aplicada no código, ainda pendente de validação em aparelho (build novo bloqueado por cota EAS)
 
 **Requisito**: RF13 (PRD, seção 6 — pós-MVP)
 
