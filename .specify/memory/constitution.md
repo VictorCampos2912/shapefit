@@ -1,19 +1,47 @@
 <!--
 Sync Impact Report
 ==================
-Version change: [TEMPLATE] → 1.0.0 (initial ratification)
-Modified principles: N/A (initial adoption)
-Added sections:
-  - Core Principles: I. TypeScript Obrigatório, II. Simplicidade no MVP,
-    III. Validação em Dois Dispositivos, IV. Controle de Dependências,
-    V. Isolamento de Dados por Perfil (NON-NEGOTIABLE)
-  - Technology & Platform Constraints
-  - Development Workflow & Quality Gates
-  - Governance
+Version change: 1.0.0 → 2.0.0 (MAJOR — redefinição incompatível do Princípio V)
+
+Modified principles:
+  - V. Isolamento de Dados por Perfil (NON-NEGOTIABLE)
+    → V. Autenticação Obrigatória e Isolamento por Conta (NON-NEGOTIABLE)
+
+Modified sections:
+  - Technology & Platform Constraints: modelo de perfis locais sem autenticação
+    (AsyncStorage como fonte de verdade) substituído por Firebase Authentication
+    (Google/Apple Sign-In) + Firestore como fonte de verdade, com persistência
+    offline nativa; exceção de conectividade explicitada (login/logout).
+  - Development Workflow & Quality Gates: item 2 trocado de filtro por
+    `perfil_id` para filtro/isolamento por `uid` da conta autenticada.
+  - Governance: referência ao Princípio V atualizada; nota de migração da
+    Emenda v2.0.0 adicionada (dados locais existentes NÃO migrados).
+  - Correção editorial (mesma emenda v2.0.0, ainda não commitada quando esta
+    correção foi feita): Princípio II ("Simplicidade sobre Funcionalidades
+    Avançadas no MVP") teve "sincronização em nuvem" removida da lista de
+    exemplos de funcionalidades a adiar — deixou de ser "avançada demais para
+    o MVP" e passou a ser parte do Princípio V. Sem bump de versão: é uma
+    correção ao rascunho da própria v2.0.0, que nunca chegou a ser commitado
+    com o texto antigo.
+
+Added sections: N/A
 Removed sections: N/A
-Follow-up TODOs:
-  - TODO(GUIDANCE_FILE): nenhum arquivo de guidance de runtime separado ainda;
-    AGENTS.md/CLAUDE.md cumprem esse papel hoje.
+
+Follow-up TODOs / itens fora do escopo deste comando (não alterados aqui):
+  - docs/PRD-app-treino.md RNF02 (offline) precisa registrar a exceção de
+    login/logout exigindo rede — pedido explicitamente pelo usuário, mas edição
+    de PRD está fora do escopo do /speckit.constitution.
+  - docs/PRD-app-treino.md RNF05 ("Perfis são armazenados localmente, sem senha
+    ou autenticação") e a seção 5 (Não-objetivos: "Login, senha ou autenticação
+    real", "Sincronização de perfis/dados entre aparelhos") agora contradizem
+    esta emenda — precisam de atualização formal no PRD.
+  - Risco prático não resolvido por esta emenda de governança: o PRD (seção de
+    riscos) registra que o projeto não tem conta paga do Apple Developer
+    Program hoje — Sign in with Apple normalmente exige essa conta para
+    configurar a capability em build de produção.
+  - Nenhum código/spec existente foi migrado por este comando (fora de escopo);
+    todo o app implementado até aqui (RF01-RF20) ainda opera sob o modelo de
+    `perfil_id`/AsyncStorage e ficará desalinhado até specs de migração rodarem.
 -->
 
 # ShapeFit Constitution
@@ -23,16 +51,16 @@ Follow-up TODOs:
 ### I. TypeScript Obrigatório
 Todo o código do projeto (app, componentes, hooks, utilitários, scripts de build) MUST ser
 escrito em TypeScript, sem uso de `any` implícito e sem arquivos `.js`/`.jsx` novos. Tipos
-de dados de domínio (perfil, treino, sessão, histórico) MUST ser explicitamente definidos e
+de dados de domínio (conta, treino, sessão, histórico) MUST ser explicitamente definidos e
 compartilhados entre as camadas que os consomem.
-Rationale: consistência de tipos reduz bugs de integração entre telas, storage local e lógica
-de negócio, especialmente em um app com múltiplos perfis e dados sensíveis a contexto.
+Rationale: consistência de tipos reduz bugs de integração entre telas, Firestore e lógica
+de negócio, especialmente em um app com dados sensíveis a contexto de conta.
 
 ### II. Simplicidade sobre Funcionalidades Avançadas no MVP
 No MVP, a equipe MUST preferir a solução mais simples que atenda ao requisito, evitando
 abstrações, camadas de configuração ou funcionalidades especulativas não solicitadas no PRD.
-Funcionalidades avançadas (sincronização em nuvem, analytics, gamificação, etc.) MUST ser
-adiadas para fases posteriores, a menos que explicitamente incluídas no escopo do MVP.
+Funcionalidades avançadas (analytics, gamificação, etc.) MUST ser adiadas para fases
+posteriores, a menos que explicitamente incluídas no escopo do MVP.
 Rationale: o público-alvo inicial e o cronograma do MVP exigem previsibilidade e baixo risco
 técnico; complexidade prematura compromete ambos.
 
@@ -52,31 +80,50 @@ resolvem o problema.
 Rationale: cada dependência adicional aumenta superfície de manutenção, risco de
 compatibilidade com o Expo SDK e tempo de build; o controle evita inchaço não planejado.
 
-### V. Isolamento de Dados por Perfil (NON-NEGOTIABLE)
-Todo dado de treino, sessão e histórico MUST ser segregado pelo `perfil_id` do perfil local
-ativo. Nenhuma consulta, tela ou operação de escrita MUST expor, agregar ou vazar dados entre
-perfis diferentes no mesmo aparelho. Qualquer nova tabela, chave de armazenamento local ou
-estrutura de estado que armazene dados de treino MUST incluir `perfil_id` como parte da sua
-chave de identidade ou de filtro obrigatório.
-Rationale: o app suporta múltiplos perfis locais sem login; a única barreira de privacidade
-entre usuários do mesmo aparelho é a segregação correta por perfil — uma falha aqui é uma
-falha de privacidade, não apenas um bug funcional.
+### V. Autenticação Obrigatória e Isolamento por Conta (NON-NEGOTIABLE)
+Todo acesso ao app MUST exigir autenticação via Google Sign-In ou Apple Sign-In (Firebase
+Authentication) — não há uso do app sem conta autenticada. Todo dado de treino, sessão e
+histórico MUST ser segregado pelo `uid` da conta autenticada ativa no Firestore, substituindo
+`perfil_id` como chave de isolamento. Nenhuma consulta, tela, regra de segurança do Firestore
+ou operação de escrita MUST expor, agregar ou vazar dados entre contas diferentes. Qualquer
+nova coleção do Firestore, hook de leitura/escrita ou estrutura de estado que armazene dados
+de treino MUST incluir o `uid` como parte da chave do documento/coleção e das regras de
+segurança do Firestore (não apenas como filtro no cliente).
+Rationale: substitui o modelo de múltiplos perfis locais sem login por contas reais — a
+barreira de privacidade deixa de ser a segregação local por `perfil_id` e passa a ser a
+autenticação somada às regras de segurança do Firestore por `uid`; uma falha aqui expõe
+dados entre contas de usuários diferentes, um risco mais sério do que a exposição entre
+perfis no mesmo aparelho que este princípio substitui.
+
+**Nota de migração (Emenda v2.0.0, 2026-09-29)**: dados locais já existentes sob o modelo de
+perfil (perfis de teste no AsyncStorage) NÃO são migrados para o Firestore — são descartados
+nesta transição, por decisão explícita do usuário. Specs que implementem esta emenda MUST
+assumir estado inicial vazio no Firestore, sem processo de importação de dados legados do
+AsyncStorage.
 
 ## Technology & Platform Constraints
 
 Stack: React Native + Expo (ver `AGENTS.md` para a versão do Expo em uso e a exigência de
-consultar a documentação versionada antes de escrever código). Perfis são locais ao
-dispositivo, sem autenticação remota ou backend de login. Qualquer mudança de stack (ex.:
-adoção de um backend, banco remoto, ou biblioteca de autenticação) é uma mudança de escopo
-que MUST passar por atualização desta constituição antes da implementação.
+consultar a documentação versionada antes de escrever código). Autenticação MUST usar Firebase
+Authentication com os provedores Google Sign-In e Apple Sign-In (Princípio V) — Firebase
+Authentication e Firestore são dependências aprovadas por esta emenda (Princípio IV). Firestore
+é a fonte de verdade para dados de treino, sessão e histórico, substituindo o AsyncStorage local
+usado como fonte de verdade até a v1.x desta constituição (AsyncStorage pode seguir em uso
+apenas para estado não sensível de UI, nunca como fonte de verdade de dados de treino/sessão/
+histórico). Leitura e escrita durante uso offline MUST usar a persistência offline nativa do
+Firestore, sincronizando automaticamente ao reconectar — a única exceção à operação offline
+(RNF02 do PRD) é o fluxo de login/logout, que exige conectividade de rede; todo o restante do
+app MUST continuar funcionando offline. Qualquer mudança adicional de stack (ex.: outro
+provedor de autenticação, outro banco remoto) é uma mudança de escopo que MUST passar por
+atualização desta constituição antes da implementação.
 
 ## Development Workflow & Quality Gates
 
 Toda etapa de desenvolvimento (feature, correção, refatoração) MUST passar pelos seguintes
 gates antes de ser marcada como concluída:
 1. Código em TypeScript, sem erros de type-check.
-2. Verificação de que nenhuma consulta ou escrita de dado de treino/sessão/histórico ocorre
-   sem filtro por `perfil_id`.
+2. Verificação de que nenhuma consulta, escrita ou regra de segurança do Firestore relativa a
+   dado de treino/sessão/histórico ocorre sem isolamento pelo `uid` da conta autenticada.
 3. Teste manual (ou automatizado, quando disponível) em Android e iOS.
 4. Confirmação de que nenhuma dependência nova foi introduzida sem estar no PRD ou sem
    justificativa registrada.
@@ -90,7 +137,8 @@ constituição, exceto quando o outro documento for mais específico e não a co
 
 Emendas a esta constituição MUST ser propostas por escrito (PR ou registro equivalente),
 descrever o motivo da mudança e, quando alterarem ou removerem um princípio, incluir um
-plano de migração para o código/processo já existente que dependa do princípio anterior.
+plano de migração para o código/processo já existente que dependa do princípio anterior (ver
+nota de migração da Emenda v2.0.0 no Princípio V).
 
 Versionamento segue semântica MAJOR.MINOR.PATCH:
 - MAJOR: remoção ou redefinição incompatível de um princípio existente.
@@ -98,7 +146,8 @@ Versionamento segue semântica MAJOR.MINOR.PATCH:
 - PATCH: esclarecimentos, correções de texto ou ajustes não semânticos.
 
 Toda revisão de código (PR review) MUST verificar aderência aos princípios acima,
-especialmente ao Princípio V (isolamento por perfil). Complexidade adicional ou desvio de
-qualquer princípio MUST ser justificado explicitamente na descrição do PR ou da spec.
+especialmente ao Princípio V (autenticação obrigatória e isolamento por conta/`uid`).
+Complexidade adicional ou desvio de qualquer princípio MUST ser justificado explicitamente
+na descrição do PR ou da spec.
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-14 | **Last Amended**: 2026-09-14
+**Version**: 2.0.0 | **Ratified**: 2026-09-14 | **Last Amended**: 2026-09-29

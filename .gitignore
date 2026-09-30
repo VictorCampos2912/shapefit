@@ -44,3 +44,9 @@ example
 # generated native folders
 /ios
 /android
+
+# Firebase native config (spec 022-autenticacao-google-firestore-treinos) —
+# baixar do console do Firebase e colocar na raiz do projeto antes de buildar
+# (ver quickstart.md, Pré-requisitos)
+google-services.json
+GoogleService-Info.plist

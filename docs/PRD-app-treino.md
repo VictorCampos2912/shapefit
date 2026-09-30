@@ -52,17 +52,20 @@ e histórico separados. Perfis não são sincronizados entre aparelhos diferente
 - Vídeos ou imagens ilustrativas de execução dos exercícios
 - Periodização automática (linear, ondulatória, blocos)
 - Módulo de nutrição
-- Login, senha ou autenticação real — perfis são apenas selecionados localmente, sem
-  proteção de acesso
-- Sincronização de perfis/dados entre aparelhos diferentes (ex: o perfil criado no Redmi
-  Note 12 não aparece automaticamente no iPhone 16 Plus)
-- Publicação nas lojas (App Store / Play Store) — uso via Expo Go é suficiente por ora
+- Publicação nas lojas (App Store / Play Store) — uso via Expo Go/development build é
+  suficiente por ora
 
-> **Nota:** os dois últimos itens (login/sync e publicação nas lojas) estavam implícitos
-> na versão anterior do PRD e foram removidos na edição recebida. Estou mantendo-os aqui
-> como não-objetivos explícitos, já que nada do que foi conversado hoje indica que
-> autenticação real ou publicação nas lojas entraram no escopo — avise se isso não for o
-> caso.
+> **Nota:** o item de publicação nas lojas estava implícito na versão anterior do PRD e
+> foi removido na edição recebida. Estou mantendo-o aqui como não-objetivo explícito, já
+> que nada do que foi conversado indica que publicação nas lojas entrou no escopo — avise
+> se isso não for o caso.
+
+> **Removido em 2026-09-29 (spec `022-autenticacao-google-firestore-treinos`, em
+> implementação):** os itens "Login, senha ou autenticação real" e "Sincronização de
+> perfis/dados entre aparelhos diferentes" que estavam aqui deixaram de ser
+> não-objetivos — essa spec os torna escopo real (autenticação obrigatória via Google
+> Sign-In + Firestore, Constitution v2.0.0 Princípio V). Ver seção 7 (RNF02/RNF05,
+> atualizadas) e seção 6 (tabela de requisitos, a atualizar após validação).
 
 ## 6. Requisitos funcionais
 
@@ -98,11 +101,22 @@ e histórico separados. Perfis não são sincronizados entre aparelhos diferente
 ## 7. Requisitos não funcionais
 
 - **RNF01:** Rodar via Expo Go em Android 12+ (Redmi Note 12) e iOS 17+ (iPhone 16 Plus)
-- **RNF02:** Funcionar offline (dados salvos localmente, sem dependência de internet)
+- **RNF02:** Funcionar offline (dados salvos localmente, sem dependência de internet).
+  **Atualizado (spec `022-autenticacao-google-firestore-treinos`, em implementação —
+  número de RF a confirmar na tabela da seção 6 após validação):** a única exceção é
+  o próprio fluxo de login/logout (Google Sign-In), que exige rede — todo o restante
+  do app, incluindo leitura/escrita de treinos no Firestore, continua funcionando
+  offline via persistência offline nativa do SDK do Firestore, sincronizando
+  automaticamente ao reconectar
 - **RNF03:** Interações principais (registrar série) devem levar no máximo 2 toques
 - **RNF04:** Código em TypeScript, organizado para permitir evolução incremental (v2, v3...)
-- **RNF05:** Perfis são armazenados localmente, sem senha ou autenticação — a seleção de
-  perfil é apenas para segregar dados, não para proteger acesso
+- **RNF05:** ~~Perfis são armazenados localmente, sem senha ou autenticação — a seleção
+  de perfil é apenas para segregar dados, não para proteger acesso~~ **Substituído
+  (spec `022-autenticacao-google-firestore-treinos`, em implementação — número de RF a
+  confirmar na tabela da seção 6 após validação):** autenticação via Conta Google
+  (Firebase Authentication) é obrigatória para qualquer uso do app; dados de
+  treino/sessão/histórico são segregados pelo `uid` da conta autenticada em vez de um
+  perfil local sem login (Constitution v2.0.0, Princípio V)
 
 ## 8. Modelo de dados
 
@@ -188,7 +202,20 @@ prática, não só na teoria do contrato.
 - React Native + Expo (SDK gerenciado)
 - TypeScript
 - Armazenamento local: `AsyncStorage` no MVP (migrar para `expo-sqlite` quando o volume
-  de dados justificar)
+  de dados justificar). **Atualizado (spec `022-autenticacao-google-firestore-treinos`,
+  em implementação):** treinos importados/listados (RF01/RF02) e os dados físicos da
+  conta migram para o Firestore, segregados por `uid`; execução, histórico e ciclo de
+  progresso continuam em `AsyncStorage` sem mudança de schema (Constitution v2.0.0)
+- Autenticação e banco remoto: **`@react-native-firebase/app`**,
+  **`@react-native-firebase/auth`**, **`@react-native-firebase/firestore`** e
+  **`@react-native-google-signin/google-signin`** (adicionados na spec
+  `022-autenticacao-google-firestore-treinos`, em implementação) — módulos nativos
+  (não o SDK Web do Firebase) escolhidos por entregarem persistência offline
+  genuinamente nativa do Firestore e login nativo do Google, em vez de depender de
+  workarounds não-oficiais em React Native (comparação completa em
+  `specs/022-autenticacao-google-firestore-treinos/research.md`, Decisões 1-2);
+  Firebase Authentication e Firestore foram pré-aprovados pela Constitution v2.0.0
+  (Princípio V, NON-NEGOTIABLE)
 - Navegação: **Expo Router** (roteamento baseado em arquivos, dentro de `src/app/`) — usa
   React Navigation internamente, mas sem configuração manual de `NavigationContainer` ou
   `Stack.Navigator`
@@ -212,9 +239,13 @@ prática, não só na teoria do contrato.
   nesse aparelho especificamente. **No iOS, o Expo Go puro continuou funcionando
   normalmente** mesmo após o RF06 (confirmado em teste real) — o crash de import é uma
   limitação específica do Expo Go no Android, não da biblioteca em si. Resumindo:
-  Android usa development build a partir do RF06; iOS pode continuar em Expo Go puro
-  em toda a linha do tempo do projeto. Reflita essa distinção por plataforma nos
-  `quickstart.md` de features futuras, sem precisar de nova confirmação a cada vez.
+  Android usa development build a partir do RF06; iOS podia continuar em Expo Go puro
+  até este ponto da linha do tempo do projeto.
+  **Atualizado (spec `022-autenticacao-google-firestore-treinos`, em implementação):**
+  essa distinção por plataforma deixa de existir a partir desta spec — os módulos
+  nativos do Firebase/Google Sign-In exigem development build **nos dois sistemas**,
+  Android e iOS, não só no Android. Expo Go puro deixa de ser viável em qualquer
+  plataforma a partir daqui.
 
 ## 10. Telas do MVP
 
