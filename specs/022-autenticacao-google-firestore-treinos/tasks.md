@@ -46,12 +46,12 @@ exaustivo em `plan.md`) tiverem sido migrados — nunca antes.
 - [X] T003 Adicionar os plugins nativos `@react-native-firebase/app` e
       `@react-native-google-signin/google-signin` em `app.json` (depende de
       T002).
-- [ ] T004 **(passo manual, fora do código)** Configurar o projeto Firebase:
+- [X] T004 **(passo manual, fora do código)** Configurar o projeto Firebase:
       habilitar Firestore e Authentication (provedor Google); registrar os apps
       Android (`com.shapefit.app`) e iOS (`com.shapefit.app`, ver `app.json`);
       colocar `google-services.json` e `GoogleService-Info.plist` na raiz do
       projeto (`quickstart.md`, Pré-requisitos 1-2).
-- [ ] T005 **(passo manual, fora do código)** Publicar a regra de segurança de
+- [X] T005 **(passo manual, fora do código)** Publicar a regra de segurança de
       `contracts/firestore-rules.md` como `firestore.rules` no projeto Firebase
       — antes de qualquer teste com dados reais (`quickstart.md`, Pré-requisito
       3; depende de T004).
