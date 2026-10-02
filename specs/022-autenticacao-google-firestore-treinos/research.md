@@ -214,13 +214,49 @@ o padrão em vez de inventar um mecanismo novo de roteamento condicional
 de "carregando/autenticado/não autenticado" em vários lugares em vez de centralizar
 num único hook, quebrando o padrão já estabelecido pelo projeto.
 
+## Decisão 7: `app.json` → `app.config.js` + variáveis de ambiente de arquivo do EAS (correção pós-implementação, 2026-10-02)
+
+**Decision**: converter `app.json` em `app.config.js` (JS, não mais JSON estático)
+e trocar `android.googleServicesFile`/`ios.googleServicesFile` de caminho fixo
+para `process.env.GOOGLE_SERVICES_JSON ?? './google-services.json'` e
+`process.env.GOOGLE_SERVICE_INFO_PLIST ?? './GoogleService-Info.plist'`. As duas
+variáveis foram criadas como variáveis de ambiente do tipo `file`, visibilidade
+`secret`, no ambiente `development` do EAS (`eas env:set development --name
+GOOGLE_SERVICES_JSON --type file --value ./google-services.json --visibility
+secret`, e o equivalente para `GOOGLE_SERVICE_INFO_PLIST`).
+
+**Rationale**: o primeiro build real (`eas-cli build --profile development
+--platform android`, disparado pelo Victor) falhou com
+`"google-services.json" is missing` — o EAS Build só sobe pro builder remoto os
+arquivos rastreados pelo git, e esse arquivo está no `.gitignore` (Decisão de
+Setup, T004: não versionar config nativa do Firebase). O próprio erro do EAS CLI
+já apontava a solução oficial: variáveis de ambiente de arquivo. Sem isso, não
+existe build remoto possível com esses arquivos fora do git — não é uma
+preferência de estilo, é a única forma documentada do EAS de prover um arquivo
+não versionado ao builder.
+
+**Efeito colateral aceito**: `app.json` deixou de existir; toda referência a ele
+nos documentos desta spec (`plan.md`, `tasks.md`, `quickstart.md`) foi atualizada
+para `app.config.js`. O fallback para o caminho relativo (`./google-services.json`)
+mantém builds/dev locais funcionando sem exigir as variáveis de ambiente fora do
+EAS Build.
+
+**Alternatives considered**: reverter a decisão de T004 e commitar os arquivos de
+config nativa — rejeitado, o `.gitignore` foi uma escolha explícita do Victor
+(nenhum motivo novo surgiu pra revisitar isso, só porque o EAS exige outro
+caminho de solução não significa que versionar segredo-adjacente seja a resposta
+certa); manter `app.json` estático e só configurar os arquivos manualmente antes
+de cada build remoto — rejeitado, frágil (exige lembrar de um passo manual
+sempre, sem nenhuma validação automática se for esquecido) e não é o fluxo
+suportado oficialmente pelo EAS.
+
 ## Resumo das entidades técnicas afetadas
 
 - `package.json`: novas dependências — `@react-native-firebase/app`,
   `@react-native-firebase/auth`, `@react-native-firebase/firestore`,
   `@react-native-google-signin/google-signin` (Decisões 1-2; MUST ser registradas
   no PRD, Constitution Princípio IV — task de documentação, não de código).
-- `app.json`: novos plugins nativos (`@react-native-firebase/app`,
+- `app.config.js`: novos plugins nativos (`@react-native-firebase/app`,
   `@react-native-google-signin/google-signin`) + arquivos de config nativa
   (`google-services.json`, `GoogleService-Info.plist`) — implica um novo build de
   development client antes de qualquer teste em aparelho (mesma categoria de

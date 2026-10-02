@@ -9,7 +9,7 @@ Guia de validação ponta a ponta — não repete os contratos detalhados em
 
 1. Projeto Firebase criado, com Firestore e Authentication (provedor Google)
    habilitados.
-2. App Android (`com.shapefit.app`, ver `app.json`) e iOS (`com.shapefit.app`)
+2. App Android (`com.shapefit.app`, ver `app.config.js`) e iOS (`com.shapefit.app`)
    registrados no projeto Firebase; `google-services.json` e
    `GoogleService-Info.plist` baixados e colocados na raiz do projeto (ver
    `research.md`, Decisão 1).

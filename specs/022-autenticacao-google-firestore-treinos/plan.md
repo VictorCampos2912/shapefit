@@ -137,7 +137,7 @@ src/
     └── treino.ts                    # Treino.perfilId removido
 
 firestore.rules                      # NOVO — regra de segurança (contracts/firestore-rules.md)
-app.json                             # ALTERADO — plugins nativos (Firebase/Google Sign-In)
+app.config.js                             # ALTERADO — plugins nativos (Firebase/Google Sign-In)
 google-services.json                 # NOVO — config nativa Android; NÃO commitado (.gitignore), baixar do console do Firebase (quickstart.md)
 GoogleService-Info.plist             # NOVO — config nativa iOS; NÃO commitado (.gitignore), baixar do console do Firebase (quickstart.md)
 ```
