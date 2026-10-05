@@ -87,10 +87,14 @@ consumidor ser migrado nas fases seguintes.
       + `signInWithCredential` (research.md, Decisão 2); `sairDaConta` chama
       `auth().signOut()`; ao autenticar, chama `conta-storage.obterDadosFisicos`
       (T008) para preencher `temDadosFisicos` (depende de T008).
-- [X] T010 [P] Em `src/types/treino.ts`: remover o campo `perfilId` do tipo
-      `Treino` — a segregação por conta passa a ser o caminho do documento
-      Firestore (`users/{uid}/treinos/*`), não um campo interno
-      (`data-model.md`).
+- [X] T010 **(revertida em 2026-10-05 — movida para T016)** Em
+      `src/types/treino.ts`: remover o campo `perfilId` do tipo `Treino`.
+      Implementada e depois revertida nesta fase porque deixava o
+      `tsc --noEmit` vermelho durante toda a Foundational e US1+US2 (o único
+      lugar que monta o literal `Treino`, `montarTreinoValido`, só é corrigido
+      na T016/US3) — o campo volta a existir em `Treino` até a T016 remover os
+      dois juntos, no mesmo commit, para o type-check nunca ficar vermelho
+      entre fases.
 
 **Checkpoint**: infraestrutura nova pronta; nada do sistema antigo foi tocado
 ainda — o app continua funcionando exatamente como antes desta feature até a
@@ -177,12 +181,19 @@ vê os próprios treinos.
       para `uid` em todas essas funções (`contracts/treino-storage-firestore.md`);
       a normalização de `categoria` ausente (bug fix do RF17) continua
       aplicada sobre os dados vindos do Firestore, sem alteração de lógica.
-- [ ] T016 [US3] Em `src/services/treino-storage.ts`, função
-      `montarTreinoValido`: remover o parâmetro `perfilId` **inteiramente**
-      (não renomear para `uid`) e o campo `perfilId` do literal `Treino`
-      construído — função pura, sem outro uso para esse valor depois da
-      remoção do campo do tipo (`contracts/treino-storage-firestore.md`,
-      "Ponto de construção afetado"; depende de T010, T015).
+- [ ] T016 [US3] No mesmo commit: (a) em `src/types/treino.ts`, remover o
+      campo `perfilId` do tipo `Treino` — a segregação por conta passa a ser o
+      caminho do documento Firestore (`users/{uid}/treinos/*`), não um campo
+      interno (`data-model.md`; esta remoção pertence a esta task, não à
+      Foundational — ver nota da T010); (b) em
+      `src/services/treino-storage.ts`, função `montarTreinoValido`: remover o
+      parâmetro `perfilId` **inteiramente** (não renomear para `uid`) e o
+      campo `perfilId` do literal `Treino` construído — função pura, sem
+      outro uso para esse valor depois da remoção do campo do tipo
+      (`contracts/treino-storage-firestore.md`, "Ponto de construção
+      afetado"). As duas partes MUST ir no mesmo commit — remover o campo do
+      tipo sem corrigir `montarTreinoValido` (ou vice-versa) deixa o
+      `tsc --noEmit` vermelho; depende de T015.
 - [ ] T017 [US3] Alterar `src/app/(tabs)/index.tsx`: trocar todo uso de
       `usePerfilAtivo().perfilAtivo.id` por `useContaAutenticada().uid` —
       chamadas a `listarTreinos`, `carregarContagens`, `carregarDatasFinalizacao`,
@@ -292,8 +303,8 @@ depois remover o sistema antigo por completo e validar.
 ### Parallel Opportunities
 
 - Setup: T002 pode rodar em paralelo com T001 (arquivos diferentes).
-- Foundational: T007, T008, T010 são `[P]` entre si (arquivos diferentes); T009
-  depende de T008.
+- Foundational: T007 e T008 são `[P]` entre si (arquivos diferentes); T009
+  depende de T008. (T010 foi revertida desta fase — ver nota na própria task.)
 - Depois da Foundational: US1 (T011-T012), o storage de US3 (T015-T016) e os
   itens de Polish T021/T022 podem avançar em paralelo — todos só dependem da
   Foundational, não uns dos outros.
@@ -303,10 +314,9 @@ depois remover o sistema antigo por completo e validar.
 ## Parallel Example: Foundational
 
 ```bash
-# T007, T008 e T010 podem ser feitos em paralelo (arquivos diferentes, sem dependência entre si):
+# T007 e T008 podem ser feitos em paralelo (arquivos diferentes, sem dependência entre si):
 Task: "Adicionar DadosFisicos em src/types/perfil.ts"
 Task: "Criar src/services/conta-storage.ts"
-Task: "Remover perfilId de Treino em src/types/treino.ts"
 
 # T009 depende de T008 (chama obterDadosFisicos) — não entra no lote paralelo acima.
 ```
