@@ -142,11 +142,13 @@ o app chega à lista de treinos.
 ### Implementation for User Story 2
 
 - [ ] T013 [US2] Criar `src/app/conta/dados-fisicos.tsx`: renderiza
-      `PerfilForm` (`src/components/perfil/perfil-form.tsx`, **sem nenhuma
-      alteração** — research.md, Decisão 4) com `onSubmit` chamando
-      `conta-storage.salvarDadosFisicos(useContaAutenticada().uid, dados)` e, ao
-      concluir, navegando para a lista de treinos (mesmo padrão de
-      `src/app/perfil/criar.tsx`, que este arquivo substitui) — depende de
+      `PerfilForm` (`src/components/perfil/perfil-form.tsx`, sem alteração) com
+      `onSubmit` chamando `conta-storage.salvarDadosFisicos(useContaAutenticada().uid, dados)`
+      e, ao concluir, navegando para a lista de treinos (mesmo padrão de
+      `src/app/perfil/criar.tsx`, que este arquivo substitui, **incluindo o
+      `KeyboardAvoidingView` + `ScrollView` com `keyboardShouldPersistTaps="handled"`
+      — correção de 2026-10-05, research.md Decisão 4, sem isso o botão "Salvar"
+      fica inacessível atrás do teclado em telas menores**) — depende de
       T008, T009.
 - [ ] T014 [US2] Remover `src/app/perfil/criar.tsx` (substituído por T013;
       confirmar que nada mais importa este arquivo antes de remover).

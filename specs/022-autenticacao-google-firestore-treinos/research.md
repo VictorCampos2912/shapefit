@@ -173,6 +173,23 @@ projetada de um jeito que essa reutilização é direta.
 (`src/components/conta/`) e divergir dali — rejeitado, cria duplicação de UI sem
 necessidade; qualquer ajuste visual futuro teria que ser replicado em dois lugares.
 
+**Correção (2026-10-05)**: "sem nenhuma alteração" deixou de ser exato — o usuário
+relatou, testando `src/app/perfil/criar.tsx` real no iPhone, que os campos Peso/
+Altura/Idade (`keyboardType="decimal-pad"`/`"number-pad"`) não têm nenhuma tecla
+de retorno no iOS, e o campo Nome não avançava pro próximo campo — um bug
+pré-existente do RF10 (não introduzido por esta feature), mas que afeta
+diretamente o teste da User Story 2 porque é o mesmo componente. Corrigido:
+`PerfilForm` ganhou `returnKeyType`/`onSubmitEditing`/refs encadeando Nome → Peso
+→ Altura → Idade, uma `InputAccessoryView` (iOS) com botão "Próximo"/"Concluído"
+pros 3 campos numéricos (que não têm tecla de retorno nativa no iOS), e um
+`TouchableWithoutFeedback` pra fechar o teclado ao tocar fora de qualquer campo.
+`src/app/perfil/criar.tsx` também ganhou `KeyboardAvoidingView` + `ScrollView`
+(`keyboardShouldPersistTaps="handled"`), já que sem isso o botão "Salvar perfil"
+podia ficar inacessível atrás do teclado em telas menores. Esta correção se
+propaga de graça para `src/app/conta/dados-fisicos.tsx` (ainda a criar, T013)
+já que ele reaproveita o mesmo `PerfilForm` — só precisa repetir o mesmo padrão
+de `KeyboardAvoidingView`/`ScrollView` na tela nova.
+
 ## Decisão 5: Continuidade do restante do app — `uid` no lugar de `perfilId`, sem migrar storage
 
 **Decision**: `src/services/treino-storage.ts` (execução/histórico já cobertos por
