@@ -71,15 +71,15 @@ consumidor ser migrado nas fases seguintes.
 
 **⚠️ CRITICAL**: Nenhuma user story começa antes desta fase estar completa.
 
-- [ ] T007 [P] Em `src/types/perfil.ts`: adicionar o tipo `DadosFisicos = { nome: string; pesoKg: number; alturaCm: number; idade: number; sexo: Sexo; objetivo: ObjetivoTreino; criadoEm: string }`
+- [X] T007 [P] Em `src/types/perfil.ts`: adicionar o tipo `DadosFisicos = { nome: string; pesoKg: number; alturaCm: number; idade: number; sexo: Sexo; objetivo: ObjetivoTreino; criadoEm: string }`
       (`data-model.md`, `users/{uid}`), reaproveitando `Sexo` e `ObjetivoTreino`
       já existentes no mesmo arquivo **sem alterá-los**. Não remover `Perfil`/
       `PerfisState` ainda (fase de Polish, T023).
-- [ ] T008 [P] Criar `src/services/conta-storage.ts` com `obterDadosFisicos(uid: string): Promise<DadosFisicos | null>`
+- [X] T008 [P] Criar `src/services/conta-storage.ts` com `obterDadosFisicos(uid: string): Promise<DadosFisicos | null>`
       e `salvarDadosFisicos(uid: string, dados: DadosFisicos): Promise<void>`,
       lendo/escrevendo o documento `users/{uid}` no Firestore
       (`contracts/conta-storage.md`). Não toca em `perfil-storage.ts`.
-- [ ] T009 Criar `src/hooks/use-conta-autenticada.tsx` com
+- [X] T009 Criar `src/hooks/use-conta-autenticada.tsx` com
       `ContaAutenticadaProvider`/`useContaAutenticada()` expondo `{ uid,
       contaAutenticada, carregando, temDadosFisicos, entrarComGoogle,
       sairDaConta }` (`contracts/use-conta-autenticada.md`) — `entrarComGoogle`
@@ -87,7 +87,7 @@ consumidor ser migrado nas fases seguintes.
       + `signInWithCredential` (research.md, Decisão 2); `sairDaConta` chama
       `auth().signOut()`; ao autenticar, chama `conta-storage.obterDadosFisicos`
       (T008) para preencher `temDadosFisicos` (depende de T008).
-- [ ] T010 [P] Em `src/types/treino.ts`: remover o campo `perfilId` do tipo
+- [X] T010 [P] Em `src/types/treino.ts`: remover o campo `perfilId` do tipo
       `Treino` — a segregação por conta passa a ser o caminho do documento
       Firestore (`users/{uid}/treinos/*`), não um campo interno
       (`data-model.md`).
