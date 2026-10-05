@@ -6,16 +6,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { PerfilForm } from '@/components/perfil/perfil-form';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
-import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
+import { useContaAutenticada } from '@/hooks/use-conta-autenticada';
+import { salvarDadosFisicos } from '@/services/conta-storage';
 
-export default function CriarPerfilScreen() {
-  const { criarPerfil } = usePerfilAtivo();
+export default function DadosFisicosScreen() {
+  const { uid } = useContaAutenticada();
   const [submitting, setSubmitting] = useState(false);
 
-  async function handleSubmit(dados: Parameters<typeof criarPerfil>[0]) {
+  async function handleSubmit(dados: Parameters<typeof salvarDadosFisicos>[1]) {
+    if (!uid) return;
     setSubmitting(true);
     try {
-      await criarPerfil(dados);
+      await salvarDadosFisicos(uid, dados);
       router.replace('/');
     } finally {
       setSubmitting(false);

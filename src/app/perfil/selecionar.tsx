@@ -5,7 +5,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { PerfilListItem } from '@/components/perfil/perfil-list-item';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Button } from '@/components/ui/button';
 import { Spacing } from '@/constants/theme';
 import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
 
@@ -47,10 +46,6 @@ export default function SelecionarPerfilScreen() {
             />
           )}
         />
-
-        <Button variant="outline" onPress={() => router.push('/perfil/criar')}>
-          Criar novo perfil
-        </Button>
       </SafeAreaView>
     </ThemedView>
   );

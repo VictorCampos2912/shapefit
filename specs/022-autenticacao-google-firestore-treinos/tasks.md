@@ -115,18 +115,23 @@ isoladamente até o ponto de "login bem-sucedido").
 
 ### Implementation for User Story 1
 
-- [ ] T011 [US1] Criar `src/app/login.tsx`: tela com um único botão "Entrar com
+- [X] T011 [US1] Criar `src/app/login.tsx`: tela com um único botão "Entrar com
       o Google", chamando `useContaAutenticada().entrarComGoogle()`; em caso de
       falha/cancelamento, exibir mensagem de erro e permanecer na tela (FR-004,
       Acceptance Scenario 3 da User Story 1) — depende de T009.
-- [ ] T012 [US1] Alterar `src/app/_layout.tsx`: trocar `PerfilAtivoProvider`/
-      `usePerfilAtivo()` por `ContaAutenticadaProvider`/`useContaAutenticada()`
-      no `RootNavigator` — gate conforme `contracts/use-conta-autenticada.md`:
-      `carregando` → não renderiza nada; sem conta → `Redirect` para `/login`;
-      com conta e `temDadosFisicos === null` → não renderiza nada; com conta e
-      `temDadosFisicos === false` → `Redirect` para `/conta/dados-fisicos`; com
-      conta e `temDadosFisicos === true` → stack normal (depende de T009,
-      T011; plan.md, linha #1 do levantamento exaustivo).
+- [X] T012 [US1] Alterar `src/app/_layout.tsx`: trocar `usePerfilAtivo()` por
+      `useContaAutenticada()` no `RootNavigator` — gate conforme
+      `contracts/use-conta-autenticada.md`: `carregando` → não renderiza nada;
+      sem conta → `Redirect` para `/login`; com conta e
+      `temDadosFisicos === null` → não renderiza nada; com conta e
+      `temDadosFisicos === false` → `Redirect` para `/conta/dados-fisicos`;
+      com conta e `temDadosFisicos === true` → stack normal (depende de T009,
+      T011; plan.md, linha #1 do levantamento exaustivo). **`PerfilAtivoProvider`
+      MUST continuar envolvendo a árvore** (aninhado dentro de
+      `ContaAutenticadaProvider`, não substituído por ele) até as 5 telas que
+      ainda chamam `usePerfilAtivo()` (T017-T022) serem migradas — removê-lo
+      agora quebra essas telas com "deve ser usado dentro de um
+      PerfilAtivoProvider" (research.md, correção na Decisão 6).
 
 **Checkpoint**: login funciona e o gate decide corretamente para onde navegar
 — falta a tela de destino do primeiro login (US2) para o fluxo ficar completo
@@ -145,7 +150,7 @@ o app chega à lista de treinos.
 
 ### Implementation for User Story 2
 
-- [ ] T013 [US2] Criar `src/app/conta/dados-fisicos.tsx`: renderiza
+- [X] T013 [US2] Criar `src/app/conta/dados-fisicos.tsx`: renderiza
       `PerfilForm` (`src/components/perfil/perfil-form.tsx`, sem alteração) com
       `onSubmit` chamando `conta-storage.salvarDadosFisicos(useContaAutenticada().uid, dados)`
       e, ao concluir, navegando para a lista de treinos (mesmo padrão de
@@ -154,7 +159,7 @@ o app chega à lista de treinos.
       — correção de 2026-10-05, research.md Decisão 4, sem isso o botão "Salvar"
       fica inacessível atrás do teclado em telas menores**) — depende de
       T008, T009.
-- [ ] T014 [US2] Remover `src/app/perfil/criar.tsx` (substituído por T013;
+- [X] T014 [US2] Remover `src/app/perfil/criar.tsx` (substituído por T013;
       confirmar que nada mais importa este arquivo antes de remover).
 
 **Checkpoint**: US1 + US2 juntas cobrem o fluxo completo de login até a lista
@@ -256,12 +261,14 @@ depois remover o sistema antigo por completo e validar.
       linha #7 do levantamento exaustivo, o arquivo com mais pontos de uso —
       maior risco de esquecer algum call site) — FR-012, execução/sessão
       continuam em AsyncStorage sem mudança de schema (depende de T009, T015).
-- [ ] T023 Remover `src/hooks/use-perfil-ativo.tsx`, `src/services/perfil-storage.ts`
-      e os tipos `Perfil`/`PerfisState`/`DefinirPerfilAtivoResultado`/
+- [ ] T023 Remover `src/hooks/use-perfil-ativo.tsx`, `src/services/perfil-storage.ts`,
+      os tipos `Perfil`/`PerfisState`/`DefinirPerfilAtivoResultado`/
       `SessaoRegistro` de `src/types/perfil.ts` (manter `Sexo`/`ObjetivoTreino`,
-      usados por `PerfilForm`/`DadosFisicos`) — **só depois** de T012, T014,
-      T017, T018, T019, T020, T021 e T022 estarem todos completos. Confirmar
-      com `grep -rn "usePerfilAtivo" src/` retornando vazio antes de remover.
+      usados por `PerfilForm`/`DadosFisicos`), **e o `PerfilAtivoProvider` que
+      ficou envolvendo a árvore em `src/app/_layout.tsx` desde a T012** (nota
+      da T012/research.md Decisão 6) — **só depois** de T012, T014, T017,
+      T018, T019, T020, T021 e T022 estarem todos completos. Confirmar com
+      `grep -rn "usePerfilAtivo" src/` retornando vazio antes de remover.
 - [ ] T024 Rodar `npx tsc --noEmit` na raiz do projeto e confirmar zero erros —
       validação final de que nenhum consumidor de `usePerfilAtivo`/`Perfil`/
       `perfilId` (em `Treino`) foi esquecido (Constitution v2.0.0, Princípio I;

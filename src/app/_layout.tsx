@@ -9,25 +9,38 @@ import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import { PerfilAtivoProvider, usePerfilAtivo } from '@/hooks/use-perfil-ativo';
+import { ContaAutenticadaProvider, useContaAutenticada } from '@/hooks/use-conta-autenticada';
+// Mantido temporariamente (spec 022, Fase US1+US2): 5 telas ainda não migradas
+// (acoes.tsx, (tabs)/index.tsx, (tabs)/explore.tsx, treino/[treinoId].tsx,
+// perfil/selecionar.tsx — tasks.md T017-T022) ainda chamam usePerfilAtivo() e
+// quebrariam com "deve ser usado dentro de um PerfilAtivoProvider" sem este
+// Provider continuar envolvendo a árvore. Remover só quando as 5 estiverem
+// migradas e PerfilAtivoProvider for removido (tasks.md T023).
+import { PerfilAtivoProvider } from '@/hooks/use-perfil-ativo';
 import { configurarNotificacoesDescanso } from '@/services/notificacao-descanso';
 
 SplashScreen.preventAutoHideAsync();
 
 function RootNavigator() {
-  const { perfis, sessaoConfirmada, carregando } = usePerfilAtivo();
+  const { contaAutenticada, carregando, temDadosFisicos } = useContaAutenticada();
 
   if (carregando) {
     return null;
   }
 
-  return (
-    <>
-      {!sessaoConfirmada && perfis.length === 0 && <Redirect href="/perfil/criar" />}
-      {!sessaoConfirmada && perfis.length > 0 && <Redirect href="/perfil/selecionar" />}
-      <Stack screenOptions={{ headerShown: false }} />
-    </>
-  );
+  if (!contaAutenticada) {
+    return <Redirect href="/login" />;
+  }
+
+  if (temDadosFisicos === null) {
+    return null;
+  }
+
+  if (temDadosFisicos === false) {
+    return <Redirect href="/conta/dados-fisicos" />;
+  }
+
+  return <Stack screenOptions={{ headerShown: false }} />;
 }
 
 export default function RootLayout() {
@@ -47,10 +60,12 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <PerfilAtivoProvider>
-        <AnimatedSplashOverlay />
-        <RootNavigator />
-      </PerfilAtivoProvider>
+      <ContaAutenticadaProvider>
+        <PerfilAtivoProvider>
+          <AnimatedSplashOverlay />
+          <RootNavigator />
+        </PerfilAtivoProvider>
+      </ContaAutenticadaProvider>
     </ThemeProvider>
   );
 }

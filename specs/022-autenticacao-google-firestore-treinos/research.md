@@ -231,6 +231,21 @@ o padrão em vez de inventar um mecanismo novo de roteamento condicional
 de "carregando/autenticado/não autenticado" em vários lugares em vez de centralizar
 num único hook, quebrando o padrão já estabelecido pelo projeto.
 
+**Correção na implementação (T012, 2026-10-05)**: trocar `PerfilAtivoProvider`
+por `ContaAutenticadaProvider` em `_layout.tsx` sozinho quebraria as 5 telas
+ainda não migradas (`acoes.tsx`, `(tabs)/index.tsx`, `(tabs)/explore.tsx`,
+`treino/[treinoId].tsx`, `perfil/selecionar.tsx` — tasks.md T017-T022), que
+ainda chamam `usePerfilAtivo()` e lançariam "deve ser usado dentro de um
+PerfilAtivoProvider" ao serem alcançadas. `_layout.tsx` ficou com os **dois**
+Providers aninhados (`ContaAutenticadaProvider` por fora, decidindo o gate;
+`PerfilAtivoProvider` por dentro, mantido só para essas 5 telas não
+quebrarem) até elas serem migradas e `PerfilAtivoProvider` ser removido de
+vez (T023). Como essas 5 telas já tratam `perfilAtivo === null` de forma
+defensiva (todas têm `if (!perfilAtivo) return;` antes de usar `.id`), o
+efeito enquanto não migradas é um estado vazio/parado (ex.: lista de treinos
+nunca carrega), não um crash — aceitável para esta fase, já que US3/Polish
+ainda não rodaram.
+
 ## Decisão 7: `app.json` → `app.config.js` + variáveis de ambiente de arquivo do EAS (correção pós-implementação, 2026-10-02)
 
 **Decision**: converter `app.json` em `app.config.js` (JS, não mais JSON estático)
