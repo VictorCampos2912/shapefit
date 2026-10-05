@@ -643,7 +643,8 @@ Android e iOS — confirmado pelo usuário em 2026-09-25.**
 confirmado pelo usuário em 2026-09-25. Ampliado em 2026-09-29** (30 → 35
 exercícios, +categoria "cardio") — mesmos critérios abaixo continuam válidos,
 sem necessidade de revalidar o que já passou; a ampliação em si é só mais dado
-curado, sem mudança de comportamento.
+curado, sem mudança de comportamento. **Imagens novas da ampliação confirmadas
+em aparelho real (Android e iOS) em 2026-10-05**, durante teste da spec 022.
 
 **Critérios de aceite:**
 - [X] Catálogo (35 exercícios, 7 grupos musculares — peito, costas, pernas,
