@@ -187,7 +187,7 @@ vê os próprios treinos.
 
 ### Implementation for User Story 3
 
-- [ ] T015 [US3] Em `src/services/treino-storage.ts`: migrar `listarTreinos`,
+- [X] T015 [US3] Em `src/services/treino-storage.ts`: migrar `listarTreinos`,
       `importarTreino`, `importarTreinoExemplo`, `processarConteudoObjeto` e
       `processarConteudoArray` de `AsyncStorage` (`treinos:<perfilId>`) para
       Firestore (`users/{uid}/treinos/*`) — parâmetro renomeado de `perfilId`

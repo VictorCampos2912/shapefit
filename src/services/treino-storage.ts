@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { collection, doc, getDocs, getFirestore, setDoc, writeBatch } from '@react-native-firebase/firestore';
 import * as Crypto from 'expo-crypto';
 import * as DocumentPicker from 'expo-document-picker';
 
@@ -12,39 +12,33 @@ import type {
   ResultadoImportacaoMultipla,
   Treino,
   TreinoImportadoComPendencias,
-  TreinosPorPerfilState,
 } from '@/types/treino';
 
 const CATEGORIAS_VALIDAS: CategoriaExercicio[] = ['peso', 'tempo', 'distancia', 'repeticoes'];
 
-function treinosKey(perfilId: string): string {
-  return `treinos:${perfilId}`;
+function treinosCollection(uid: string) {
+  return collection(getFirestore(), 'users', uid, 'treinos');
 }
 
-async function getTreinosState(perfilId: string): Promise<TreinosPorPerfilState> {
-  const raw = await AsyncStorage.getItem(treinosKey(perfilId));
-  if (!raw) {
-    return { treinos: [] };
-  }
-  return JSON.parse(raw) as TreinosPorPerfilState;
+async function setDocTreino(uid: string, treino: Treino): Promise<void> {
+  await setDoc(doc(treinosCollection(uid), treino.id), treino);
 }
 
-async function setTreinosState(perfilId: string, state: TreinosPorPerfilState): Promise<void> {
-  await AsyncStorage.setItem(treinosKey(perfilId), JSON.stringify(state));
-}
-
-export async function listarTreinos(perfilId: string): Promise<Treino[]> {
-  const state = await getTreinosState(perfilId);
+export async function listarTreinos(uid: string): Promise<Treino[]> {
+  const snapshot = await getDocs(treinosCollection(uid));
   // Treinos importados antes da RF17 (categorias) não têm `categoria` persistida —
   // normaliza para o mesmo default já aplicado na importação ('peso'), sem exigir
   // migração de dados nem reescrever o storage.
-  return state.treinos.map((treino) => ({
-    ...treino,
-    exercicios: treino.exercicios.map((exercicio) => ({
-      ...exercicio,
-      categoria: exercicio.categoria ?? 'peso',
-    })),
-  }));
+  return snapshot.docs.map((documento) => {
+    const treino = documento.data() as Treino;
+    return {
+      ...treino,
+      exercicios: treino.exercicios.map((exercicio) => ({
+        ...exercicio,
+        categoria: exercicio.categoria ?? 'peso',
+      })),
+    };
+  });
 }
 
 function validarExercicio(
@@ -161,30 +155,30 @@ function montarTreinoValido(bruto: unknown, perfilId: string): ResultadoMontagem
   return { ok: true, treino, exerciciosIgnorados };
 }
 
-async function processarConteudoObjeto(bruto: unknown, perfilId: string): Promise<ResultadoImportacao> {
-  const resultado = montarTreinoValido(bruto, perfilId);
+async function processarConteudoObjeto(bruto: unknown, uid: string): Promise<ResultadoImportacao> {
+  const resultado = montarTreinoValido(bruto, uid);
   if (!resultado.ok) {
     return { treino: null, exerciciosIgnorados: [], erro: resultado.motivo };
   }
 
-  const state = await getTreinosState(perfilId);
-  await setTreinosState(perfilId, { treinos: [...state.treinos, resultado.treino] });
+  await setDocTreino(uid, resultado.treino);
 
   return { treino: resultado.treino, exerciciosIgnorados: resultado.exerciciosIgnorados, erro: null };
 }
 
-async function processarConteudoArray(bruto: unknown[], perfilId: string): Promise<ResultadoImportacaoMultipla> {
+async function processarConteudoArray(bruto: unknown[], uid: string): Promise<ResultadoImportacaoMultipla> {
   if (bruto.length === 0) {
     return { treinos: [], treinosIgnorados: [], erro: 'O arquivo não contém nenhum treino.' };
   }
 
   // Bloqueio por ciclo em andamento (RF17, FR-007) — checagem por tamanho bruto do
   // array, antes de qualquer validação, para falhar rápido e não persistir nada
-  // (tudo ou nada) enquanto o ciclo atual do perfil ainda não atingiu 40 sessões.
+  // (tudo ou nada) enquanto o ciclo atual da conta ainda não atingiu 40 sessões.
+  // Ciclo de progresso (RF15) continua em AsyncStorage, chaveado por uid (FR-012).
   if (bruto.length >= 2) {
-    const cicloAtual = await obterCicloAtual(perfilId);
+    const cicloAtual = await obterCicloAtual(uid);
     if (cicloAtual) {
-      const { totalFinalizado } = await calcularProgressoCiclo(perfilId, cicloAtual);
+      const { totalFinalizado } = await calcularProgressoCiclo(uid, cicloAtual);
       if (totalFinalizado < 40) {
         return {
           treinos: [],
@@ -200,7 +194,7 @@ async function processarConteudoArray(bruto: unknown[], perfilId: string): Promi
   const treinosIgnorados: ResultadoImportacaoMultipla['treinosIgnorados'] = [];
 
   for (const item of bruto) {
-    const resultado = montarTreinoValido(item, perfilId);
+    const resultado = montarTreinoValido(item, uid);
     if (resultado.ok) {
       treinos.push({ treino: resultado.treino, exerciciosIgnorados: resultado.exerciciosIgnorados });
     } else {
@@ -209,15 +203,18 @@ async function processarConteudoArray(bruto: unknown[], perfilId: string): Promi
   }
 
   if (treinos.length > 0) {
-    const state = await getTreinosState(perfilId);
-    await setTreinosState(perfilId, {
-      treinos: [...state.treinos, ...treinos.map((item) => item.treino)],
+    // Escrita em lote (tudo ou nada) — equivalente Firestore do antigo
+    // setTreinosState único em AsyncStorage.
+    const lote = writeBatch(getFirestore());
+    treinos.forEach((item) => {
+      lote.set(doc(treinosCollection(uid), item.treino.id), item.treino);
     });
+    await lote.commit();
 
     // Cria o ciclo de progresso (RF17, FR-001) só quando 2+ treinos de fato
     // validaram — um array com só 1 treino válido não é um lote de múltiplos.
     if (treinos.length >= 2) {
-      await criarCiclo(perfilId, treinos.map((item) => item.treino.id));
+      await criarCiclo(uid, treinos.map((item) => item.treino.id));
     }
   }
 
@@ -226,7 +223,7 @@ async function processarConteudoArray(bruto: unknown[], perfilId: string): Promi
 
 async function processarConteudo(
   conteudo: string,
-  perfilId: string,
+  uid: string,
 ): Promise<ResultadoImportacao | ResultadoImportacaoMultipla> {
   let bruto: unknown;
   try {
@@ -236,14 +233,14 @@ async function processarConteudo(
   }
 
   if (Array.isArray(bruto)) {
-    return processarConteudoArray(bruto, perfilId);
+    return processarConteudoArray(bruto, uid);
   }
 
-  return processarConteudoObjeto(bruto, perfilId);
+  return processarConteudoObjeto(bruto, uid);
 }
 
 export async function importarTreino(
-  perfilId: string,
+  uid: string,
 ): Promise<ResultadoImportacao | ResultadoImportacaoMultipla | null> {
   const resultado = await DocumentPicker.getDocumentAsync({
     type: 'application/json',
@@ -255,12 +252,12 @@ export async function importarTreino(
   }
 
   const conteudo = await (await fetch(resultado.assets[0].uri)).text();
-  return processarConteudo(conteudo, perfilId);
+  return processarConteudo(conteudo, uid);
 }
 
 export async function importarTreinoExemplo(
-  perfilId: string,
+  uid: string,
 ): Promise<ResultadoImportacao | ResultadoImportacaoMultipla> {
   const conteudo = JSON.stringify(treinoExemplo);
-  return processarConteudo(conteudo, perfilId);
+  return processarConteudo(conteudo, uid);
 }
