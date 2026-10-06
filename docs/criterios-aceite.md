@@ -679,3 +679,87 @@ Android e iOS — confirmado pelo usuário em 2026-09-29.**
       corretamente NÃO corresponde — nunca aproxima nomes só parecidos
 - [X] Imagem resolve corretamente nos 3 bundlers (web, Android, iOS) — mapa
       estático de `require()` (`imagens-index.ts`, RF19) funciona igual nos três
+
+---
+
+### Autenticação Google + Firestore (substitui RF10; migra RF01/RF02)
+
+**Spec**: `specs/022-autenticacao-google-firestore-treinos/` · substitui o RF10
+(perfil local sem autenticação); migra RF01 (importar treino) e RF02 (listar
+treinos) de AsyncStorage para Firestore; base de regras: Constitution v2.0.0,
+Princípio V (NON-NEGOTIABLE). Número de RF definitivo a confirmar na tabela da
+seção 6 do PRD só após validação (disciplina já usada pelo RF11-RF20 — nunca
+presumir o número antes de fechar). **Status da spec: em validação.**
+
+**Critérios de aceite:**
+
+Login (User Story 1):
+- [ ] Ao abrir o app sem sessão ativa, a tela de login aparece antes de
+      qualquer outra tela, com só a opção "Entrar com o Google" (nenhuma opção
+      Apple, nenhuma opção de perfil local)
+- [ ] Login cancelado ou com falha: mensagem de erro clara, app permanece na
+      tela de login, sem travar
+- [ ] Sessão permanece ativa entre aberturas do app (fechar e reabrir não pede
+      login de novo, sem ter saído da conta)
+
+Dados físicos no primeiro login (User Story 2):
+- [ ] Primeiro login de uma conta (sem dados físicos salvos): formulário de
+      dados físicos aparece antes de qualquer outra tela, com os mesmos campos
+      do RF10 (nome, peso, altura, idade, sexo, objetivo) e a mesma validação
+      de obrigatoriedade
+- [ ] Salvar com campo vazio: bloqueado, campos faltantes indicados
+- [ ] Preencher e salvar: navega para a lista de treinos (vazia, primeira vez
+      desta conta)
+- [ ] **Login subsequente da mesma conta** (neste ou em outro aparelho): vai
+      direto para a lista de treinos, **sem reexibir o formulário**
+
+Isolamento entre contas — Firestore (User Story 3, o teste mais importante da
+feature):
+- [ ] Conta A importa um treino; trocar para conta B (nova, primeiro login):
+      lista de treinos de B aparece **vazia** — o treino de A não aparece
+- [ ] Conta B importa um treino diferente; voltar para conta A: lista de A
+      mostra só o treino de A, o treino de B não aparece
+- [ ] Rules Playground do Firestore (`contracts/firestore-rules.md`, sem
+      depender do app — console do Firebase), os 4 casos:
+  - [ ] Sessão de A tenta ler `users/B` → rejeitado (`permission-denied`)
+  - [ ] Sessão de A lê/escreve em `users/A` ou `users/A/treinos/*` → permitido
+  - [ ] Sem autenticação (cliente anônimo) tenta ler/escrever `users/*` →
+        rejeitado
+  - [ ] Sessão de A tenta escrever em `users/B` (caminho) com `A` em algum
+        campo do corpo do documento → continua rejeitado (regra não lê campo
+        nenhum do corpo, só o segmento `{uid}` do caminho)
+
+Offline (FR-011):
+- [ ] Com treino já importado/sincronizado, modo avião: lista de treinos
+      continua aparecendo normalmente (cache offline nativo do Firestore)
+- [ ] Importar um treino novo em modo avião: mensagem de sucesso normal,
+      mesmo sem rede (sem travar esperando confirmação do servidor —
+      research.md Decisão 8)
+- [ ] Reconectar: o treino importado offline aparece depois em outro
+      aparelho/sessão da mesma conta, sincronizado automaticamente
+- [ ] Tentar login/logout em modo avião: falha com mensagem clara (única
+      exceção à operação offline)
+
+Sair da conta (User Story 4):
+- [ ] Tela de Ações mostra "Sair da conta ({e-mail})" no lugar de "Trocar
+      perfil"
+- [ ] Tocar em "Sair da conta": volta para a tela de login; login seguinte
+      mostra o seletor de conta do Google de novo (não reloga direto na
+      mesma conta — confirma que `GoogleSignin.signOut()` limpou a sessão
+      nativa, não só o Firebase)
+- [ ] Sair da conta com uma sessão de treino em andamento: **não bloqueado**
+      (diferente da regra antiga do RF10); entrar de novo com a mesma conta:
+      sessão em andamento continua exatamente onde estava
+
+Recuperação de erro (Decisão 9, `research.md`):
+- [ ] Se a checagem de dados físicos falhar (ex.: sem rede no momento do
+      login): tela de erro aparece com "Tentar novamente" e "Sair da conta" —
+      nunca uma tela em branco travada
+
+Continuidade do que não migra (FR-012):
+- [ ] Execução de treino, histórico e progresso de ciclo continuam
+      funcionando exatamente como antes desta feature, agora chaveados por
+      `uid` em vez de `perfilId`
+
+**Validado em Android e iOS**: *pendente* (Constitution v2.0.0, Princípio
+III — nenhum item acima fica `[X]` sem confirmação nos dois aparelhos).
