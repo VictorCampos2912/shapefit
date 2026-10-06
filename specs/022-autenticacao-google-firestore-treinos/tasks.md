@@ -213,7 +213,7 @@ vê os próprios treinos.
       `carregarCicloAtual` e os arrays de dependência de `useEffect`/
       `useFocusEffect` (plan.md, linha #5 do levantamento exaustivo; depende
       de T009, T015).
-- [ ] T018 [US3] Alterar `src/app/acoes.tsx`: trocar `perfilAtivo.id` por
+- [X] T018 [US3] Alterar `src/app/acoes.tsx`: trocar `perfilAtivo.id` por
       `useContaAutenticada().uid` nas chamadas a `importarTreino`/
       `importarTreinoExemplo` (plan.md, linha #4 do levantamento exaustivo —
       só a parte de importação; o item "Sair da conta" no mesmo arquivo é

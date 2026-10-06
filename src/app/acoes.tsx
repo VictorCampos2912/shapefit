@@ -8,6 +8,7 @@ import { ThemedView } from '@/components/themed-view';
 import { ImportarIcon, InfoIcon, PerfilIcon, VoltarIcon } from '@/components/ui/icons';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useContaAutenticada } from '@/hooks/use-conta-autenticada';
 import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
 import { importarTreino, importarTreinoExemplo } from '@/services/treino-storage';
 import type { ResultadoImportacao, ResultadoImportacaoMultipla } from '@/types/treino';
@@ -88,15 +89,18 @@ function handleAbrirCreditos() {
 }
 
 export default function AcoesScreen() {
+  // perfilAtivo ainda é usado só pela linha "Perfil ativo: ... (trocar)"
+  // abaixo — essa parte é da US4 (T019), não desta task.
   const { perfilAtivo } = usePerfilAtivo();
+  const { uid } = useContaAutenticada();
   const theme = useTheme();
   const [importando, setImportando] = useState(false);
 
   async function handleImportarTreino() {
-    if (!perfilAtivo) return;
+    if (!uid) return;
     setImportando(true);
     try {
-      const resultado = await importarTreino(perfilAtivo.id);
+      const resultado = await importarTreino(uid);
       exibirResultadoImportacao(resultado);
     } finally {
       setImportando(false);
@@ -104,10 +108,10 @@ export default function AcoesScreen() {
   }
 
   async function handleImportarTreinoExemplo() {
-    if (!perfilAtivo) return;
+    if (!uid) return;
     setImportando(true);
     try {
-      const resultado = await importarTreinoExemplo(perfilAtivo.id);
+      const resultado = await importarTreinoExemplo(uid);
       exibirResultadoImportacao(resultado);
     } finally {
       setImportando(false);
