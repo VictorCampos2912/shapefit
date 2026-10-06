@@ -24,23 +24,25 @@ SplashScreen.preventAutoHideAsync();
 function RootNavigator() {
   const { contaAutenticada, carregando, temDadosFisicos } = useContaAutenticada();
 
-  if (carregando) {
+  // Enquanto não sabemos se há conta, ou já sabemos que há mas ainda estamos
+  // checando se tem dados físicos, não renderiza nada (mesmo padrão do gate
+  // antigo baseado em usePerfilAtivo).
+  if (carregando || (contaAutenticada && temDadosFisicos === null)) {
     return null;
   }
 
-  if (!contaAutenticada) {
-    return <Redirect href="/login" />;
-  }
-
-  if (temDadosFisicos === null) {
-    return null;
-  }
-
-  if (temDadosFisicos === false) {
-    return <Redirect href="/conta/dados-fisicos" />;
-  }
-
-  return <Stack screenOptions={{ headerShown: false }} />;
+  // O <Stack> MUST sempre ser renderizado junto com qualquer <Redirect> (nunca
+  // sozinho) — sem isso não existe Navigator montado no momento do redirect,
+  // o que causa um loop de remontagem do RootNavigator inteiro (achado em
+  // teste real no Android, 2026-10-05; o gate antigo já evitava isso
+  // renderizando <Stack> dentro do mesmo Fragment que os <Redirect>s).
+  return (
+    <>
+      {!contaAutenticada && <Redirect href="/login" />}
+      {contaAutenticada && temDadosFisicos === false && <Redirect href="/conta/dados-fisicos" />}
+      <Stack screenOptions={{ headerShown: false }} />
+    </>
+  );
 }
 
 export default function RootLayout() {

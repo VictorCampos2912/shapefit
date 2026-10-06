@@ -246,6 +246,20 @@ efeito enquanto não migradas é um estado vazio/parado (ex.: lista de treinos
 nunca carrega), não um crash — aceitável para esta fase, já que US3/Polish
 ainda não rodaram.
 
+**Bug real encontrado e corrigido em teste no Android (2026-10-05)**: o
+`RootNavigator` original desta feature retornava `<Redirect href="/login" />`
+**sozinho** (sem `<Stack>` nenhum montado junto) quando não havia conta
+autenticada. Isso deixava a navegação sem nenhum Navigator montado no
+momento do redirect — causava um **loop de remontagem contínua** do
+`RootNavigator`/`ContaAutenticadaProvider` inteiro (centenas de vezes por
+segundo, confirmado via log de diagnóstico: `carregando` voltava a `true` do
+zero a cada ciclo, nunca estabilizava), travando o app na splash screen azul
+para sempre. O gate original baseado em `usePerfilAtivo()` nunca tinha esse
+problema porque sempre renderizava `<Stack>` dentro do mesmo Fragment que os
+`<Redirect>`s — nunca sozinho. Corrigido replicando exatamente esse padrão:
+`<Stack>` agora é renderizado incondicionalmente (como irmão de qualquer
+`<Redirect>` ativo) assim que `carregando` é `false`, nunca mais sozinho.
+
 ## Decisão 7: `app.json` → `app.config.js` + variáveis de ambiente de arquivo do EAS (correção pós-implementação, 2026-10-02)
 
 **Decision**: converter `app.json` em `app.config.js` (JS, não mais JSON estático)
