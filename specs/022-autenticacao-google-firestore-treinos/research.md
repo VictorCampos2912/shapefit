@@ -322,24 +322,37 @@ do cache local mesclado do Firestore, mesmo antes do commit no servidor
 terminar. Esse comportamento de leitura (cache inclui escritas pendentes)
 é o que torna seguro não esperar a confirmação do servidor antes de seguir.
 
-**Achado relacionado, ainda NÃO corrigido**: ao revisar
+**Achado relacionado — RESOLVIDO (2026-10-06, mesmo dia)**: ao revisar
 `use-conta-autenticada.tsx` para confirmar este fix, notei que
-`temDadosFisicos` no contexto não é atualizado depois que
-`conta/dados-fisicos.tsx` chama `salvarDadosFisicos` com sucesso — o
-`RootNavigator` só recalcula o gate quando `onAuthStateChanged` dispara de
-novo (login/logout), não quando o Firestore é escrito. O fluxo atual só
-funciona porque `router.replace('/')` muda a rota ativa sem que
-`RootNavigator` re-renderize (o valor do contexto não mudou) — o
-`<Redirect>` antigo não "persegue" a navegação, só dispara uma vez quando
-renderizado. Isso é frágil: qualquer re-render do `RootNavigator` por outro
+`temDadosFisicos` no contexto não era atualizado depois que
+`conta/dados-fisicos.tsx` chamava `salvarDadosFisicos` com sucesso — o
+`RootNavigator` só recalculava o gate quando `onAuthStateChanged` disparava
+de novo (login/logout), não quando o Firestore era escrito. O fluxo só
+funcionava porque `router.replace('/')` muda a rota ativa sem que
+`RootNavigator` re-renderize (o valor do contexto não mudava) — o
+`<Redirect>` não "persegue" a navegação, só dispara uma vez quando
+renderizado. Era frágil: qualquer re-render do `RootNavigator` por outro
 motivo (ex.: `RootLayout` re-renderizando por causa de `useColorScheme()`)
 re-avaliaria o gate com `temDadosFisicos` ainda `false` (stale) e
-redirecionaria de volta pro formulário, mesmo a conta já tendo dados
-salvos. Não corrigido ainda — fica registrado aqui para resolver antes de
-fechar a spec (provável fix: `dados-fisicos.tsx` chamar algo como
-`confirmarDadosFisicosSalvos()` exposto pelo hook, ou o hook reler
-`obterDadosFisicos` sob demanda, em vez de depender só de
-`onAuthStateChanged`).
+redirecionaria de volta pro formulário, mesmo a conta já tendo dados salvos.
+
+**Corrigido** com três mudanças em `use-conta-autenticada.tsx` e
+`dados-fisicos.tsx`:
+1. Novo `confirmarDadosFisicosSalvos()` exposto pelo hook — seta
+   `temDadosFisicos = true` otimisticamente, sem nova leitura do Firestore.
+   `dados-fisicos.tsx` chama logo após `salvarDadosFisicos` resolver.
+2. `temDadosFisicos` agora é resetado para `null` a cada disparo de
+   `onAuthStateChanged` (login, logout, troca de conta), antes de rechecar —
+   nunca mantém o valor da conta anterior. A checagem assíncrona de
+   `obterDadosFisicos(uid)` ganhou uma guarda de corrida via `useRef`
+   (`uidChecagemAtualRef`): se outra mudança de auth chegar antes dessa
+   checagem resolver, a resposta tardia é descartada (comparação por `uid`)
+   em vez de sobrescrever o estado da conta já ativa.
+3. Verificado (não precisou de mudança): `salvarDadosFisicos` já preserva
+   `criadoEm` do documento existente em chamadas repetidas, só gera um novo
+   na criação — contrato (`contracts/conta-storage.md`) já estava correto.
+
+Contrato atualizado em `contracts/use-conta-autenticada.md`.
 
 **Alternatives considered**: manter o `await` e aceitar que operações
 offline ficam "penduradas" até reconectar — rejeitado, contradiz

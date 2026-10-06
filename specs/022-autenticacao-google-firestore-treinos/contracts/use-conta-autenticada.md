@@ -17,6 +17,8 @@ type ContaAutenticadaContextValue = {
   temDadosFisicos: boolean | null;
   entrarComGoogle: () => Promise<{ ok: true } | { ok: false; motivo: string }>;
   sairDaConta: () => Promise<void>;
+  /** Atualização otimista — ver "Comportamento" abaixo (research.md Decisão 8) */
+  confirmarDadosFisicosSalvos: () => void;
 };
 
 function useContaAutenticada(): ContaAutenticadaContextValue;
@@ -27,9 +29,22 @@ function useContaAutenticada(): ContaAutenticadaContextValue;
 - **Ao montar**: escuta `onAuthStateChanged` do `@react-native-firebase/auth`.
   Enquanto o estado inicial não chega, `carregando = true` (mesmo padrão do
   `carregando` de `usePerfilAtivo`).
+- **A cada mudança de auth** (login, logout, troca de conta): `temDadosFisicos`
+  é resetado para `null` **antes** de rechecar — nunca mantém o valor da conta
+  anterior. A checagem assíncrona (`conta-storage.obterDadosFisicos(uid)`) é
+  guardada contra corrida: se outra mudança de auth chegar antes dessa checagem
+  resolver, a resposta tardia é descartada (comparação por `uid`, via ref) em
+  vez de sobrescrever o estado da conta já ativa.
 - **Quando autenticado**: chama `conta-storage.obterDadosFisicos(uid)` para
   preencher `temDadosFisicos` — `null` enquanto a checagem não resolve (nunca
   tratar `null` como `false`; ver Edge Case da falha de rede no meio do login).
+- **`confirmarDadosFisicosSalvos()`**: seta `temDadosFisicos = true`
+  imediatamente (atualização otimista, sem nova leitura do Firestore).
+  Necessário porque `conta-storage.salvarDadosFisicos` não dá mais `await` no
+  `setDoc` (research.md Decisão 8) — sem essa chamada, `temDadosFisicos`
+  só mudaria na próxima vez que `onAuthStateChanged` disparasse (login/logout),
+  nunca no momento do cadastro em si. Chamada por `conta/dados-fisicos.tsx`
+  logo após `salvarDadosFisicos` resolver.
 - **`entrarComGoogle()`**: dispara o fluxo nativo de
   `@react-native-google-signin/google-signin`, troca o ID token resultante por
   uma credencial do Firebase (`GoogleAuthProvider.credential`) e autentica via

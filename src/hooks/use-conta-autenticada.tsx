@@ -1,6 +1,6 @@
 import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithCredential, signOut, type User } from '@react-native-firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import { obterDadosFisicos } from '@/services/conta-storage';
 
@@ -27,6 +27,14 @@ type ContaAutenticadaContextValue = {
   temDadosFisicos: boolean | null;
   entrarComGoogle: () => Promise<EntrarComGoogleResultado>;
   sairDaConta: () => Promise<void>;
+  /**
+   * Chamado por `conta/dados-fisicos.tsx` logo após `salvarDadosFisicos`
+   * resolver (que agora não dá `await` no `setDoc`, research.md Decisão 8) —
+   * atualização otimista: sem isso, `temDadosFisicos` só mudaria quando
+   * `onAuthStateChanged` disparasse de novo (login/logout), não quando os
+   * dados são salvos.
+   */
+  confirmarDadosFisicosSalvos: () => void;
 };
 
 const ContaAutenticadaContext = createContext<ContaAutenticadaContextValue | null>(null);
@@ -43,34 +51,56 @@ export function ContaAutenticadaProvider({ children }: { children: ReactNode }) 
   const [carregando, setCarregando] = useState(true);
   const [temDadosFisicos, setTemDadosFisicos] = useState<boolean | null>(null);
 
+  // Guarda de corrida: identifica qual uid cada checagem assíncrona de
+  // obterDadosFisicos pertence. Se a conta mudar de novo (logout, troca de
+  // conta) enquanto uma checagem anterior ainda está em voo, a resposta
+  // tardia dessa checagem antiga é descartada em vez de sobrescrever o
+  // estado da conta atual.
+  const uidChecagemAtualRef = useRef<string | null>(null);
+
   useEffect(() => {
     const auth = getAuth();
     const cancelar = onAuthStateChanged(auth, async (usuario) => {
       const conta = paraContaAutenticada(usuario);
+      uidChecagemAtualRef.current = conta?.uid ?? null;
       setContaAutenticada(conta);
+      // Reseta para null a cada mudança de auth (login, logout, troca de
+      // conta), antes de re-checar — nunca mantém o valor da conta anterior.
+      setTemDadosFisicos(null);
 
       if (!conta) {
-        setTemDadosFisicos(null);
         setCarregando(false);
         return;
       }
 
-      setTemDadosFisicos(null);
       try {
         const dados = await obterDadosFisicos(conta.uid);
+        if (uidChecagemAtualRef.current !== conta.uid) {
+          // Uma mudança de conta mais recente já substituiu esta checagem —
+          // ignora a resposta tardia.
+          return;
+        }
         setTemDadosFisicos(dados !== null);
       } catch {
         // Falha ao checar (ex: rede cai no meio do login) — mantém null, nunca
         // trata como "sem dados" (evitaria reexibir o formulário por engano
         // ou arriscar duplicar o documento). Quem consome este hook decide o
         // que mostrar enquanto temDadosFisicos continua null.
-        setTemDadosFisicos(null);
+        if (uidChecagemAtualRef.current === conta.uid) {
+          setTemDadosFisicos(null);
+        }
       } finally {
-        setCarregando(false);
+        if (uidChecagemAtualRef.current === conta.uid) {
+          setCarregando(false);
+        }
       }
     });
 
     return cancelar;
+  }, []);
+
+  const confirmarDadosFisicosSalvos = useCallback(() => {
+    setTemDadosFisicos(true);
   }, []);
 
   const entrarComGoogle = useCallback(async (): Promise<EntrarComGoogleResultado> => {
@@ -102,8 +132,9 @@ export function ContaAutenticadaProvider({ children }: { children: ReactNode }) 
       temDadosFisicos,
       entrarComGoogle,
       sairDaConta,
+      confirmarDadosFisicosSalvos,
     }),
-    [contaAutenticada, carregando, temDadosFisicos, entrarComGoogle, sairDaConta],
+    [contaAutenticada, carregando, temDadosFisicos, entrarComGoogle, sairDaConta, confirmarDadosFisicosSalvos],
   );
 
   return <ContaAutenticadaContext.Provider value={value}>{children}</ContaAutenticadaContext.Provider>;

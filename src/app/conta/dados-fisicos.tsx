@@ -10,7 +10,7 @@ import { useContaAutenticada } from '@/hooks/use-conta-autenticada';
 import { salvarDadosFisicos } from '@/services/conta-storage';
 
 export default function DadosFisicosScreen() {
-  const { uid } = useContaAutenticada();
+  const { uid, confirmarDadosFisicosSalvos } = useContaAutenticada();
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(dados: Parameters<typeof salvarDadosFisicos>[1]) {
@@ -18,6 +18,10 @@ export default function DadosFisicosScreen() {
     setSubmitting(true);
     try {
       await salvarDadosFisicos(uid, dados);
+      // Atualização otimista do gate (research.md Decisão 8) — salvarDadosFisicos
+      // não espera a confirmação do servidor, então nada mais avisaria o
+      // RootNavigator de que os dados já foram salvos.
+      confirmarDadosFisicosSalvos();
       router.replace('/');
     } finally {
       setSubmitting(false);
