@@ -256,7 +256,7 @@ independentemente.
 nenhuma story específica (FR-012 — continuidade do que não muda de tecnologia),
 depois remover o sistema antigo por completo e validar.
 
-- [ ] T021 [P] Alterar `src/app/(tabs)/explore.tsx`: trocar
+- [X] T021 [P] Alterar `src/app/(tabs)/explore.tsx`: trocar
       `usePerfilAtivo().perfilAtivo.id` por `useContaAutenticada().uid` em
       `obterHistoricoPorPerfil`, `obterHistoricoPorData`, `marcarSessaoRevisada`
       e os arrays de dependência de efeito (plan.md, linha #6 do levantamento

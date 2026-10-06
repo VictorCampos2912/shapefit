@@ -12,7 +12,7 @@ import { EditarIcon } from '@/components/ui/icons';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
+import { useContaAutenticada } from '@/hooks/use-conta-autenticada';
 import { atualizarSerieDeSessaoFinalizada } from '@/services/sessao-treino-storage';
 import { obterHistoricoPorData, obterHistoricoPorPerfil } from '@/services/historico-evolucao';
 import type {
@@ -244,16 +244,16 @@ function SecaoDia({ dia }: { dia: DiaHistorico }) {
 }
 
 export default function HistoricoScreen() {
-  const { perfilAtivo } = usePerfilAtivo();
+  const { uid } = useContaAutenticada();
   const [historico, setHistorico] = useState<HistoricoPerfil | null>(null);
   const [historicoPorData, setHistoricoPorData] = useState<HistoricoPorData | null>(null);
   const [visao, setVisao] = useState<'exercicio' | 'data'>('exercicio');
 
   async function recarregarHistorico() {
-    if (!perfilAtivo) return;
+    if (!uid) return;
     const [porExercicio, porData] = await Promise.all([
-      obterHistoricoPorPerfil(perfilAtivo.id),
-      obterHistoricoPorData(perfilAtivo.id),
+      obterHistoricoPorPerfil(uid),
+      obterHistoricoPorData(uid),
     ]);
     setHistorico(porExercicio);
     setHistoricoPorData(porData);
@@ -262,21 +262,21 @@ export default function HistoricoScreen() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- mesmo padrão de supressão já usado no RF07 ([treinoId].tsx) para este mesmo lint; recarregarHistorico() só dispara setState de forma assíncrona (após o await), não sincronamente dentro do corpo do efeito
     recarregarHistorico();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- recarrega só por id do perfil ativo, mesmo padrão do RF02 (index.tsx)
-  }, [perfilAtivo?.id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- recarrega só por uid da conta autenticada, mesmo padrão do RF02 (index.tsx)
+  }, [uid]);
 
   useFocusEffect(
     useCallback(() => {
       recarregarHistorico();
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- mesmo padrão do RF02/RF07 (index.tsx): recarrega ao ganhar foco (ex.: voltar de finalizar um treino, trocar de perfil)
-    }, [perfilAtivo?.id]),
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- mesmo padrão do RF02/RF07 (index.tsx): recarrega ao ganhar foco (ex.: voltar de finalizar um treino)
+    }, [uid]),
   );
 
   async function handleEditarRegistro(params: ParamsEditarRegistro) {
-    if (!perfilAtivo) return;
+    if (!uid) return;
 
     const sessao = await atualizarSerieDeSessaoFinalizada({
-      perfilId: perfilAtivo.id,
+      perfilId: uid,
       sessaoId: params.sessaoId,
       exercicioId: params.exercicioId,
       serie: params.serie,
