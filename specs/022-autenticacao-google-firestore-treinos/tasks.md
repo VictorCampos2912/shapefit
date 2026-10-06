@@ -194,7 +194,7 @@ vê os próprios treinos.
       para `uid` em todas essas funções (`contracts/treino-storage-firestore.md`);
       a normalização de `categoria` ausente (bug fix do RF17) continua
       aplicada sobre os dados vindos do Firestore, sem alteração de lógica.
-- [ ] T016 [US3] No mesmo commit: (a) em `src/types/treino.ts`, remover o
+- [X] T016 [US3] No mesmo commit: (a) em `src/types/treino.ts`, remover o
       campo `perfilId` do tipo `Treino` — a segregação por conta passa a ser o
       caminho do documento Firestore (`users/{uid}/treinos/*`), não um campo
       interno (`data-model.md`; esta remoção pertence a esta task, não à

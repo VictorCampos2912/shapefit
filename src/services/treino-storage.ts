@@ -118,7 +118,7 @@ type ResultadoMontagemTreino =
  * AsyncStorage. Reaproveitada tanto pelo caminho de treino único quanto pelo de
  * múltiplos treinos (specs/012-importar-multiplos-treinos).
  */
-function montarTreinoValido(bruto: unknown, perfilId: string): ResultadoMontagemTreino {
+function montarTreinoValido(bruto: unknown): ResultadoMontagemTreino {
   const estrutura = validarEstruturaTreino(bruto);
   if (!estrutura.ok) {
     return { ok: false, nome: null, motivo: estrutura.motivo };
@@ -146,7 +146,6 @@ function montarTreinoValido(bruto: unknown, perfilId: string): ResultadoMontagem
 
   const treino: Treino = {
     id: Crypto.randomUUID(),
-    perfilId,
     nome: estrutura.nome,
     exercicios,
     importadoEm: new Date().toISOString(),
@@ -156,7 +155,7 @@ function montarTreinoValido(bruto: unknown, perfilId: string): ResultadoMontagem
 }
 
 async function processarConteudoObjeto(bruto: unknown, uid: string): Promise<ResultadoImportacao> {
-  const resultado = montarTreinoValido(bruto, uid);
+  const resultado = montarTreinoValido(bruto);
   if (!resultado.ok) {
     return { treino: null, exerciciosIgnorados: [], erro: resultado.motivo };
   }
@@ -194,7 +193,7 @@ async function processarConteudoArray(bruto: unknown[], uid: string): Promise<Re
   const treinosIgnorados: ResultadoImportacaoMultipla['treinosIgnorados'] = [];
 
   for (const item of bruto) {
-    const resultado = montarTreinoValido(item, uid);
+    const resultado = montarTreinoValido(item);
     if (resultado.ok) {
       treinos.push({ treino: resultado.treino, exerciciosIgnorados: resultado.exerciciosIgnorados });
     } else {

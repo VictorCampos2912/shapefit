@@ -12,7 +12,6 @@ export type ExercicioPlanejado = {
 
 export type Treino = {
   id: string;
-  perfilId: string;
   nome: string;
   exercicios: ExercicioPlanejado[];
   importadoEm: string;
@@ -44,8 +43,4 @@ export type ResultadoImportacaoMultipla = {
   treinos: TreinoImportadoComPendencias[];
   treinosIgnorados: TreinoIgnorado[];
   erro: string | null;
-};
-
-export type TreinosPorPerfilState = {
-  treinos: Treino[];
 };
