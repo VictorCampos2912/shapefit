@@ -14,7 +14,7 @@ import { ProgressRing } from '@/components/ui/progress-ring';
 import { Spacing } from '@/constants/theme';
 import { PADRAO_VIBRACAO_FIM_DESCANSO } from '@/constants/vibracao';
 import { useTheme } from '@/hooks/use-theme';
-import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
+import { useContaAutenticada } from '@/hooks/use-conta-autenticada';
 import {
   atualizarSerieRealizada,
   finalizarSessao,
@@ -87,7 +87,7 @@ function estadosPorExercicioDaSessao(
 
 export default function ExecucaoTreinoScreen() {
   const { treinoId } = useLocalSearchParams<{ treinoId: string }>();
-  const { perfilAtivo } = usePerfilAtivo();
+  const { uid } = useContaAutenticada();
   const theme = useTheme();
 
   const [treino, setTreino] = useState<Treino | null>(null);
@@ -106,22 +106,22 @@ export default function ExecucaoTreinoScreen() {
   const voltouDeSegundoPlanoRef = useRef(false);
 
   useEffect(() => {
-    if (!perfilAtivo) return;
+    if (!uid) return;
     let ativo = true;
     (async () => {
       setCarregando(true);
-      const treinos = await listarTreinos(perfilAtivo.id);
+      const treinos = await listarTreinos(uid);
       const encontrado = treinos.find((item) => item.id === treinoId) ?? null;
       if (!ativo) return;
 
       setTreino(encontrado);
 
       if (encontrado) {
-        let sessao = await obterSessao(perfilAtivo.id, encontrado.id);
+        let sessao = await obterSessao(uid, encontrado.id);
         let jaFinalizada = false;
         if (!sessao) {
           sessao = await obterUltimaSessaoConcluidaNaoRevisada(
-            perfilAtivo.id,
+            uid,
             encontrado.id,
             encontrado.exercicios.length,
           );
@@ -141,7 +141,7 @@ export default function ExecucaoTreinoScreen() {
     return () => {
       ativo = false;
     };
-  }, [perfilAtivo, treinoId]);
+  }, [uid, treinoId]);
 
   useEffect(() => {
     if (!descansoAtivo) return;
@@ -194,12 +194,12 @@ export default function ExecucaoTreinoScreen() {
   }
 
   async function handleConcluirSerie(exercicioId: string, serie: SerieRealizada) {
-    if (!perfilAtivo || !treino) return;
+    if (!uid || !treino) return;
     const exercicio = treino.exercicios.find((item) => item.id === exercicioId);
     if (!exercicio) return;
 
     const sessao = await registrarSerieConcluida({
-      perfilId: perfilAtivo.id,
+      perfilId: uid,
       treinoId: treino.id,
       exercicioId,
       serie,
@@ -228,10 +228,10 @@ export default function ExecucaoTreinoScreen() {
   }
 
   async function handleEditarSerie(exercicioId: string, serieEditada: SerieRealizada) {
-    if (!perfilAtivo || !treino) return;
+    if (!uid || !treino) return;
 
     const sessao = await atualizarSerieRealizada({
-      perfilId: perfilAtivo.id,
+      perfilId: uid,
       treinoId: treino.id,
       exercicioId,
       serie: serieEditada.serie,
@@ -254,8 +254,8 @@ export default function ExecucaoTreinoScreen() {
   }
 
   async function handleConcluirExercicio(exercicioId: string) {
-    if (!perfilAtivo || !sessaoAtualId) return;
-    await marcarExercicioConcluido({ perfilId: perfilAtivo.id, sessaoId: sessaoAtualId, exercicioId });
+    if (!uid || !sessaoAtualId) return;
+    await marcarExercicioConcluido({ perfilId: uid, sessaoId: sessaoAtualId, exercicioId });
     setExercicioSelecionadoId(null);
   }
 
@@ -323,13 +323,13 @@ export default function ExecucaoTreinoScreen() {
   }
 
   async function handleFinalizarTreino() {
-    if (!perfilAtivo || !sessaoAtualId) return;
+    if (!uid || !sessaoAtualId) return;
 
     // false: finalizar o treino manualmente não é "o descanso terminou" (RF13) —
     // só limpa o cronômetro ativo, se houver, sem disparar a vibração do RF13.
     handleDescansoConcluido(false);
-    await finalizarSessao(perfilAtivo.id, sessaoAtualId);
-    await marcarSessaoRevisada(perfilAtivo.id, sessaoAtualId);
+    await finalizarSessao(uid, sessaoAtualId);
+    await marcarSessaoRevisada(uid, sessaoAtualId);
 
     setSessaoAtualId(null);
     setEstadosPorExercicio({});
@@ -338,8 +338,8 @@ export default function ExecucaoTreinoScreen() {
   }
 
   async function handleNovaSessaoDeTreino() {
-    if (perfilAtivo && sessaoAtualId) {
-      await marcarSessaoRevisada(perfilAtivo.id, sessaoAtualId);
+    if (uid && sessaoAtualId) {
+      await marcarSessaoRevisada(uid, sessaoAtualId);
     }
     setSessaoAtualId(null);
     setEstadosPorExercicio({});
@@ -351,12 +351,12 @@ export default function ExecucaoTreinoScreen() {
     treino?.exercicios.every((item) => estadosPorExercicio[item.id]?.concluido) ?? false;
 
   useEffect(() => {
-    if (todosConcluidos && sessaoAtualId !== null && !sessaoFinalizadaAutomaticamente && perfilAtivo) {
+    if (todosConcluidos && sessaoAtualId !== null && !sessaoFinalizadaAutomaticamente && uid) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSessaoFinalizadaAutomaticamente(true);
-      finalizarSessao(perfilAtivo.id, sessaoAtualId);
+      finalizarSessao(uid, sessaoAtualId);
     }
-  }, [todosConcluidos, sessaoAtualId, sessaoFinalizadaAutomaticamente, perfilAtivo]);
+  }, [todosConcluidos, sessaoAtualId, sessaoFinalizadaAutomaticamente, uid]);
 
   if (carregando) {
     return (

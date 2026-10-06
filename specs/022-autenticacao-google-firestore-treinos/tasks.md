@@ -262,7 +262,7 @@ depois remover o sistema antigo por completo e validar.
       e os arrays de dependência de efeito (plan.md, linha #6 do levantamento
       exaustivo) — FR-012, histórico continua em AsyncStorage sem mudança de
       schema, só troca a origem do identificador (depende de T009).
-- [ ] T022 [P] Alterar `src/app/treino/[treinoId].tsx`: trocar **todos** os 9
+- [X] T022 [P] Alterar `src/app/treino/[treinoId].tsx`: trocar **todos** os 9
       pontos de uso de `perfilAtivo.id` por `uid` — `listarTreinos`,
       `obterSessao`, `marcarExercicioConcluido`, `finalizarSessao`,
       `marcarSessaoRevisada` e os arrays de dependência de efeito (plan.md,
