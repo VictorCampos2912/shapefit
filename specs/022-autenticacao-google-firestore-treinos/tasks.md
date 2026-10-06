@@ -166,6 +166,14 @@ o app chega à lista de treinos.
 de treinos, incluindo o primeiro login. `_layout.tsx` (T012) já aponta pra
 rota criada aqui.
 
+**Validado em aparelho real (Android) em 2026-10-05**: login com Google e
+primeiro cadastro de dados físicos confirmados pelo Victor, ponta a ponta —
+app chegou em "Meus Treinos" normalmente depois do cadastro. A lista
+mostrada é dado antigo local (via `PerfilAtivoProvider`/AsyncStorage,
+mantido de propósito nesta fase — ver nota da T012); some quando a T015/T016
+migrarem RF01/RF02 pra Firestore (FR-015, sem migração de dados locais —
+comportamento esperado, não um bug).
+
 ---
 
 ## Phase 5: User Story 3 - Treinos importados e listados via Firestore (Priority: P1)
