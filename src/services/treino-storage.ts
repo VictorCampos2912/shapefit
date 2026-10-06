@@ -20,8 +20,16 @@ function treinosCollection(uid: string) {
   return collection(getFirestore(), 'users', uid, 'treinos');
 }
 
-async function setDocTreino(uid: string, treino: Treino): Promise<void> {
-  await setDoc(doc(treinosCollection(uid), treino.id), treino);
+// Sem await de propósito: a Promise do setDoc só resolve com confirmação do
+// servidor, mesmo a escrita já estando aplicada no cache local offline
+// imediatamente — com await, a importação ficaria pendurada até reconectar
+// (quebra o comportamento offline exigido por FR-011). listarTreinos logo
+// depois já enxerga este treino via cache local, mesmo antes do commit no
+// servidor terminar.
+function setDocTreino(uid: string, treino: Treino): void {
+  setDoc(doc(treinosCollection(uid), treino.id), treino).catch((erro) => {
+    console.error('[treino-storage] Falha ao confirmar treino no servidor (já salvo no cache local):', erro);
+  });
 }
 
 export async function listarTreinos(uid: string): Promise<Treino[]> {
@@ -160,7 +168,7 @@ async function processarConteudoObjeto(bruto: unknown, uid: string): Promise<Res
     return { treino: null, exerciciosIgnorados: [], erro: resultado.motivo };
   }
 
-  await setDocTreino(uid, resultado.treino);
+  setDocTreino(uid, resultado.treino);
 
   return { treino: resultado.treino, exerciciosIgnorados: resultado.exerciciosIgnorados, erro: null };
 }
@@ -203,12 +211,16 @@ async function processarConteudoArray(bruto: unknown[], uid: string): Promise<Re
 
   if (treinos.length > 0) {
     // Escrita em lote (tudo ou nada) — equivalente Firestore do antigo
-    // setTreinosState único em AsyncStorage.
+    // setTreinosState único em AsyncStorage. Sem await no commit de
+    // propósito (mesmo motivo de setDocTreino acima) — os treinos já ficam
+    // visíveis via cache local antes do commit no servidor terminar.
     const lote = writeBatch(getFirestore());
     treinos.forEach((item) => {
       lote.set(doc(treinosCollection(uid), item.treino.id), item.treino);
     });
-    await lote.commit();
+    lote.commit().catch((erro) => {
+      console.error('[treino-storage] Falha ao confirmar importação em lote no servidor (já salva no cache local):', erro);
+    });
 
     // Cria o ciclo de progresso (RF17, FR-001) só quando 2+ treinos de fato
     // validaram — um array com só 1 treino válido não é um lote de múltiplos.

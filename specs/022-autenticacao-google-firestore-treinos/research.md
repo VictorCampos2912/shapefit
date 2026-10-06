@@ -296,6 +296,60 @@ de cada build remoto — rejeitado, frágil (exige lembrar de um passo manual
 sempre, sem nenhuma validação automática se for esquecido) e não é o fluxo
 suportado oficialmente pelo EAS.
 
+## Decisão 8: Não dar `await` em `setDoc`/`writeBatch.commit()` nas escritas de treino/dados físicos (correção pós-implementação, 2026-10-06)
+
+**Decision**: em `treino-storage.ts` (`setDocTreino`, o `writeBatch` de
+`processarConteudoArray`) e em `conta-storage.ts` (`salvarDadosFisicos`), a
+chamada de escrita no Firestore (`setDoc`/`batch.commit()`) passou a ser
+disparada **sem `await`**, com `.catch(erro => console.error(...))` anexado
+para não perder falhas reais silenciosamente.
+
+**Rationale**: achado relatado pelo usuário (via outro Claude revisando o
+código) — a Promise retornada por `setDoc`/`batch.commit()` do Firestore só
+resolve quando o servidor confirma a escrita, **mesmo a escrita já estando
+aplicada no cache local offline imediatamente** (comportamento documentado
+do próprio SDK, não um bug do Firestore). Com `await` nessas chamadas, uma
+importação ou cadastro de dados físicos feito **offline** ficaria com a
+Promise pendurada indefinidamente até a rede voltar — travando a UI
+("Importando…"/"Salvando…" para sempre) e quebrando FR-011/Cenário 4 do
+`quickstart.md`, que exige que essas operações funcionem offline com a
+mesma mensagem de sucesso imediata.
+
+Sem o `await`, a função retorna assim que a escrita é **enfileirada**
+localmente — o que já é suficiente, porque leituras subsequentes
+(`listarTreinos`, `obterDadosFisicos`) enxergam escritas pendentes através
+do cache local mesclado do Firestore, mesmo antes do commit no servidor
+terminar. Esse comportamento de leitura (cache inclui escritas pendentes)
+é o que torna seguro não esperar a confirmação do servidor antes de seguir.
+
+**Achado relacionado, ainda NÃO corrigido**: ao revisar
+`use-conta-autenticada.tsx` para confirmar este fix, notei que
+`temDadosFisicos` no contexto não é atualizado depois que
+`conta/dados-fisicos.tsx` chama `salvarDadosFisicos` com sucesso — o
+`RootNavigator` só recalcula o gate quando `onAuthStateChanged` dispara de
+novo (login/logout), não quando o Firestore é escrito. O fluxo atual só
+funciona porque `router.replace('/')` muda a rota ativa sem que
+`RootNavigator` re-renderize (o valor do contexto não mudou) — o
+`<Redirect>` antigo não "persegue" a navegação, só dispara uma vez quando
+renderizado. Isso é frágil: qualquer re-render do `RootNavigator` por outro
+motivo (ex.: `RootLayout` re-renderizando por causa de `useColorScheme()`)
+re-avaliaria o gate com `temDadosFisicos` ainda `false` (stale) e
+redirecionaria de volta pro formulário, mesmo a conta já tendo dados
+salvos. Não corrigido ainda — fica registrado aqui para resolver antes de
+fechar a spec (provável fix: `dados-fisicos.tsx` chamar algo como
+`confirmarDadosFisicosSalvos()` exposto pelo hook, ou o hook reler
+`obterDadosFisicos` sob demanda, em vez de depender só de
+`onAuthStateChanged`).
+
+**Alternatives considered**: manter o `await` e aceitar que operações
+offline ficam "penduradas" até reconectar — rejeitado, contradiz
+explicitamente FR-011 e o Cenário 4 do `quickstart.md`, que já definem que
+offline deve funcionar com resposta imediata; usar
+`enableNetwork`/`disableNetwork` pra detectar modo offline e pular a
+escrita condicionalmente — rejeitado, mais complexo sem necessidade: o SDK
+já trata escrita offline nativamente, o único problema era o `await`
+artificial no código do app.
+
 ## Resumo das entidades técnicas afetadas
 
 - `package.json`: novas dependências — `@react-native-firebase/app`,
