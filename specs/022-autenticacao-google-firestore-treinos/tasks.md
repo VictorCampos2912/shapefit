@@ -269,7 +269,7 @@ depois remover o sistema antigo por completo e validar.
       linha #7 do levantamento exaustivo, o arquivo com mais pontos de uso —
       maior risco de esquecer algum call site) — FR-012, execução/sessão
       continuam em AsyncStorage sem mudança de schema (depende de T009, T015).
-- [ ] T023 Remover `src/hooks/use-perfil-ativo.tsx`, `src/services/perfil-storage.ts`,
+- [X] T023 Remover `src/hooks/use-perfil-ativo.tsx`, `src/services/perfil-storage.ts`,
       os tipos `Perfil`/`PerfisState`/`DefinirPerfilAtivoResultado`/
       `SessaoRegistro` de `src/types/perfil.ts` (manter `Sexo`/`ObjetivoTreino`,
       usados por `PerfilForm`/`DadosFisicos`), **e o `PerfilAtivoProvider` que
@@ -277,17 +277,39 @@ depois remover o sistema antigo por completo e validar.
       da T012/research.md Decisão 6) — **só depois** de T012, T014, T017,
       T018, T019, T020, T021 e T022 estarem todos completos. Confirmar com
       `grep -rn "usePerfilAtivo" src/` retornando vazio antes de remover.
-- [ ] T024 Rodar `npx tsc --noEmit` na raiz do projeto e confirmar zero erros —
+      **Concluída em 2026-10-05**: `grep -rn "usePerfilAtivo" src/` confirmado
+      vazio (só o auto-grep inicial, mostrado ao usuário antes da remoção) —
+      `use-perfil-ativo.tsx` e `perfil-storage.ts` removidos (`rm`),
+      `src/app/perfil/` removido (`rmdir`, já estava vazio desde T014/T020),
+      `Perfil`/`PerfisState`/`DefinirPerfilAtivoResultado` removidos de
+      `types/perfil.ts`. **Desvio explícito, sinalizado ao usuário**:
+      `SessaoRegistro` foi **mantido** (não estava na lista literal de tipos a
+      manter, mas `grep` confirmou uso ativo por
+      `src/types/execucao-treino.ts` — não é órfão). `PerfilAtivoProvider`
+      removido de `src/app/_layout.tsx` (import, comentário explicativo da
+      T012 e aninhamento JSX).
+- [X] T024 Rodar `npx tsc --noEmit` na raiz do projeto e confirmar zero erros —
       validação final de que nenhum consumidor de `usePerfilAtivo`/`Perfil`/
       `perfilId` (em `Treino`) foi esquecido (Constitution v2.0.0, Princípio I;
-      depende de T023).
+      depende de T023). **Concluída em 2026-10-05**, com escopo ampliado por
+      instrução explícita do usuário: `grep -rn "DIAG" src/` confirmado vazio
+      (nenhum `console.log('[DIAG]...')` remanescente da depuração do loop de
+      remontagem); `npx tsc --noEmit` limpo; `npx eslint .` limpo (0 erros —
+      1 erro pré-existente e não relacionado em
+      `src/hooks/use-color-scheme.web.ts` — hook de hidratação web, não
+      tocado por esta feature — foi corrigido com um
+      `eslint-disable-next-line` pontual, já que é um padrão intencional, não
+      um bug real; 1 warning remanescente é em arquivo autogerado
+      `.expo/types/router.d.ts`, não-fonte).
 - [ ] T025 Executar os 5 cenários de `quickstart.md` em Android e iOS
       (Constitution v2.0.0, Princípio III) — incluindo o caso de teste de
       isolamento entre contas via regra de segurança
       (`contracts/firestore-rules.md`, casos de teste 1-4). Atualizar
       `docs/criterios-aceite.md` com o resultado, marcando RF10 como
       substituído e registrando RF01/RF02 como migrados para Firestore
-      (depende de T024).
+      (depende de T024). **Pendente**: aguardando o usuário testar o app
+      inteiro nos dois aparelhos (Android e iOS) após a remoção do sistema
+      antigo de perfil.
 
 ---
 

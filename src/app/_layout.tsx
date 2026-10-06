@@ -15,12 +15,6 @@ import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
 import { Spacing } from '@/constants/theme';
 import { ContaAutenticadaProvider, useContaAutenticada } from '@/hooks/use-conta-autenticada';
-// Mantido só por formalidade (spec 022): todos os 7 consumidores originais
-// de usePerfilAtivo() (levantamento exaustivo do plan.md) já foram migrados
-// ou removidos (T017-T022) — nenhum código em src/ chama mais usePerfilAtivo().
-// Falta só a T023 (Polish) remover este Provider, use-perfil-ativo.tsx e
-// perfil-storage.ts de vez.
-import { PerfilAtivoProvider } from '@/hooks/use-perfil-ativo';
 import { configurarNotificacoesDescanso } from '@/services/notificacao-descanso';
 
 SplashScreen.preventAutoHideAsync();
@@ -110,10 +104,8 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <ContaAutenticadaProvider>
-        <PerfilAtivoProvider>
-          <AnimatedSplashOverlay />
-          <RootNavigator />
-        </PerfilAtivoProvider>
+        <AnimatedSplashOverlay />
+        <RootNavigator />
       </ContaAutenticadaProvider>
     </ThemeProvider>
   );
