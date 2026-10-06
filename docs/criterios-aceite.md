@@ -764,3 +764,11 @@ Continuidade do que não migra (FR-012):
 
 **Validado em Android e iOS**: *pendente* (Constitution v2.0.0, Princípio
 III — nenhum item acima fica `[X]` sem confirmação nos dois aparelhos).
+**iOS bloqueado em 2026-10-06**: build de desenvolvimento no iPhone falha
+(`Native module NativeRNFBTurboApp is not registered` — binário anterior à
+adição dos módulos nativos do Firebase/Google Sign-In). Corrigir exige um
+novo build via EAS, que exige Apple Developer Program (~US$99/ano, sem
+alternativa sem Mac). Decisão do usuário: adiar a compra, seguir validando
+só no Android por ora. Alternativa de trocar para SDK JS do Firebase (sem
+exigir conta Apple) avaliada e rejeitada — perderia a persistência offline
+real do Firestore em React Native (FR-011).

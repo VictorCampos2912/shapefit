@@ -307,9 +307,27 @@ depois remover o sistema antigo por completo e validar.
       (`contracts/firestore-rules.md`, casos de teste 1-4). Atualizar
       `docs/criterios-aceite.md` com o resultado, marcando RF10 como
       substituído e registrando RF01/RF02 como migrados para Firestore
-      (depende de T024). **Pendente**: aguardando o usuário testar o app
-      inteiro nos dois aparelhos (Android e iOS) após a remoção do sistema
-      antigo de perfil.
+      (depende de T024). **Bloqueado em iOS (2026-10-06)**: build de
+      desenvolvimento para iOS falha em runtime (`Native module
+      NativeRNFBTurboApp is not registered`) porque o binário instalado no
+      iPhone é anterior à adição dos módulos nativos do Firebase/Google
+      Sign-In (spec 022) — corrigir exige gerar um novo build via EAS
+      (`eas build --profile development --platform ios`), o que por sua vez
+      exige Apple Developer Program (conta paga, ~US$99/ano) para assinar o
+      provisioning profile; sem Mac na máquina de desenvolvimento, não há
+      alternativa local. **Decisão do usuário**: adiar essa compra por ora e
+      seguir validando só no Android; os cenários de `quickstart.md` em iOS
+      ficam pendentes até a decisão sobre a conta Apple ser retomada.
+      Avaliada e **rejeitada** a alternativa de trocar os módulos nativos
+      (`@react-native-firebase/*`, `@react-native-google-signin/google-signin`)
+      por SDK JS do Firebase + `expo-auth-session` (rodaria no Expo Go sem
+      nenhuma conta Apple) — rejeitada porque o SDK JS do Firestore não tem
+      persistência em disco no React Native puro (sem IndexedDB), regredindo
+      o offline real (FR-011) já validado via Decisão 8 do `research.md`, e
+      exigiria revalidar Android do zero também.
+      Progresso real nesta tarefa, só no Android: cenários do
+      `quickstart.md` ainda não executados formalmente — próximo passo
+      quando o usuário retomar o teste.
 
 ---
 
