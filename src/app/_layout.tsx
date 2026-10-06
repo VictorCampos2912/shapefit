@@ -10,12 +10,13 @@ import { useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { ContaAutenticadaProvider, useContaAutenticada } from '@/hooks/use-conta-autenticada';
-// Mantido temporariamente (spec 022, Fase US1+US2): 5 telas ainda não migradas
-// (acoes.tsx, (tabs)/index.tsx, (tabs)/explore.tsx, treino/[treinoId].tsx,
-// perfil/selecionar.tsx — tasks.md T017-T022) ainda chamam usePerfilAtivo() e
-// quebrariam com "deve ser usado dentro de um PerfilAtivoProvider" sem este
-// Provider continuar envolvendo a árvore. Remover só quando as 5 estiverem
-// migradas e PerfilAtivoProvider for removido (tasks.md T023).
+// Mantido temporariamente (spec 022): 2 telas ainda não migradas
+// ((tabs)/explore.tsx, treino/[treinoId].tsx — tasks.md T021-T022) ainda
+// chamam usePerfilAtivo() e quebrariam com "deve ser usado dentro de um
+// PerfilAtivoProvider" sem este Provider continuar envolvendo a árvore.
+// acoes.tsx, (tabs)/index.tsx e perfil/selecionar.tsx (removido) já foram
+// migrados/removidos. Remover este Provider só quando as 2 restantes
+// estiverem migradas (tasks.md T023).
 import { PerfilAtivoProvider } from '@/hooks/use-perfil-ativo';
 import { configurarNotificacoesDescanso } from '@/services/notificacao-descanso';
 

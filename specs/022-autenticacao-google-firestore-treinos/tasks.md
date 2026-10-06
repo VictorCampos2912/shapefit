@@ -242,7 +242,7 @@ ou outra) funciona normalmente depois.
       sessão de treino em andamento (spec.md, Edge Cases). Remover o import de
       `usePerfilAtivo` deste arquivo (T018 já migrou o outro uso — depois desta
       task, `acoes.tsx` não usa mais `usePerfilAtivo`).
-- [ ] T020 [US4] Remover `src/app/perfil/selecionar.tsx` (não há mais seleção
+- [X] T020 [US4] Remover `src/app/perfil/selecionar.tsx` (não há mais seleção
       entre múltiplos perfis no mesmo login — trocar de conta é logout + login).
 
 **Checkpoint**: todas as 4 user stories completas e testáveis
