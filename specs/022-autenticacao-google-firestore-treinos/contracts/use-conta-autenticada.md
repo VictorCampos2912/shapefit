@@ -15,10 +15,14 @@ type ContaAutenticadaContextValue = {
   carregando: boolean;
   /** null enquanto ainda não sabemos (ver obterDadosFisicos); true/false depois de checar */
   temDadosFisicos: boolean | null;
+  /** true quando a última checagem de obterDadosFisicos falhou (ex.: rede caiu) */
+  erroAoChecarDadosFisicos: boolean;
   entrarComGoogle: () => Promise<{ ok: true } | { ok: false; motivo: string }>;
   sairDaConta: () => Promise<void>;
   /** Atualização otimista — ver "Comportamento" abaixo (research.md Decisão 8) */
   confirmarDadosFisicosSalvos: () => void;
+  /** Refaz a checagem de obterDadosFisicos para a conta atual, após uma falha */
+  tentarNovamenteChecarDadosFisicos: () => void;
 };
 
 function useContaAutenticada(): ContaAutenticadaContextValue;
@@ -38,6 +42,14 @@ function useContaAutenticada(): ContaAutenticadaContextValue;
 - **Quando autenticado**: chama `conta-storage.obterDadosFisicos(uid)` para
   preencher `temDadosFisicos` — `null` enquanto a checagem não resolve (nunca
   tratar `null` como `false`; ver Edge Case da falha de rede no meio do login).
+- **Se `obterDadosFisicos` rejeitar** (ex.: rede caiu): `erroAoChecarDadosFisicos`
+  vira `true` (`temDadosFisicos` continua `null`) — `_layout.tsx` MUST tratar
+  isso como um estado próprio, nunca deixar o app parado numa tela em branco
+  indefinidamente. Ver `tentarNovamenteChecarDadosFisicos()` abaixo.
+- **`tentarNovamenteChecarDadosFisicos()`**: refaz `obterDadosFisicos(uid)` para
+  a conta atual (`carregando` volta a `true` durante a nova tentativa,
+  `erroAoChecarDadosFisicos` volta a `false`). Usado pelo botão "Tentar
+  novamente" da tela de erro do gate.
 - **`confirmarDadosFisicosSalvos()`**: seta `temDadosFisicos = true`
   imediatamente (atualização otimista, sem nova leitura do Firestore).
   Necessário porque `conta-storage.salvarDadosFisicos` não dá mais `await` no
@@ -50,18 +62,24 @@ function useContaAutenticada(): ContaAutenticadaContextValue;
   uma credencial do Firebase (`GoogleAuthProvider.credential`) e autentica via
   `signInWithCredential`. Retorna `{ ok: false, motivo }` em caso de cancelamento
   ou falha (FR-004), nunca lança exceção não tratada para quem chama.
-- **`sairDaConta()`**: `auth().signOut()` — não verifica nem bloqueia por sessão
-  de treino em andamento (Assumption da spec: dados ficam seguros em
-  AsyncStorage sob o mesmo `uid`, ver Edge Cases de `spec.md`).
+- **`sairDaConta()`**: chama **os dois** `signOut` — `auth().signOut()` (encerra
+  a sessão do Firebase) **e** `GoogleSignin.signOut()` (limpa a sessão nativa
+  do Google Sign-In). Os dois são necessários: sem o segundo, o SDK do Google
+  mantém a conta "lembrada" nativamente e o próximo `entrarComGoogle()` reloga
+  direto na mesma conta sem mostrar o seletor — "sair da conta" precisa
+  devolver ao usuário a escolha de qual conta usar depois. Não verifica nem
+  bloqueia por sessão de treino em andamento (Assumption da spec: dados ficam
+  seguros em AsyncStorage sob o mesmo `uid`, ver Edge Cases de `spec.md`).
 
 ## Gate de navegação (`src/app/_layout.tsx`, substitui o `RootNavigator` atual)
 
 ```
-carregando            → não renderiza nada (mesmo comportamento atual)
-!contaAutenticada      → Redirect para /login
-contaAutenticada && temDadosFisicos === null → não renderiza nada (checando)
-contaAutenticada && temDadosFisicos === false → Redirect para /conta/dados-fisicos
-contaAutenticada && temDadosFisicos === true  → Stack normal (comportamento de hoje)
+carregando                                        → não renderiza nada
+contaAutenticada && erroAoChecarDadosFisicos      → tela de erro (Tentar novamente / Sair da conta)
+contaAutenticada && temDadosFisicos === null      → não renderiza nada (checando, sem erro ainda)
+!contaAutenticada                                  → Redirect para /login
+contaAutenticada && temDadosFisicos === false     → Redirect para /conta/dados-fisicos
+contaAutenticada && temDadosFisicos === true      → Stack normal
 ```
 
 ## Consumida por

@@ -363,6 +363,49 @@ escrita condicionalmente — rejeitado, mais complexo sem necessidade: o SDK
 já trata escrita offline nativamente, o único problema era o `await`
 artificial no código do app.
 
+## Decisão 9: Gate não pode travar em branco se `obterDadosFisicos` falhar; `sairDaConta` precisa dos dois `signOut` (correção, 2026-10-06, RESOLVIDO)
+
+**Decision**: duas correções em `use-conta-autenticada.tsx` e `_layout.tsx`,
+registradas pelo Victor numa revisão antes de implementar a US4:
+
+**(a) Estado de erro explícito para falha em `obterDadosFisicos`**: novo
+`erroAoChecarDadosFisicos: boolean` no contexto, e `tentarNovamenteChecarDadosFisicos()`
+pra refazer a checagem. A lógica de checagem foi extraída pra uma função
+`checarDadosFisicos(uid)` reutilizável tanto pelo listener de
+`onAuthStateChanged` quanto pelo retry manual. `_layout.tsx` ganhou uma tela
+`ErroChecagemDadosFisicos` (inline, mesmo padrão de outros componentes
+locais do projeto) com dois botões — "Tentar novamente" e "Sair da conta" —
+mostrada quando `contaAutenticada && erroAoChecarDadosFisicos`.
+
+**Rationale**: antes desta correção, uma falha em `obterDadosFisicos` (ex.:
+rede cai durante a checagem inicial) deixava `temDadosFisicos` em `null`
+para sempre (nada reexecutava a checagem) e `carregando` em `false` — o gate
+(`if (carregando || (contaAutenticada && temDadosFisicos === null))`)
+ficava preso renderizando `null` indefinidamente, sem crash, sem erro
+visível, sem nenhuma ação possível pro usuário (nem sair da conta). Mesma
+categoria de bug do "loop de remontagem" documentado na correção da
+Decisão 6, mas desta vez travando em branco em vez de travar reconstruindo.
+
+**(b) `sairDaConta()` precisa chamar os dois `signOut`**: verificado que o
+código já fazia isso corretamente (`await signOut(getAuth()); await
+GoogleSignin.signOut();`) — não precisou de mudança de lógica, só um
+comentário explicando o motivo (sem o segundo `signOut`, o SDK do Google
+mantém a conta "lembrada" nativamente e o próximo login pula direto pra
+mesma conta, sem mostrar o seletor — quebraria a possibilidade real de
+trocar de conta no mesmo aparelho, objetivo central da US4).
+
+**Alternatives considered (item a)**: mostrar só um spinner infinito em vez
+de uma tela de erro — rejeitado, usuário real ficaria sem noção do que
+fazer numa falha de rede real (diferente do spinner "checando" normal, que
+resolve sozinho em segundos); tentar de novo automaticamente com backoff em
+vez de botão manual — rejeitado por simplicidade (Princípio II): um retry
+manual já resolve o problema real (usuário percebe que caiu a rede, resolve
+a conexão, toca em "Tentar novamente"), sem a complexidade de um scheduler
+de retry automático.
+
+Contrato atualizado em `contracts/use-conta-autenticada.md` (forma exposta,
+comportamento, e o diagrama do gate).
+
 ## Resumo das entidades técnicas afetadas
 
 - `package.json`: novas dependências — `@react-native-firebase/app`,
