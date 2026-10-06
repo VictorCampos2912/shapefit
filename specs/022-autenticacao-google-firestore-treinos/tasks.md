@@ -235,7 +235,7 @@ ou outra) funciona normalmente depois.
 
 ### Implementation for User Story 4
 
-- [ ] T019 [US4] Alterar `src/app/acoes.tsx`: substituir a linha
+- [X] T019 [US4] Alterar `src/app/acoes.tsx`: substituir a linha
       `Perfil ativo: {perfilAtivo?.nome} (trocar)` por
       `Sair da conta ({contaAutenticada?.email})`, com `onPress` chamando
       `useContaAutenticada().sairDaConta()` (FR-013/FR-014) — sem bloquear por

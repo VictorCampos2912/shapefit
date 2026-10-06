@@ -9,7 +9,6 @@ import { ImportarIcon, InfoIcon, PerfilIcon, VoltarIcon } from '@/components/ui/
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useContaAutenticada } from '@/hooks/use-conta-autenticada';
-import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
 import { importarTreino, importarTreinoExemplo } from '@/services/treino-storage';
 import type { ResultadoImportacao, ResultadoImportacaoMultipla } from '@/types/treino';
 
@@ -89,12 +88,17 @@ function handleAbrirCreditos() {
 }
 
 export default function AcoesScreen() {
-  // perfilAtivo ainda é usado só pela linha "Perfil ativo: ... (trocar)"
-  // abaixo — essa parte é da US4 (T019), não desta task.
-  const { perfilAtivo } = usePerfilAtivo();
-  const { uid } = useContaAutenticada();
+  const { uid, contaAutenticada, sairDaConta } = useContaAutenticada();
   const theme = useTheme();
   const [importando, setImportando] = useState(false);
+
+  // Sem navegação manual aqui de propósito: signOut() dispara
+  // onAuthStateChanged, que atualiza contaAutenticada=null no contexto — o
+  // gate em _layout.tsx já redireciona pra /login sozinho quando isso
+  // acontece (mesmo padrão que já resolve o caso de login/logout).
+  async function handleSairDaConta() {
+    await sairDaConta();
+  }
 
   async function handleImportarTreino() {
     if (!uid) return;
@@ -129,11 +133,9 @@ export default function AcoesScreen() {
         <ThemedText type="subtitle">Ações</ThemedText>
 
         <ThemedView style={styles.acoes}>
-          <Pressable onPress={() => router.push('/perfil/selecionar')} style={styles.linhaComIcone}>
+          <Pressable onPress={handleSairDaConta} style={styles.linhaComIcone}>
             <PerfilIcon size={16} color={theme.accent} />
-            <ThemedText type="link">
-              Perfil ativo: {perfilAtivo?.nome ?? '—'} (trocar)
-            </ThemedText>
+            <ThemedText type="link">Sair da conta ({contaAutenticada?.email ?? '—'})</ThemedText>
           </Pressable>
 
           <Pressable onPress={handleImportarTreino} disabled={importando} style={styles.linhaComIcone}>
