@@ -9,7 +9,7 @@ import { BotaoAcoes } from '@/components/ui/botao-acoes';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { TreinoListItem } from '@/components/treino/treino-list-item';
 import { Spacing } from '@/constants/theme';
-import { usePerfilAtivo } from '@/hooks/use-perfil-ativo';
+import { useContaAutenticada } from '@/hooks/use-conta-autenticada';
 import { calcularProgressoCiclo, cotaComoFracao, obterCicloAtual } from '@/services/ciclo-treino-storage';
 import { contarSessoesFinalizadas, obterDataUltimaSessaoFinalizada } from '@/services/sessao-treino-storage';
 import { listarTreinos } from '@/services/treino-storage';
@@ -56,7 +56,7 @@ function calcularChavesColidindo(
 }
 
 export default function TreinosScreen() {
-  const { perfilAtivo } = usePerfilAtivo();
+  const { uid } = useContaAutenticada();
   const [treinos, setTreinos] = useState<Treino[]>([]);
   const [contagensPorTreino, setContagensPorTreino] = useState<Record<string, number>>({});
   const [dataFinalizacaoPorTreino, setDataFinalizacaoPorTreino] = useState<Record<string, string | null>>({});
@@ -67,66 +67,65 @@ export default function TreinosScreen() {
   } | null>(null);
   const [carregando, setCarregando] = useState(true);
 
-  async function carregarContagens(perfilId: string, lista: Treino[]) {
+  async function carregarContagens(uid: string, lista: Treino[]) {
     const entradas = await Promise.all(
-      lista.map(async (treino) => [treino.id, await contarSessoesFinalizadas(perfilId, treino.id)] as const),
+      lista.map(async (treino) => [treino.id, await contarSessoesFinalizadas(uid, treino.id)] as const),
     );
     setContagensPorTreino(Object.fromEntries(entradas));
   }
 
-  async function carregarDatasFinalizacao(perfilId: string, lista: Treino[]) {
+  async function carregarDatasFinalizacao(uid: string, lista: Treino[]) {
     const entradas = await Promise.all(
       lista.map(
-        async (treino) => [treino.id, await obterDataUltimaSessaoFinalizada(perfilId, treino.id)] as const,
+        async (treino) => [treino.id, await obterDataUltimaSessaoFinalizada(uid, treino.id)] as const,
       ),
     );
     setDataFinalizacaoPorTreino(Object.fromEntries(entradas));
   }
 
-  async function carregarCicloAtual(perfilId: string) {
-    const ciclo = await obterCicloAtual(perfilId);
+  async function carregarCicloAtual(uid: string) {
+    const ciclo = await obterCicloAtual(uid);
     setCicloAtual(ciclo);
-    setProgressoCiclo(ciclo ? await calcularProgressoCiclo(perfilId, ciclo) : null);
+    setProgressoCiclo(ciclo ? await calcularProgressoCiclo(uid, ciclo) : null);
   }
 
   async function recarregarTreinos() {
-    if (!perfilAtivo) return;
-    const lista = await listarTreinos(perfilAtivo.id);
+    if (!uid) return;
+    const lista = await listarTreinos(uid);
     setTreinos(lista);
     await Promise.all([
-      carregarContagens(perfilAtivo.id, lista),
-      carregarDatasFinalizacao(perfilAtivo.id, lista),
-      carregarCicloAtual(perfilAtivo.id),
+      carregarContagens(uid, lista),
+      carregarDatasFinalizacao(uid, lista),
+      carregarCicloAtual(uid),
     ]);
   }
 
   useEffect(() => {
-    if (!perfilAtivo) return;
+    if (!uid) return;
     let ativo = true;
     (async () => {
       setCarregando(true);
-      const lista = await listarTreinos(perfilAtivo.id);
+      const lista = await listarTreinos(uid);
       if (ativo) {
         setTreinos(lista);
         setCarregando(false);
       }
       await Promise.all([
-        carregarContagens(perfilAtivo.id, lista),
-        carregarDatasFinalizacao(perfilAtivo.id, lista),
-        carregarCicloAtual(perfilAtivo.id),
+        carregarContagens(uid, lista),
+        carregarDatasFinalizacao(uid, lista),
+        carregarCicloAtual(uid),
       ]);
     })();
     return () => {
       ativo = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reload deve depender só do id do perfil ativo (research.md, Decisão 2), não do objeto perfilAtivo inteiro
-  }, [perfilAtivo?.id]);
+  }, [uid]);
 
   useFocusEffect(
     useCallback(() => {
       recarregarTreinos();
       // eslint-disable-next-line react-hooks/exhaustive-deps -- recarrega ao ganhar foco (ex.: voltar de uma sessão finalizada), sem precisar de mais dependências
-    }, [perfilAtivo?.id]),
+    }, [uid]),
   );
 
   function handleSelecionarTreino(treino: Treino) {

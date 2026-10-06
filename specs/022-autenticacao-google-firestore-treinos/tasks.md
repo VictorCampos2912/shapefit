@@ -207,7 +207,7 @@ vê os próprios treinos.
       afetado"). As duas partes MUST ir no mesmo commit — remover o campo do
       tipo sem corrigir `montarTreinoValido` (ou vice-versa) deixa o
       `tsc --noEmit` vermelho; depende de T015.
-- [ ] T017 [US3] Alterar `src/app/(tabs)/index.tsx`: trocar todo uso de
+- [X] T017 [US3] Alterar `src/app/(tabs)/index.tsx`: trocar todo uso de
       `usePerfilAtivo().perfilAtivo.id` por `useContaAutenticada().uid` —
       chamadas a `listarTreinos`, `carregarContagens`, `carregarDatasFinalizacao`,
       `carregarCicloAtual` e os arrays de dependência de `useEffect`/
