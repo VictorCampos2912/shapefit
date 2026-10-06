@@ -719,13 +719,14 @@ feature):
       lista de treinos de B aparece **vazia** — o treino de A não aparece
 - [ ] Conta B importa um treino diferente; voltar para conta A: lista de A
       mostra só o treino de A, o treino de B não aparece
-- [ ] Rules Playground do Firestore (`contracts/firestore-rules.md`, sem
-      depender do app — console do Firebase), os 4 casos:
-  - [ ] Sessão de A tenta ler `users/B` → rejeitado (`permission-denied`)
-  - [ ] Sessão de A lê/escreve em `users/A` ou `users/A/treinos/*` → permitido
-  - [ ] Sem autenticação (cliente anônimo) tenta ler/escrever `users/*` →
+- [X] Rules Playground do Firestore (`contracts/firestore-rules.md`, sem
+      depender do app — console do Firebase), os 4 casos — **confirmado pelo
+      usuário em 2026-10-06**:
+  - [X] Sessão de A tenta ler `users/B` → rejeitado (`permission-denied`)
+  - [X] Sessão de A lê/escreve em `users/A` ou `users/A/treinos/*` → permitido
+  - [X] Sem autenticação (cliente anônimo) tenta ler/escrever `users/*` →
         rejeitado
-  - [ ] Sessão de A tenta escrever em `users/B` (caminho) com `A` em algum
+  - [X] Sessão de A tenta escrever em `users/B` (caminho) com `A` em algum
         campo do corpo do documento → continua rejeitado (regra não lê campo
         nenhum do corpo, só o segmento `{uid}` do caminho)
 

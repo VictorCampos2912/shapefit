@@ -46,6 +46,10 @@ service cloud.firestore {
 
 ## Casos de teste desta regra (validação manual via Firebase Console/emulador, `quickstart.md`)
 
+**Os 4 casos abaixo foram confirmados pelo usuário via Rules Playground do
+Firebase Console em 2026-10-06** (`docs/criterios-aceite.md`, seção
+"Autenticação Google + Firestore").
+
 1. **Given** duas contas Google autenticadas (`uid=A`, `uid=B`), **When** a
    sessão de `A` tenta ler `users/B`, **Then** a operação é rejeitada
    (`permission-denied`).
