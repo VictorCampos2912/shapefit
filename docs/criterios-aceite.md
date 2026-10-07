@@ -698,10 +698,11 @@ Login (User Story 1):
       qualquer outra tela, com só a opção "Entrar com o Google" (nenhuma opção
       Apple, nenhuma opção de perfil local) — **confirmado pelo usuário em
       Android, 2026-10-07**
-- [ ] Login cancelado ou com falha: mensagem de erro clara, app permanece na
-      tela de login, sem travar
-- [ ] Sessão permanece ativa entre aberturas do app (fechar e reabrir não pede
-      login de novo, sem ter saído da conta)
+- [X] Login cancelado ou com falha: mensagem de erro clara, app permanece na
+      tela de login, sem travar — **confirmado em Android, 2026-10-07**
+- [X] Sessão permanece ativa entre aberturas do app (fechar e reabrir não pede
+      login de novo, sem ter saído da conta) — **confirmado em Android,
+      2026-10-07**
 
 Dados físicos no primeiro login (User Story 2):
 - [X] Primeiro login de uma conta (sem dados físicos salvos): formulário de
