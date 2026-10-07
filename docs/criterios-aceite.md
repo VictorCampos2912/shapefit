@@ -737,21 +737,22 @@ feature):
 Offline (FR-011):
 - [ ] Com treino já importado/sincronizado, modo avião: lista de treinos
       continua aparecendo normalmente (cache offline nativo do Firestore)
-- [ ] Importar um treino novo em modo avião: mensagem de sucesso normal,
+- [X] Importar um treino novo em modo avião: mensagem de sucesso normal,
       mesmo sem rede (sem travar esperando confirmação do servidor —
-      research.md Decisão 8)
-- [ ] Reconectar: o treino importado offline aparece depois em outro
-      aparelho/sessão da mesma conta, sincronizado automaticamente
+      research.md Decisão 8) — **confirmado em Android, 2026-10-07**
+- [X] Reconectar: o treino importado offline aparece depois em outro
+      aparelho/sessão da mesma conta, sincronizado automaticamente —
+      **confirmado em Android, 2026-10-07**
 - [ ] Tentar login/logout em modo avião: falha com mensagem clara (única
       exceção à operação offline)
 
 Sair da conta (User Story 4):
-- [ ] Tela de Ações mostra "Sair da conta ({e-mail})" no lugar de "Trocar
-      perfil"
-- [ ] Tocar em "Sair da conta": volta para a tela de login; login seguinte
+- [X] Tela de Ações mostra "Sair da conta ({e-mail})" no lugar de "Trocar
+      perfil" — **confirmado em Android, 2026-10-07**
+- [X] Tocar em "Sair da conta": volta para a tela de login; login seguinte
       mostra o seletor de conta do Google de novo (não reloga direto na
       mesma conta — confirma que `GoogleSignin.signOut()` limpou a sessão
-      nativa, não só o Firebase)
+      nativa, não só o Firebase) — **confirmado em Android, 2026-10-07**
 - [X] Sair da conta com uma sessão de treino em andamento: **não bloqueado**
       (diferente da regra antiga do RF10); entrar de novo com a mesma conta:
       sessão em andamento continua exatamente onde estava — **confirmado em
@@ -768,11 +769,11 @@ Continuidade do que não migra (FR-012):
       `uid` em vez de `perfilId` — **confirmado em Android, 2026-10-07**
       (treino executado e finalizado em modo avião, sem travar)
 
-**Validado em Android e iOS**: Android com a maior parte dos cenários
-confirmados em 2026-10-07 (ver itens `[X]` acima); restam "login
+**Validado em Android e iOS**: Android com quase todos os cenários
+confirmados em 2026-10-07 (ver itens `[X]` acima); restam só "login
 cancelado/falha", "sessão persiste entre aberturas", "salvar com campo
-vazio", "recuperação de erro de rede" e os 2 primeiros itens de Offline
-(FR-011) a confirmar — ainda sem nenhuma validação em iOS (Constitution
+vazio", "recuperação de erro de rede" e "tentar login/logout em modo
+avião" a confirmar — ainda sem nenhuma validação em iOS (Constitution
 v2.0.0, Princípio III exige os dois aparelhos antes de fechar a spec).
 **iOS bloqueado em 2026-10-06**: build de desenvolvimento no iPhone falha
 (`Native module NativeRNFBTurboApp is not registered` — binário anterior à
