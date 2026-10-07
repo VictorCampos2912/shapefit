@@ -694,31 +694,35 @@ presumir o número antes de fechar). **Status da spec: em validação.**
 **Critérios de aceite:**
 
 Login (User Story 1):
-- [ ] Ao abrir o app sem sessão ativa, a tela de login aparece antes de
+- [X] Ao abrir o app sem sessão ativa, a tela de login aparece antes de
       qualquer outra tela, com só a opção "Entrar com o Google" (nenhuma opção
-      Apple, nenhuma opção de perfil local)
+      Apple, nenhuma opção de perfil local) — **confirmado pelo usuário em
+      Android, 2026-10-07**
 - [ ] Login cancelado ou com falha: mensagem de erro clara, app permanece na
       tela de login, sem travar
 - [ ] Sessão permanece ativa entre aberturas do app (fechar e reabrir não pede
       login de novo, sem ter saído da conta)
 
 Dados físicos no primeiro login (User Story 2):
-- [ ] Primeiro login de uma conta (sem dados físicos salvos): formulário de
+- [X] Primeiro login de uma conta (sem dados físicos salvos): formulário de
       dados físicos aparece antes de qualquer outra tela, com os mesmos campos
       do RF10 (nome, peso, altura, idade, sexo, objetivo) e a mesma validação
-      de obrigatoriedade
+      de obrigatoriedade — **confirmado em Android, 2026-10-07**
 - [ ] Salvar com campo vazio: bloqueado, campos faltantes indicados
-- [ ] Preencher e salvar: navega para a lista de treinos (vazia, primeira vez
-      desta conta)
-- [ ] **Login subsequente da mesma conta** (neste ou em outro aparelho): vai
-      direto para a lista de treinos, **sem reexibir o formulário**
+- [X] Preencher e salvar: navega para a lista de treinos (vazia, primeira vez
+      desta conta) — **confirmado em Android, 2026-10-07**
+- [X] **Login subsequente da mesma conta** (neste ou em outro aparelho): vai
+      direto para a lista de treinos, **sem reexibir o formulário** —
+      **confirmado em Android, 2026-10-07**
 
 Isolamento entre contas — Firestore (User Story 3, o teste mais importante da
 feature):
-- [ ] Conta A importa um treino; trocar para conta B (nova, primeiro login):
-      lista de treinos de B aparece **vazia** — o treino de A não aparece
-- [ ] Conta B importa um treino diferente; voltar para conta A: lista de A
-      mostra só o treino de A, o treino de B não aparece
+- [X] Conta A importa um treino; trocar para conta B (nova, primeiro login):
+      lista de treinos de B aparece **vazia** — o treino de A não aparece —
+      **confirmado em Android, 2026-10-07**
+- [X] Conta B importa um treino diferente; voltar para conta A: lista de A
+      mostra só o treino de A, o treino de B não aparece — **confirmado em
+      Android, 2026-10-07**
 - [X] Rules Playground do Firestore (`contracts/firestore-rules.md`, sem
       depender do app — console do Firebase), os 4 casos — **confirmado pelo
       usuário em 2026-10-06**:
@@ -748,9 +752,10 @@ Sair da conta (User Story 4):
       mostra o seletor de conta do Google de novo (não reloga direto na
       mesma conta — confirma que `GoogleSignin.signOut()` limpou a sessão
       nativa, não só o Firebase)
-- [ ] Sair da conta com uma sessão de treino em andamento: **não bloqueado**
+- [X] Sair da conta com uma sessão de treino em andamento: **não bloqueado**
       (diferente da regra antiga do RF10); entrar de novo com a mesma conta:
-      sessão em andamento continua exatamente onde estava
+      sessão em andamento continua exatamente onde estava — **confirmado em
+      Android, 2026-10-07** ("sair da conta ok sem perda de dados")
 
 Recuperação de erro (Decisão 9, `research.md`):
 - [ ] Se a checagem de dados físicos falhar (ex.: sem rede no momento do
@@ -758,12 +763,17 @@ Recuperação de erro (Decisão 9, `research.md`):
       nunca uma tela em branco travada
 
 Continuidade do que não migra (FR-012):
-- [ ] Execução de treino, histórico e progresso de ciclo continuam
+- [X] Execução de treino, histórico e progresso de ciclo continuam
       funcionando exatamente como antes desta feature, agora chaveados por
-      `uid` em vez de `perfilId`
+      `uid` em vez de `perfilId` — **confirmado em Android, 2026-10-07**
+      (treino executado e finalizado em modo avião, sem travar)
 
-**Validado em Android e iOS**: *pendente* (Constitution v2.0.0, Princípio
-III — nenhum item acima fica `[X]` sem confirmação nos dois aparelhos).
+**Validado em Android e iOS**: Android com a maior parte dos cenários
+confirmados em 2026-10-07 (ver itens `[X]` acima); restam "login
+cancelado/falha", "sessão persiste entre aberturas", "salvar com campo
+vazio", "recuperação de erro de rede" e os 2 primeiros itens de Offline
+(FR-011) a confirmar — ainda sem nenhuma validação em iOS (Constitution
+v2.0.0, Princípio III exige os dois aparelhos antes de fechar a spec).
 **iOS bloqueado em 2026-10-06**: build de desenvolvimento no iPhone falha
 (`Native module NativeRNFBTurboApp is not registered` — binário anterior à
 adição dos módulos nativos do Firebase/Google Sign-In). Corrigir exige um
