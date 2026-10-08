@@ -406,6 +406,29 @@ de retry automático.
 Contrato atualizado em `contracts/use-conta-autenticada.md` (forma exposta,
 comportamento, e o diagrama do gate).
 
+## Decisão 10: Escape para sair da conta na tela de dados físicos (achado em teste manual, 2026-10-08, RESOLVIDO)
+
+**Decision**: adicionar um link "Sair da conta ({email})" no topo de
+`src/app/conta/dados-fisicos.tsx`, chamando `sairDaConta()` sem navegação
+manual (mesmo padrão de `acoes.tsx`: `signOut()` dispara
+`onAuthStateChanged`, e o gate em `_layout.tsx` redireciona pra `/login`
+sozinho).
+
+**Rationale**: achado pelo usuário testando em aparelho real — logar com a
+conta errada do Google no primeiro acesso deixava a pessoa **presa** nessa
+tela, sem nenhum jeito de voltar: fechar o app não ajuda (a sessão do
+Firebase Authentication persiste entre aberturas, Decisão 6/contrato
+`use-conta-autenticada.md`), e preencher o formulário criaria dados físicos
+permanentes associados à conta errada. Esse caminho de fuga não estava
+coberto pelos critérios de aceite originais da US2 (que descrevem só o
+caminho feliz de primeiro cadastro).
+
+**Alternatives considered**: nenhuma — é um escape hatch mínimo necessário,
+sem alternativa de design razoável (a tela não pode ser pulável sem
+preencher, por design da US2, mas precisa de ALGUMA saída).
+
+Confirmado pelo usuário em Android, 2026-10-08.
+
 ## Resumo das entidades técnicas afetadas
 
 - `package.json`: novas dependências — `@react-native-firebase/app`,

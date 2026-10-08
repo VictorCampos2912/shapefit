@@ -715,6 +715,10 @@ Dados físicos no primeiro login (User Story 2):
 - [X] **Login subsequente da mesma conta** (neste ou em outro aparelho): vai
       direto para a lista de treinos, **sem reexibir o formulário** —
       **confirmado em Android, 2026-10-07**
+- [X] Logar com a conta errada do Google: existe um link "Sair da conta" na
+      própria tela de dados físicos, permite voltar ao login e escolher
+      outra conta sem preencher nada (achado em teste manual, `research.md`
+      Decisão 10) — **confirmado em Android, 2026-10-08**
 
 Isolamento entre contas — Firestore (User Story 3, o teste mais importante da
 feature):
