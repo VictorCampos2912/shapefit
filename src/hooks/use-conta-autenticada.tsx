@@ -161,8 +161,14 @@ export function ContaAutenticadaProvider({ children }: { children: ReactNode }) 
           motivo: 'Não foi possível entrar. Verifique a conexão com a internet e tente novamente.',
         };
       }
-      const mensagem = erro instanceof Error ? erro.message : 'Não foi possível entrar com o Google.';
-      return { ok: false, motivo: mensagem };
+      // Qualquer outro erro do SDK (ex.: "[auth/unknown] An internal error
+      // has occurred.") nunca é mostrado cru pro usuário — não diz o que
+      // fazer e às vezes nem é sobre rede de fato (achado em teste manual,
+      // 2026-10-08: erro de login com rede instável veio como "auth/unknown",
+      // não bateu no filtro de erro de rede acima). O texto completo só vai
+      // pro console, pra debug.
+      console.error('[entrarComGoogle] Falha ao entrar com o Google:', erro);
+      return { ok: false, motivo: 'Não foi possível entrar. Tente novamente.' };
     }
   }, []);
 

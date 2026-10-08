@@ -459,6 +459,23 @@ vs. Google Sign-In) com mensagens diferentes — rejeitado por simplicidade
 (Princípio II): pro usuário final, qualquer uma das duas falhas significa a
 mesma coisa ("sem internet agora"), não há valor em diferenciar a origem.
 
+**Generalização (mesmo dia, 2026-10-08)**: testando de novo (rede instável no
+momento exato da escolha da conta Google), apareceu `[auth/unknown] An
+internal error has occurred.` na tela de login — um código que não bate no
+filtro `/network/i` de `ehErroDeRede`, então caiu no fallback antigo e
+mostrou o texto técnico cru de novo. Em vez de ampliar o filtro pra mais um
+código específico (lista sem fim de códigos possíveis), o fallback
+`catch` passou a **nunca** mostrar `erro.message` cru pro usuário — qualquer
+erro não reconhecido vira `'Não foi possível entrar. Tente novamente.'`, e
+o erro completo vai só pro `console.error` (debug). Mantém a mensagem mais
+específica de rede (Decision acima) só pra quando o filtro realmente bate.
+
+**Nota**: esse teste específico não validou a tela de erro do **gate**
+(`erroAoChecarDadosFisicos`, `_layout.tsx`) — a falha aconteceu na própria
+tela de login (`entrarComGoogle()`), antes do login completar. A validação
+do gate continua pendente (precisa de uma falha de rede *depois* do login
+ter sucesso, durante a checagem de `obterDadosFisicos`).
+
 ## Resumo das entidades técnicas afetadas
 
 - `package.json`: novas dependências — `@react-native-firebase/app`,
