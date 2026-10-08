@@ -16,8 +16,19 @@ export async function salvarDadosFisicos(
   dados: Omit<DadosFisicos, 'criadoEm'>,
 ): Promise<void> {
   const referencia = doc(getFirestore(), 'users', uid);
-  const existente = await getDoc(referencia);
-  const criadoEm = existente.exists() ? (existente.data() as DadosFisicos).criadoEm : new Date().toISOString();
+
+  // getDoc só serve pra preservar o criadoEm de um cadastro já existente — mas
+  // esta tela só aparece quando o documento ainda não existe (gate em
+  // use-conta-autenticada.tsx), então se getDoc rejeitar (ex.: sem rede), não
+  // há criadoEm antigo a preservar: usa a data atual como se fosse o primeiro
+  // cadastro mesmo, sem travar o salvamento esperando a rede voltar.
+  let criadoEm: string;
+  try {
+    const existente = await getDoc(referencia);
+    criadoEm = existente.exists() ? (existente.data() as DadosFisicos).criadoEm : new Date().toISOString();
+  } catch {
+    criadoEm = new Date().toISOString();
+  }
 
   // Sem await de propósito: a Promise do setDoc só resolve com confirmação do
   // servidor, mesmo a escrita já estando aplicada no cache local offline
