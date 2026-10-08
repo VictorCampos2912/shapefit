@@ -37,7 +37,7 @@ export async function listarTreinos(uid: string): Promise<Treino[]> {
   // Treinos importados antes da RF17 (categorias) não têm `categoria` persistida —
   // normaliza para o mesmo default já aplicado na importação ('peso'), sem exigir
   // migração de dados nem reescrever o storage.
-  return snapshot.docs.map((documento) => {
+  const treinos = snapshot.docs.map((documento) => {
     const treino = documento.data() as Treino;
     return {
       ...treino,
@@ -46,6 +46,17 @@ export async function listarTreinos(uid: string): Promise<Treino[]> {
         categoria: exercicio.categoria ?? 'peso',
       })),
     };
+  });
+
+  // getDocs() do Firestore não garante nenhuma ordem sem orderBy explícito —
+  // ordena por importadoEm (mais antigo primeiro, mesma ordem de importação),
+  // com desempate por id para a ordem ser estável entre leituras quando dois
+  // treinos têm o mesmo importadoEm.
+  return treinos.sort((a, b) => {
+    if (a.importadoEm !== b.importadoEm) {
+      return a.importadoEm < b.importadoEm ? -1 : 1;
+    }
+    return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
   });
 }
 
@@ -197,7 +208,7 @@ async function processarConteudoArray(bruto: unknown[], uid: string): Promise<Re
     }
   }
 
-  const treinos: TreinoImportadoComPendencias[] = [];
+  let treinos: TreinoImportadoComPendencias[] = [];
   const treinosIgnorados: ResultadoImportacaoMultipla['treinosIgnorados'] = [];
 
   for (const item of bruto) {
@@ -208,6 +219,17 @@ async function processarConteudoArray(bruto: unknown[], uid: string): Promise<Re
       treinosIgnorados.push({ nome: resultado.nome, motivo: resultado.motivo });
     }
   }
+
+  // montarTreinoValido usa `new Date().toISOString()` individualmente — chamado
+  // num laço síncrono, tende a colidir no mesmo milissegundo pra vários treinos
+  // do lote. Reescreve importadoEm com um timestamp base + índice (ms), pra
+  // garantir ordem estritamente crescente e preservar a ordem do arquivo quando
+  // listarTreinos ordenar por importadoEm.
+  const baseTimestamp = Date.now();
+  treinos = treinos.map((item, indice) => ({
+    ...item,
+    treino: { ...item.treino, importadoEm: new Date(baseTimestamp + indice).toISOString() },
+  }));
 
   if (treinos.length > 0) {
     // Escrita em lote (tudo ou nada) — equivalente Firestore do antigo
