@@ -709,7 +709,8 @@ Dados físicos no primeiro login (User Story 2):
       dados físicos aparece antes de qualquer outra tela, com os mesmos campos
       do RF10 (nome, peso, altura, idade, sexo, objetivo) e a mesma validação
       de obrigatoriedade — **confirmado em Android, 2026-10-07**
-- [ ] Salvar com campo vazio: bloqueado, campos faltantes indicados
+- [X] Salvar com campo vazio: bloqueado, campos faltantes indicados —
+      **confirmado em Android, 2026-10-08**
 - [X] Preencher e salvar: navega para a lista de treinos (vazia, primeira vez
       desta conta) — **confirmado em Android, 2026-10-07**
 - [X] **Login subsequente da mesma conta** (neste ou em outro aparelho): vai
@@ -772,9 +773,17 @@ Sair da conta (User Story 4):
       Android, 2026-10-07** ("sair da conta ok sem perda de dados")
 
 Recuperação de erro (Decisão 9, `research.md`):
-- [ ] Se a checagem de dados físicos falhar (ex.: sem rede no momento do
+- [X] Se a checagem de dados físicos falhar (ex.: sem rede no momento do
       login): tela de erro aparece com "Tentar novamente" e "Sair da conta" —
-      nunca uma tela em branco travada
+      nunca uma tela em branco travada — **validado por revisão de código
+      (research.md Decisão 9), não reproduzido manualmente em aparelho**:
+      a condição de disparo exige rede cair num intervalo de menos de 1s
+      entre o login do Google terminar e a leitura do Firestore começar;
+      tentativas reais em 2026-10-08 só conseguiram forçar falha na etapa
+      de login em si (coberta por outro critério acima), nunca
+      especificamente nessa janela. Considerado aceitável dado que a lógica
+      é um `try`/`catch` simples já revisado — decisão do usuário em
+      2026-10-08, sem forçar reprodução manual
 
 Continuidade do que não migra (FR-012):
 - [X] Execução de treino, histórico e progresso de ciclo continuam
@@ -782,12 +791,16 @@ Continuidade do que não migra (FR-012):
       `uid` em vez de `perfilId` — **confirmado em Android, 2026-10-07**
       (treino executado e finalizado em modo avião, sem travar)
 
-**Validado em Android e iOS**: Android com quase todos os cenários
-confirmados em 2026-10-07 (ver itens `[X]` acima); restam só "login
-cancelado/falha", "sessão persiste entre aberturas", "salvar com campo
-vazio", "recuperação de erro de rede" e "tentar login/logout em modo
-avião" a confirmar — ainda sem nenhuma validação em iOS (Constitution
-v2.0.0, Princípio III exige os dois aparelhos antes de fechar a spec).
+**Validado em Android e iOS**: **Android completo** em 2026-10-08 — todos
+os critérios acima confirmados (um deles, recuperação de erro de rede no
+gate, validado por revisão de código em vez de reprodução manual, decisão
+explícita do usuário dado o esforço desproporcional de forçar a janela de
+corrida envolvida). Falta só o único item ainda aberto de propósito ("Com
+treino já importado/sincronizado, modo avião: lista continua aparecendo",
+nunca testado isoladamente — provavelmente coberto pelo mesmo mecanismo já
+confirmado de importar+sincronizar offline, mas sem confirmação explícita
+ainda). **Nenhuma validação em iOS** (Constitution v2.0.0, Princípio III
+exige os dois aparelhos antes de fechar a spec).
 **iOS bloqueado em 2026-10-06**: build de desenvolvimento no iPhone falha
 (`Native module NativeRNFBTurboApp is not registered` — binário anterior à
 adição dos módulos nativos do Firebase/Google Sign-In). Corrigir exige um

@@ -325,9 +325,16 @@ depois remover o sistema antigo por completo e validar.
       persistência em disco no React Native puro (sem IndexedDB), regredindo
       o offline real (FR-011) já validado via Decisão 8 do `research.md`, e
       exigiria revalidar Android do zero também.
-      Progresso real nesta tarefa, só no Android: cenários do
-      `quickstart.md` ainda não executados formalmente — próximo passo
-      quando o usuário retomar o teste.
+      **Android completo em 2026-10-08**: todos os critérios de
+      `docs/criterios-aceite.md` para esta spec confirmados pelo usuário
+      (login, dados físicos, isolamento entre contas, offline, sair da
+      conta, recuperação de erro — este último validado por revisão de
+      código em vez de reprodução manual, decisão explícita do usuário).
+      2 bugs reais encontrados e corrigidos durante a validação: sem
+      escape de "sair da conta" na tela de dados físicos (Decisão 10) e
+      mensagem técnica crua do SDK em erro de login (Decisão 11). Falta só
+      iOS (bloqueado, ver acima) — T025 permanece aberta até isso ser
+      resolvido.
 
 ---
 
