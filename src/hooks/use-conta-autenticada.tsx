@@ -48,6 +48,17 @@ type ContaAutenticadaContextValue = {
 
 const ContaAutenticadaContext = createContext<ContaAutenticadaContextValue | null>(null);
 
+// Tanto o Google Sign-In nativo (ex.: código "NETWORK_ERROR") quanto o
+// Firebase Auth (ex.: "auth/network-request-failed") relatam falta de rede
+// com códigos/mensagens técnicos em inglês — aqui em vez de mostrar isso
+// direto pro usuário (achado em teste manual, 2026-10-08), traduz pra uma
+// mensagem acionável.
+function ehErroDeRede(erro: unknown): boolean {
+  if (!(erro instanceof Error)) return false;
+  const codigo = 'code' in erro && typeof (erro as { code?: unknown }).code === 'string' ? (erro as { code: string }).code : '';
+  return /network/i.test(codigo) || /network/i.test(erro.message);
+}
+
 function paraContaAutenticada(usuario: User | null): ContaAutenticada | null {
   if (!usuario) {
     return null;
@@ -144,6 +155,12 @@ export function ContaAutenticadaProvider({ children }: { children: ReactNode }) 
       await signInWithCredential(getAuth(), credencial);
       return { ok: true };
     } catch (erro) {
+      if (ehErroDeRede(erro)) {
+        return {
+          ok: false,
+          motivo: 'Não foi possível entrar. Verifique a conexão com a internet e tente novamente.',
+        };
+      }
       const mensagem = erro instanceof Error ? erro.message : 'Não foi possível entrar com o Google.';
       return { ok: false, motivo: mensagem };
     }

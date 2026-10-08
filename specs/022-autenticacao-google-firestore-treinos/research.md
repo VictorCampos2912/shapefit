@@ -429,6 +429,36 @@ preencher, por design da US2, mas precisa de ALGUMA saída).
 
 Confirmado pelo usuário em Android, 2026-10-08.
 
+## Decisão 11: Mensagem amigável para falha de rede no login (achado em teste manual, 2026-10-08, RESOLVIDO)
+
+**Decision**: `entrarComGoogle()` ganha uma checagem `ehErroDeRede(erro)` —
+olha tanto `erro.code` (formato do Firebase Auth, ex.:
+`auth/network-request-failed`) quanto `erro.message` (formato do Google
+Sign-In nativo, ex.: código `NETWORK_ERROR`) por `/network/i` — e retorna
+`{ ok: false, motivo: 'Não foi possível entrar. Verifique a conexão com a
+internet e tente novamente.' }` nesse caso, em vez do `erro.message` cru.
+
+**Rationale**: testando login em modo avião, o usuário via o código/mensagem
+técnica do SDK direto na tela (`network-request-failed` do Firebase, ou um
+código parecido do Google Sign-In antes mesmo de chegar no Firebase) — não
+diz o que fazer. Mesma falha pode vir de dois SDKs diferentes
+(`GoogleSignin.hasPlayServices()`/`signIn()` falha offline antes mesmo de
+chegar no Firebase; `signInWithCredential` falha com rede instável depois),
+por isso a checagem cobre `code` e `message`.
+
+**Relacionado**: testando o logout em modo avião no mesmo teste, o usuário
+notou que `sairDaConta()` **funciona normalmente offline** (volta pro
+login sem erro) — **não é bug**: `auth().signOut()` e
+`GoogleSignin.signOut()` são operações locais (limpam token/sessão
+guardados no aparelho), não fazem round-trip com o servidor. O critério de
+aceite original presumia que logout falharia offline; essa premissa estava
+errada, não o código — corrigido em `docs/criterios-aceite.md`.
+
+**Alternatives considered**: branch separada por SDK de origem (Firebase
+vs. Google Sign-In) com mensagens diferentes — rejeitado por simplicidade
+(Princípio II): pro usuário final, qualquer uma das duas falhas significa a
+mesma coisa ("sem internet agora"), não há valor em diferenciar a origem.
+
 ## Resumo das entidades técnicas afetadas
 
 - `package.json`: novas dependências — `@react-native-firebase/app`,

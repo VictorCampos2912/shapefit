@@ -748,8 +748,16 @@ Offline (FR-011):
 - [X] Reconectar: o treino importado offline aparece depois em outro
       aparelho/sessão da mesma conta, sincronizado automaticamente —
       **confirmado em Android, 2026-10-07**
-- [ ] Tentar login/logout em modo avião: falha com mensagem clara (única
-      exceção à operação offline)
+- [X] Tentar login em modo avião: falha com mensagem clara ("Não foi
+      possível entrar. Verifique a conexão com a internet e tente
+      novamente.", `research.md` Decisão 11) — **confirmado em Android,
+      2026-10-08**
+- [X] Tentar logout em modo avião: **critério original corrigido** —
+      `sairDaConta()` funciona normalmente offline (não é a "única exceção"
+      que o critério original presumia); `signOut()` do Firebase e do
+      Google Sign-In são operações locais, sem round-trip com o servidor —
+      comportamento esperado do SDK, não um bug (`research.md` Decisão 11)
+      — **confirmado em Android, 2026-10-08**
 
 Sair da conta (User Story 4):
 - [X] Tela de Ações mostra "Sair da conta ({e-mail})" no lugar de "Trocar
