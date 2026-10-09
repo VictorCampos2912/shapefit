@@ -2,7 +2,8 @@
 
 Este documento complementa o PRD. Cada requisito só é considerado "pronto" quando todos
 os critérios abaixo forem validados manualmente nos dois aparelhos (Redmi Note 12 e
-iPhone 16 Plus), via Expo Go.
+iPhone 16 Plus), via development build (o app usa módulos nativos desde a spec 022 —
+Expo Go não serve mais para nenhum teste deste projeto).
 
 > **Ordem de implementação (atualizada na v1.1 do PRD):** o RF10 (perfil) passou a ser
 > pré-requisito funcional do RF01, RF02, RF07 e RF08, que agora operam "por perfil ativo".
@@ -21,6 +22,12 @@ iPhone 16 Plus), via Expo Go.
 ---
 
 ## RF10 — Criar e selecionar perfil local
+
+> **SUBSTITUÍDO pela spec 022** (autenticação Google + Firestore, ver seção
+> "Autenticação Google + Firestore" mais abaixo) — perfil local sem
+> autenticação não existe mais no app. Os critérios abaixo são **históricos**,
+> mantidos como registro de quando o RF10 original foi validado; não refletem
+> o comportamento atual.
 
 **Decisões:**
 - Perfis são locais, sem senha ou autenticação (apenas seleção)
@@ -60,6 +67,11 @@ iPhone 16 Plus), via Expo Go.
 
 ## RF01 — Importar arquivo JSON com estrutura de treino
 
+> **Migrado pela spec 022**: a importação agora grava em
+> `users/{uid}/treinos/*` no Firestore, não mais em AsyncStorage por
+> `perfil_id`. Os critérios abaixo usam a terminologia antiga (perfil
+> ativo/`perfil_id`) e são **históricos**, da validação original.
+
 **Decisões:**
 - Importação via seleção de arquivo do sistema (`expo-document-picker`)
 - App inclui um arquivo de exemplo pré-carregado para testes
@@ -96,6 +108,11 @@ iPhone 16 Plus), via Expo Go.
 ---
 
 ## RF02 — Listar treinos importados/salvos
+
+> **Migrado pela spec 022**: a listagem agora lê de
+> `users/{uid}/treinos/*` no Firestore, não mais de AsyncStorage por
+> `perfil_id`. Os critérios abaixo usam a terminologia antiga (perfil
+> ativo/`perfil_id`) e são **históricos**, da validação original.
 
 **Decisões:**
 - Múltiplos treinos podem ficar salvos ao mesmo tempo (ex: Treino A, B, C de uma rotina)
@@ -296,6 +313,12 @@ specs/008-notificacao-fim-descanso/research.md.
 
 ## RF07 — Salvar sessão de treino (completa e em andamento)
 
+> **Chave trocada pela spec 022** (FR-012): sessão agora é vinculada ao
+> `uid` da conta, não ao `perfil_id` — mas **continua em AsyncStorage**, não
+> foi migrada pro Firestore (decisão explícita de escopo). Os critérios
+> abaixo usam a terminologia antiga (perfil ativo/`perfil_id`) e são
+> **históricos**, da validação original.
+
 **Decisões:**
 - Sessão é marcada como concluída automaticamente ao concluir o último exercício, **ou**
   manualmente a qualquer momento via botão "Finalizar treino"
@@ -343,6 +366,12 @@ specs/009-salvar-sessao-treino/research.md (Decisões 7 e 10).
 ---
 
 ## RF08 — Histórico de evolução por exercício
+
+> **Chave trocada pela spec 022** (FR-012): histórico agora é filtrado por
+> `uid` da conta, não por `perfil_id` — mas **continua em AsyncStorage**,
+> não foi migrado pro Firestore (decisão explícita de escopo). Os critérios
+> abaixo usam a terminologia antiga (perfil ativo/`perfil_id`) e são
+> **históricos**, da validação original.
 
 **Decisões:**
 - Exibição em lista simples com valores por data (sem gráfico no MVP)
@@ -807,13 +836,6 @@ usuário dado o esforço desproporcional de forçar a janela de corrida
 envolvida). **Nenhuma validação em iOS** (Constitution v2.0.0, Princípio
 III exige os dois aparelhos antes de fechar a spec).
 
-**Achado colateral durante a validação (não é bug do ShapeFit)**: o teste
-de abertura a frio revelou um crash nativo (SIGSEGV) recorrente, causado
-por um bug conhecido do `react-native-screens` (use-after-free em abertura
-a frio no Android) — corrigido atualizando a dependência para 4.28.0
-(commit `4f03d20`). Não bloqueia o fechamento desta spec, mas era um
-problema de estabilidade real e independente, só exposto por este teste
-específico.
 **iOS bloqueado em 2026-10-06**: build de desenvolvimento no iPhone falha
 (`Native module NativeRNFBTurboApp is not registered` — binário anterior à
 adição dos módulos nativos do Firebase/Google Sign-In). Corrigir exige um
@@ -822,3 +844,11 @@ alternativa sem Mac). Decisão do usuário: adiar a compra, seguir validando
 só no Android por ora. Alternativa de trocar para SDK JS do Firebase (sem
 exigir conta Apple) avaliada e rejeitada — perderia a persistência offline
 real do Firestore em React Native (FR-011).
+
+**Achado colateral durante a validação (não é bug do ShapeFit)**: o teste
+de abertura a frio revelou um crash nativo (SIGSEGV) recorrente, causado
+por um bug conhecido do `react-native-screens` (use-after-free em abertura
+a frio no Android) — corrigido atualizando a dependência para 4.28.0
+(commit `4f03d20`). Não bloqueia o fechamento desta spec, mas era um
+problema de estabilidade real e independente, só exposto por este teste
+específico.

@@ -55,11 +55,16 @@ exaustivo em `plan.md`) tiverem sido migrados — nunca antes.
       `contracts/firestore-rules.md` como `firestore.rules` no projeto Firebase
       — antes de qualquer teste com dados reais (`quickstart.md`, Pré-requisito
       3; depende de T004).
-- [ ] T006 **(passo manual, fora do código)** Gerar um novo build de
+- [X] T006 **(passo manual, fora do código)** Gerar um novo build de
       development client (perfil `development` do EAS) incluindo os módulos
       nativos instalados em T002/T003 — necessário para testar qualquer parte
       desta feature em aparelho (`quickstart.md`, Pré-requisito 4; depende de
-      T003).
+      T003). **Concluída**: build Android local (`expo run:android`) e build
+      iOS via EAS ambos gerados com sucesso em 2026-10-02 (research.md
+      Decisão 7) — ficou sem marcar até agora por omissão, não porque
+      estivesse pendente (múltiplos builds Android subsequentes já foram
+      gerados e testados desde então, incluindo o rebuild de 2026-10-08 que
+      corrigiu o crash do react-native-screens).
 
 ---
 
