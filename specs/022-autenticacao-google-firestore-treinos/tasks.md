@@ -325,14 +325,16 @@ depois remover o sistema antigo por completo e validar.
       persistência em disco no React Native puro (sem IndexedDB), regredindo
       o offline real (FR-011) já validado via Decisão 8 do `research.md`, e
       exigiria revalidar Android do zero também.
-      **Android completo em 2026-10-08**: todos os critérios de
-      `docs/criterios-aceite.md` para esta spec confirmados pelo usuário
-      (login, dados físicos, isolamento entre contas, offline, sair da
-      conta, recuperação de erro — este último validado por revisão de
-      código em vez de reprodução manual, decisão explícita do usuário).
-      2 bugs reais encontrados e corrigidos durante a validação: sem
-      escape de "sair da conta" na tela de dados físicos (Decisão 10) e
-      mensagem técnica crua do SDK em erro de login (Decisão 11). Falta só
+      **Android 100% completo em 2026-10-08**: todos os critérios de
+      `docs/criterios-aceite.md` para esta spec confirmados pelo usuário,
+      incluindo o cenário mais rigoroso (abertura a frio completa em modo
+      avião, testado por cabo USB + `adb reverse`, sem build novo). 3
+      bugs reais encontrados e corrigidos durante a validação: sem escape
+      de "sair da conta" na tela de dados físicos (Decisão 10), mensagem
+      técnica crua do SDK em erro de login (Decisão 11), e um crash nativo
+      (SIGSEGV) na abertura a frio causado por um bug conhecido do
+      `react-native-screens` — não é bug do ShapeFit, corrigido
+      atualizando a dependência pra 4.28.0 (commit `4f03d20`). Falta só
       iOS (bloqueado, ver acima) — T025 permanece aberta até isso ser
       resolvido.
 

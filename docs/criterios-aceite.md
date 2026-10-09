@@ -741,8 +741,15 @@ feature):
         nenhum do corpo, só o segmento `{uid}` do caminho)
 
 Offline (FR-011):
-- [ ] Com treino já importado/sincronizado, modo avião: lista de treinos
-      continua aparecendo normalmente (cache offline nativo do Firestore)
+- [X] Com treino já importado/sincronizado, modo avião: lista de treinos
+      continua aparecendo normalmente (cache offline nativo do Firestore) —
+      **confirmado em Android, 2026-10-08**, no teste mais rigoroso possível:
+      abertura a frio completa (app removido dos recentes) com o aparelho em
+      modo avião desde antes de abrir — sessão do Firebase Auth, leitura de
+      `users/{uid}` e leitura da lista de treinos todas resolvidas via cache
+      local, sem rede nenhuma. Testado via cabo USB + `adb reverse` (sem
+      precisar de build novo para o teste em si, só para o fix do crash
+      abaixo)
 - [X] Importar um treino novo em modo avião: mensagem de sucesso normal,
       mesmo sem rede (sem travar esperando confirmação do servidor —
       research.md Decisão 8) — **confirmado em Android, 2026-10-07**
@@ -791,16 +798,22 @@ Continuidade do que não migra (FR-012):
       `uid` em vez de `perfilId` — **confirmado em Android, 2026-10-07**
       (treino executado e finalizado em modo avião, sem travar)
 
-**Validado em Android e iOS**: **Android completo** em 2026-10-08 — todos
-os critérios acima confirmados (um deles, recuperação de erro de rede no
-gate, validado por revisão de código em vez de reprodução manual, decisão
-explícita do usuário dado o esforço desproporcional de forçar a janela de
-corrida envolvida). Falta só o único item ainda aberto de propósito ("Com
-treino já importado/sincronizado, modo avião: lista continua aparecendo",
-nunca testado isoladamente — provavelmente coberto pelo mesmo mecanismo já
-confirmado de importar+sincronizar offline, mas sem confirmação explícita
-ainda). **Nenhuma validação em iOS** (Constitution v2.0.0, Princípio III
-exige os dois aparelhos antes de fechar a spec).
+**Validado em Android e iOS**: **Android 100% completo** em 2026-10-08 —
+todos os critérios acima confirmados, incluindo o último item (abertura a
+frio completa em modo avião), via teste direto por cabo USB + `adb
+reverse` (um deles, recuperação de erro de rede no gate, validado por
+revisão de código em vez de reprodução manual, decisão explícita do
+usuário dado o esforço desproporcional de forçar a janela de corrida
+envolvida). **Nenhuma validação em iOS** (Constitution v2.0.0, Princípio
+III exige os dois aparelhos antes de fechar a spec).
+
+**Achado colateral durante a validação (não é bug do ShapeFit)**: o teste
+de abertura a frio revelou um crash nativo (SIGSEGV) recorrente, causado
+por um bug conhecido do `react-native-screens` (use-after-free em abertura
+a frio no Android) — corrigido atualizando a dependência para 4.28.0
+(commit `4f03d20`). Não bloqueia o fechamento desta spec, mas era um
+problema de estabilidade real e independente, só exposto por este teste
+específico.
 **iOS bloqueado em 2026-10-06**: build de desenvolvimento no iPhone falha
 (`Native module NativeRNFBTurboApp is not registered` — binário anterior à
 adição dos módulos nativos do Firebase/Google Sign-In). Corrigir exige um
