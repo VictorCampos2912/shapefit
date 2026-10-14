@@ -862,9 +862,11 @@ específico.
 FR-003 da spec `021-imagens-exercicios` (RF20) para buscar imagem de
 exercícios compostos (bi-set). Número confirmado em 2026-10-13 ao
 registrar no PRD (disciplina já usada pelo RF11-RF20 — nunca presumir o
-número antes de fechar). **Validado em Android. Nenhuma validação em iOS**
-(Constitution v2.0.0, Princípio III exige os dois aparelhos antes de
-fechar a spec; iOS bloqueado pela falta de conta Apple Developer paga,
+número antes de fechar). **Validado em Android (paridade visual, Cenário
+7, ainda não reverificada contra as capturas de referência — ver abaixo).
+Nenhuma validação em iOS** (Constitution v2.0.0, Princípio III exige os
+dois aparelhos antes de fechar a spec; iOS bloqueado pela falta de conta
+Apple Developer paga,
 mesma situação da spec 022).
 
 **Critérios de aceite:**
@@ -914,13 +916,15 @@ Nenhum efeito colateral nos caminhos sem correspondência (User Story 5):
       chave duplicada — **confirmado em Android, 2026-10-09**
 
 Paridade visual (regressão geral):
-- [X] Comparação com as capturas de referência (antes desta feature):
-      mesmo espaçamento, sem barra de rolagem/rubber-band indevidos,
-      mesmo número de toques para concluir uma série, lista de exercícios
-      e histórico idênticos — **confirmado em Android, 2026-10-09**
+- [ ] **Não verificado**: comparação com as capturas de referência (T000,
+      antes desta feature) ainda não foi de fato realizada — a confirmação
+      anterior (2026-10-09) foi dada sem reabrir as capturas para comparar
+      lado a lado. Aguardando o usuário refazer a comparação com as
+      capturas de `t000-referencia/` para marcar `[X]`.
 
-**Validado em Android**: 7 de 7 critérios confirmados (2026-10-09 a
-2026-10-13) — todas as 5 User Stories completas. **Nenhuma validação em
-iOS** (Constitution v2.0.0, Princípio
+**Validado em Android**: 6 de 7 critérios confirmados (2026-10-09 a
+2026-10-13) — as 5 User Stories completas; falta apenas reverificar a
+paridade visual (item acima) contra as capturas de referência. **Nenhuma
+validação em iOS** (Constitution v2.0.0, Princípio
 III exige os dois aparelhos antes de fechar a spec; iOS bloqueado pela
 falta de conta Apple Developer paga, mesma situação da spec 022).

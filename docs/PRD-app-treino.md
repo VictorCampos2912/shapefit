@@ -65,7 +65,7 @@ e histórico separados. Perfis não são sincronizados entre aparelhos diferente
 > perfis/dados entre aparelhos diferentes" que estavam aqui deixaram de ser
 > não-objetivos — essa spec os torna escopo real (autenticação obrigatória via Google
 > Sign-In + Firestore, Constitution v2.0.0 Princípio V). Ver seção 7 (RNF02/RNF05,
-> atualizadas) e seção 6 (tabela de requisitos, a atualizar após validação).
+> atualizadas) e seção 6 (RF22, registrado em 2026-10-14).
 
 ## 6. Requisitos funcionais
 
@@ -81,7 +81,7 @@ e histórico separados. Perfis não são sincronizados entre aparelhos diferente
 | RF08 | Tela de histórico: evolução de carga por exercício ao longo do tempo, filtrada pelo perfil ativo | Média |
 | RF09a | Editar/corrigir um registro de série já feito, da sessão **atual em andamento** (adiantado, implementado logo após o RF04 — ver `docs/criterios-aceite.md`) | Baixa |
 | RF09b | Editar/corrigir um registro de série já feito, de uma sessão **já finalizada** no passado (depende do RF07/RF08) | Baixa |
-| RF10 | Criar e selecionar perfil local (nome, dados físicos, objetivo) | Alta |
+| RF10 | ~~Criar e selecionar perfil local (nome, dados físicos, objetivo)~~ **Substituído pela spec `022-autenticacao-google-firestore-treinos` (RF22)** — perfil local sem autenticação não existe mais no app; ver RF22 e seção 7 (RNF02/RNF05) | Alta |
 
 **Pós-MVP (não fazem parte do RF01–RF10 original — pedidos pelo usuário depois do MVP completo e validado, ver seção 13):**
 
@@ -98,13 +98,14 @@ e histórico separados. Perfis não são sincronizados entre aparelhos diferente
 | RF19 | Catálogo interno de exercícios (nome, grupo muscular, imagem), 35 itens curados a partir do wger project (CC-BY-SA), 7 grupos musculares incluindo cardio, embutido no app, 100% offline; sem UI própria de navegação nesta etapa; tela de créditos/atribuição (exigência da licença) | Baixa | `specs/020-catalogo-exercicios/` |
 | RF20 | Imagem/GIF do exercício na tela de execução (RF03/RF04): busca por correspondência exata de nome (normalizado, sem aproximação) no catálogo interno (RF19) e exibe a imagem quando encontrada; nenhuma imagem nem UI de catálogo quando não há correspondência (estende o RF03/RF04/RF19) | Baixa | `specs/021-imagens-exercicios/` |
 | RF21 | Campo opcional `observacao` por exercício no JSON de importação (ausente/`null`/vazio = sem observação; presente e inválido descarta só o exercício), exibido em destaque secundário na tela de execução (RF03/RF04), nunca na lista de exercícios nem no histórico; para exercícios compostos no padrão "A + B (Bi-set)" sem correspondência de nome inteiro no catálogo (RF20), busca e exibe a imagem de cada parte encontrada (no máximo duas), ainda por igualdade exata, sem aproximação (emenda ao FR-003 da RF20) (estende o RF01/RF03/RF04/RF11/RF20) | Baixa | `specs/023-observacao-e-imagens-bi-set/` |
+| RF22 | Substitui o RF10 (perfil local sem autenticação) por login obrigatório via Google Sign-In (Firebase Authentication, Constitution v2.0.0 Princípio V, NON-NEGOTIABLE); migra RF01 (importar treino) e RF02 (listar treinos) de AsyncStorage para Firestore, segregados por `uid` da conta autenticada; RF08 (histórico) passa a ser filtrado por `uid`, mas permanece em AsyncStorage (sem migração); offline mantido para tudo exceto o próprio fluxo de login/logout (estende/substitui RF01/RF02/RF08/RF10). **Status: validado em Android; iOS pendente (sem conta Apple Developer paga)** | Alta | `specs/022-autenticacao-google-firestore-treinos/` |
 
 ## 7. Requisitos não funcionais
 
 - **RNF01:** Rodar via Expo Go em Android 12+ (Redmi Note 12) e iOS 17+ (iPhone 16 Plus)
 - **RNF02:** Funcionar offline (dados salvos localmente, sem dependência de internet).
-  **Atualizado (spec `022-autenticacao-google-firestore-treinos`, em implementação —
-  número de RF a confirmar na tabela da seção 6 após validação):** a única exceção é
+  **Atualizado (spec `022-autenticacao-google-firestore-treinos`, RF22 — número
+  confirmado em 2026-10-14 ao registrar na tabela da seção 6):** a única exceção é
   o próprio fluxo de login/logout (Google Sign-In), que exige rede — todo o restante
   do app, incluindo leitura/escrita de treinos no Firestore, continua funcionando
   offline via persistência offline nativa do SDK do Firestore, sincronizando
@@ -113,8 +114,8 @@ e histórico separados. Perfis não são sincronizados entre aparelhos diferente
 - **RNF04:** Código em TypeScript, organizado para permitir evolução incremental (v2, v3...)
 - **RNF05:** ~~Perfis são armazenados localmente, sem senha ou autenticação — a seleção
   de perfil é apenas para segregar dados, não para proteger acesso~~ **Substituído
-  (spec `022-autenticacao-google-firestore-treinos`, em implementação — número de RF a
-  confirmar na tabela da seção 6 após validação):** autenticação via Conta Google
+  (spec `022-autenticacao-google-firestore-treinos`, RF22 — número confirmado em
+  2026-10-14 ao registrar na tabela da seção 6):** autenticação via Conta Google
   (Firebase Authentication) é obrigatória para qualquer uso do app; dados de
   treino/sessão/histórico são segregados pelo `uid` da conta autenticada em vez de um
   perfil local sem login (Constitution v2.0.0, Princípio V)

@@ -4,8 +4,11 @@
 
 **Created**: 2026-10-08
 
-**Status**: Implemented — validado em Android em 2026-10-13 (Princípio III); iOS
-pendente por falta de conta Apple Developer (mesma situação da spec 022)
+**Status**: Implemented — validado em Android (Princípio III); iOS pendente por
+falta de conta Apple Developer (mesma situação da spec 022). **Exceção aberta em
+2026-10-14**: a paridade visual (US3, Cenário 7 do `quickstart.md`) ainda não foi
+reverificada de fato contra as capturas de referência (T000) — a confirmação de
+2026-10-13 foi dada sem a comparação lado a lado — ver `tasks.md`, T015
 
 **Requisito**: RF21 (PRD, seção 6 — número confirmado em 2026-10-13 ao registrar;
 estende RF01/RF11, importação, e RF03/RF04, execução, com o campo `observacao`;
