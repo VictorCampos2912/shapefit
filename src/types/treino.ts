@@ -8,6 +8,7 @@ export type ExercicioPlanejado = {
   cargaSugeridaKg: number;
   descansoSeg: number;
   categoria: CategoriaExercicio;
+  observacao?: string;
 };
 
 export type Treino = {

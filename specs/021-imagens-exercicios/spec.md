@@ -113,6 +113,17 @@ reservado vazio, nenhuma UI adicional.
 - **FR-003**: A correspondência DEVE exigir igualdade exata dos nomes já normalizados
   — o sistema NÃO DEVE tentar aproximar, sugerir ou unificar nomes apenas parecidos
   (nenhuma comparação além da normalização de FR-002).
+  > **Emenda (spec `023-observacao-e-imagens-bi-set`, Implemented):** para exercícios
+  > compostos no padrão "A + B (Bi-set)", que nunca batem por igualdade exata do
+  > nome inteiro, a busca passa a tentar cada parte separadamente antes de desistir
+  > — ainda por igualdade exata, nunca aproximada: se o nome inteiro não encontrar
+  > correspondência e contiver " + ", remove o sufixo " (Bi-set)" (se houver),
+  > separa por " + ", normaliza cada parte com a função do FR-002 e busca cada uma
+  > por igualdade exata no catálogo; exibe a imagem de cada parte encontrada (no
+  > máximo duas), legendada com o nome do item do catálogo. A regra original desta
+  > FR-003 (nenhuma aproximação) permanece válida tanto para o nome inteiro quanto
+  > para cada parte extraída. Ver FR-010–FR-014 da spec 023 para o detalhamento
+  > completo.
 - **FR-004**: Quando houver correspondência, a tela de execução DEVE exibir a
   imagem/GIF associada a esse exercício no catálogo.
 - **FR-005**: Quando NÃO houver correspondência, a tela de execução NÃO DEVE exibir

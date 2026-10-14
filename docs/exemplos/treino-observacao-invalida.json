@@ -1,0 +1,22 @@
+{
+  "nome": "Treino de teste — observação 123",
+  "exercicios": [
+    {
+      "id": "supino-reto",
+      "nome": "Supino reto (barra)",
+      "series": 3,
+      "reps_alvo": "8-10",
+      "carga_sugerida_kg": 40,
+      "descanso_seg": 90,
+      "observacao": 123
+    },
+    {
+      "id": "rosca-direta",
+      "nome": "Rosca direta com barra",
+      "series": 3,
+      "reps_alvo": "10-12",
+      "carga_sugerida_kg": 20,
+      "descanso_seg": 60
+    }
+  ]
+}

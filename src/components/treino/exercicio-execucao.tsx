@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { ConcluirIcon, EditarIcon } from '@/components/ui/icons';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { buscarNoCatalogo } from '@/services/catalogo-exercicios';
+import { buscarNoCatalogo, buscarPartesCompostoNoCatalogo } from '@/services/catalogo-exercicios';
 import type { EstadoExecucaoExercicio, SerieRealizada } from '@/types/execucao-treino';
 import type { ExercicioPlanejado } from '@/types/treino';
 import { ROTULO_CAMPO_PRINCIPAL, SUFIXO_VALOR, exibeCampoPrincipal } from '@/utils/categoria-exercicio';
@@ -47,6 +47,10 @@ export function ExercicioExecucao({
   const theme = useTheme();
   const [edicaoSerie, setEdicaoSerie] = useState<EdicaoSerieEmAndamento | null>(null);
   const correspondencia = useMemo(() => buscarNoCatalogo(exercicio.nome), [exercicio.nome]);
+  const partesComposto = useMemo(
+    () => (correspondencia ? [] : buscarPartesCompostoNoCatalogo(exercicio.nome)),
+    [exercicio.nome, correspondencia],
+  );
 
   function handleIniciarEdicaoSerie(serieRealizada: SerieRealizada) {
     setEdicaoSerie({
@@ -241,6 +245,30 @@ export function ExercicioExecucao({
         />
       )}
 
+      {!correspondencia && partesComposto.length > 0 && (
+        <View style={styles.linhaImagensComposto}>
+          {partesComposto.map((item, indice) => (
+            <View key={`${item.id}-${indice}`} style={styles.imagemCompostaItem}>
+              <Image
+                source={IMAGENS_CATALOGO[item.midia.arquivo] as ImageSourcePropType}
+                style={styles.imagemExercicioComposto}
+                resizeMode="contain"
+                accessibilityLabel={`Demonstração do exercício ${item.nome}`}
+              />
+              <ThemedText type="small" themeColor="textSecondary" style={styles.textoCentralizado}>
+                {item.nome}
+              </ThemedText>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {!!exercicio.observacao && (
+        <ThemedText type="small" themeColor="textSecondary">
+          {exercicio.observacao}
+        </ThemedText>
+      )}
+
       {!estado.iniciado && (
         <Button onPress={handleIniciarExercicio} style={styles.botaoIniciar}>
           Iniciar exercício
@@ -361,6 +389,19 @@ const styles = StyleSheet.create({
   imagemExercicio: {
     width: '100%',
     height: 180,
+    borderRadius: Spacing.two,
+  },
+  linhaImagensComposto: {
+    flexDirection: 'row',
+    gap: Spacing.two,
+  },
+  imagemCompostaItem: {
+    flex: 1,
+    gap: Spacing.one,
+  },
+  imagemExercicioComposto: {
+    width: '100%',
+    height: 140,
     borderRadius: Spacing.two,
   },
   botaoIniciar: {

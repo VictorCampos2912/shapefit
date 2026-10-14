@@ -852,3 +852,75 @@ a frio no Android) — corrigido atualizando a dependência para 4.28.0
 (commit `4f03d20`). Não bloqueia o fechamento desta spec, mas era um
 problema de estabilidade real e independente, só exposto por este teste
 específico.
+
+---
+
+### RF21 — Observação por Exercício e Imagem para Exercício Composto (Bi-set)
+
+**Spec**: `specs/023-observacao-e-imagens-bi-set/` · estende RF01/RF11
+(importação) e RF03/RF04 (execução) com o campo `observacao`; emenda o
+FR-003 da spec `021-imagens-exercicios` (RF20) para buscar imagem de
+exercícios compostos (bi-set). Número confirmado em 2026-10-13 ao
+registrar no PRD (disciplina já usada pelo RF11-RF20 — nunca presumir o
+número antes de fechar). **Validado em Android. Nenhuma validação em iOS**
+(Constitution v2.0.0, Princípio III exige os dois aparelhos antes de
+fechar a spec; iOS bloqueado pela falta de conta Apple Developer paga,
+mesma situação da spec 022).
+
+**Critérios de aceite:**
+
+Observação visível na execução (User Story 1):
+- [X] Exercício com `observacao` preenchida: o texto aparece em destaque
+      secundário antes do botão "Iniciar exercício" e continua visível
+      durante o registro da série — **confirmado em Android, 2026-10-09**
+- [X] A observação não aparece na lista de exercícios do treino nem no
+      histórico de evolução (RF08) — **confirmado em Android, 2026-10-09**
+
+Sem observação, sem nenhuma mudança / persistência (User Story 2):
+- [X] Exercício sem `observacao` se comporta de forma idêntica à versão
+      anterior — nenhum espaço reservado, nenhum placeholder —
+      **confirmado em Android, 2026-10-09**
+- [X] Treino com e sem observação aparece na lista logo após importar e
+      continua lá após fechar/reabrir o app — **confirmado em Android,
+      2026-10-09**
+- [X] Campo `observacao` com valor número (ex.: `123`) descarta só esse
+      exercício, com o motivo `Exercício {indice}: campo "observacao"
+      inválido`; demais exercícios do mesmo treino importam normalmente —
+      **confirmado em Android, 2026-10-09**
+- [X] `observacao: null`, `""` e `"   "` (só espaços) importam
+      normalmente, sem erro, sem observação — **confirmado em Android,
+      2026-10-09**
+- [X] Verificação direta no Firebase Console: documento sem observação não
+      tem a chave `observacao`; documento com observação tem a string
+      exata importada — **confirmado em Android, 2026-10-09**
+
+Observação longa não esconde o registro da série (User Story 3):
+- [X] Com a fonte do sistema no tamanho máximo e uma observação de ~600
+      caracteres, os campos de registro e "Concluir série" continuam
+      alcançáveis por rolagem; o cronômetro de descanso não é sobreposto;
+      um único toque em "Concluir série" conclui a série mesmo com o
+      teclado aberto — **confirmado em Android, 2026-10-13**
+
+Imagem de exercício composto — bi-set (User Story 4):
+- [X] Nome "A + B (Bi-set)" sem correspondência de nome inteiro, mas com
+      as duas partes encontradas no catálogo: as duas imagens aparecem,
+      legendadas com o nome do item do catálogo; mesmo resultado sem o
+      sufixo "(Bi-set)" — **confirmado em Android, 2026-10-09**
+
+Nenhum efeito colateral nos caminhos sem correspondência (User Story 5):
+- [X] Só uma parte encontrada → só essa imagem aparece; nenhuma parte
+      encontrada → nenhuma imagem; nome sem " + " → nenhuma tentativa de
+      separação; partes repetidas → mesma imagem duas vezes, sem erro de
+      chave duplicada — **confirmado em Android, 2026-10-09**
+
+Paridade visual (regressão geral):
+- [X] Comparação com as capturas de referência (antes desta feature):
+      mesmo espaçamento, sem barra de rolagem/rubber-band indevidos,
+      mesmo número de toques para concluir uma série, lista de exercícios
+      e histórico idênticos — **confirmado em Android, 2026-10-09**
+
+**Validado em Android**: 7 de 7 critérios confirmados (2026-10-09 a
+2026-10-13) — todas as 5 User Stories completas. **Nenhuma validação em
+iOS** (Constitution v2.0.0, Princípio
+III exige os dois aparelhos antes de fechar a spec; iOS bloqueado pela
+falta de conta Apple Developer paga, mesma situação da spec 022).

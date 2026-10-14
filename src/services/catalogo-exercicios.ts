@@ -13,3 +13,26 @@ export function buscarNoCatalogo(nomeExercicio: string): ExercicioCatalogo | nul
   const encontrado = listarCatalogo().find((item) => normalizarNomeExercicio(item.nome) === chave);
   return encontrado ?? null;
 }
+
+const SUFIXO_BI_SET = /\s*\(bi-set\)$/i;
+
+/**
+ * Para nomes compostos no padrão "A + B (Bi-set)" sem correspondência exata
+ * do nome inteiro (spec 021, FR-003): remove o sufixo "(Bi-set)" (se houver),
+ * separa por " + " e busca cada parte, individualmente, por igualdade exata
+ * no catálogo — sem nenhuma aproximação nova (spec 023, FR-010-014).
+ */
+export function buscarPartesCompostoNoCatalogo(nomeExercicio: string): ExercicioCatalogo[] {
+  if (!nomeExercicio.includes(' + ')) {
+    return [];
+  }
+
+  const semSufixo = nomeExercicio.trimEnd().replace(SUFIXO_BI_SET, '');
+  const partes = semSufixo.split(' + ');
+
+  const encontrados = partes
+    .map((parte) => buscarNoCatalogo(parte))
+    .filter((item): item is ExercicioCatalogo => item !== null);
+
+  return encontrados.slice(0, 2);
+}

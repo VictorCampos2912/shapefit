@@ -1,0 +1,39 @@
+{
+  "nome": "Treino de teste — observação e bi-set",
+  "exercicios": [
+    {
+      "id": "supino-reto",
+      "nome": "Supino reto (barra)",
+      "series": 3,
+      "reps_alvo": "8-10",
+      "carga_sugerida_kg": 40,
+      "descanso_seg": 90,
+      "observacao": "Pausa de 2s no fundo do movimento."
+    },
+    {
+      "id": "rosca-direta",
+      "nome": "Rosca direta com barra",
+      "series": 3,
+      "reps_alvo": "10-12",
+      "carga_sugerida_kg": 20,
+      "descanso_seg": 60
+    },
+    {
+      "id": "biset-peito",
+      "nome": "Supino reto (barra) + Crucifixo no cabo (Bi-set)",
+      "series": 3,
+      "reps_alvo": "10",
+      "carga_sugerida_kg": 30,
+      "descanso_seg": 60,
+      "observacao": "Registrar carga/reps do supino; no crucifixo, reduzir carga e ir até a falha."
+    },
+    {
+      "id": "biset-repetido",
+      "nome": "Rosca direta com barra + Rosca direta com barra (Bi-set)",
+      "series": 3,
+      "reps_alvo": "10",
+      "carga_sugerida_kg": 20,
+      "descanso_seg": 60
+    }
+  ]
+}

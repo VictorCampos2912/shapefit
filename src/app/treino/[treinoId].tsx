@@ -1,6 +1,15 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { AppState, FlatList, Pressable, StyleSheet, Vibration } from 'react-native';
+import {
+  AppState,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Vibration,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -384,26 +393,32 @@ export default function ExecucaoTreinoScreen() {
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         {exercicioSelecionado ? (
-          <>
-            <Pressable onPress={handleVoltarParaLista} style={styles.linhaComIcone}>
-              <VoltarIcon size={16} color={theme.accent} />
-              <ThemedText type="link">Voltar para exercícios</ThemedText>
-            </Pressable>
-            <ExercicioExecucao
-              exercicio={exercicioSelecionado}
-              estado={
-                estadosPorExercicio[exercicioSelecionado.id] ??
-                criarEstadoExecucaoInicial(exercicioSelecionado.id)
-              }
-              onAtualizarEstado={handleAtualizarEstadoExercicio}
-              onConcluirSerie={(serie) => handleConcluirSerie(exercicioSelecionado.id, serie)}
-              onConcluirExercicio={() => handleConcluirExercicio(exercicioSelecionado.id)}
-              onEditarSerie={(serie) => handleEditarSerie(exercicioSelecionado.id, serie)}
-              onIniciarDescanso={handleIniciarDescanso}
-              emDescanso={descansoAtivo?.exercicioId === exercicioSelecionado.id}
-              jaEstavaConcluidoAoAbrir={reaberturaJaConcluida}
-            />
-          </>
+          <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+            <ScrollView
+              contentContainerStyle={styles.scrollContent}
+              keyboardShouldPersistTaps="handled"
+              alwaysBounceVertical={false}
+            >
+              <Pressable onPress={handleVoltarParaLista} style={styles.linhaComIcone}>
+                <VoltarIcon size={16} color={theme.accent} />
+                <ThemedText type="link">Voltar para exercícios</ThemedText>
+              </Pressable>
+              <ExercicioExecucao
+                exercicio={exercicioSelecionado}
+                estado={
+                  estadosPorExercicio[exercicioSelecionado.id] ??
+                  criarEstadoExecucaoInicial(exercicioSelecionado.id)
+                }
+                onAtualizarEstado={handleAtualizarEstadoExercicio}
+                onConcluirSerie={(serie) => handleConcluirSerie(exercicioSelecionado.id, serie)}
+                onConcluirExercicio={() => handleConcluirExercicio(exercicioSelecionado.id)}
+                onEditarSerie={(serie) => handleEditarSerie(exercicioSelecionado.id, serie)}
+                onIniciarDescanso={handleIniciarDescanso}
+                emDescanso={descansoAtivo?.exercicioId === exercicioSelecionado.id}
+                jaEstavaConcluidoAoAbrir={reaberturaJaConcluida}
+              />
+            </ScrollView>
+          </KeyboardAvoidingView>
         ) : (
           <>
             <ThemedText type="subtitle">{treino.nome}</ThemedText>
@@ -463,6 +478,12 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     padding: Spacing.four,
+    gap: Spacing.three,
+  },
+  flex: {
+    flex: 1,
+  },
+  scrollContent: {
     gap: Spacing.three,
   },
   lista: {

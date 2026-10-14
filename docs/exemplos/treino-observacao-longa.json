@@ -1,0 +1,14 @@
+{
+  "nome": "Treino de teste — observação longa",
+  "exercicios": [
+    {
+      "id": "supino-reto",
+      "nome": "Supino reto (barra)",
+      "series": 3,
+      "reps_alvo": "8-10",
+      "carga_sugerida_kg": 40,
+      "descanso_seg": 90,
+      "observacao": "Pausa de 2 segundos no fundo do movimento antes de iniciar a subida. Descida controlada de 5 a 8 segundos, sem deixar a barra cair pelo peso. Na última série, reduzir a carga em aproximadamente 30% e buscar a falha muscular. Pausa de 2 segundos no fundo do movimento antes de iniciar a subida. Descida controlada de 5 a 8 segundos, sem deixar a barra cair pelo peso. Na última série, reduzir a carga em aproximadamente 30% e buscar a falha muscular. Pausa de 2 segundos no fundo do movimento antes de iniciar a subida. Descida controlada de 5 a 8 segundos, sem deixar a barra cair pelo peso."
+    }
+  ]
+}

@@ -94,6 +94,20 @@ function validarExercicio(
     }
   }
 
+  // null é tratado como ausente (sem observação), não como erro de tipo —
+  // comum em geradores de JSON que preenchem campo opcional sem valor como
+  // null em vez de omiti-lo (spec 023, FR-002).
+  let observacao: string | undefined;
+  if (item.observacao !== undefined && item.observacao !== null) {
+    if (typeof item.observacao !== 'string') {
+      return { ok: false, motivo: `Exercício ${indice}: campo "observacao" inválido` };
+    }
+    const observacaoTrimada = item.observacao.trim();
+    if (observacaoTrimada.length > 0) {
+      observacao = observacaoTrimada;
+    }
+  }
+
   return {
     ok: true,
     exercicio: {
@@ -104,6 +118,11 @@ function validarExercicio(
       cargaSugeridaKg: item.carga_sugerida_kg,
       descansoSeg: item.descanso_seg,
       categoria: (item.categoria as CategoriaExercicio | undefined) ?? 'peso',
+      // Espalhamento condicional de propósito (spec 023, FR-008): a chave só
+      // existe no objeto quando há observação válida — nunca
+      // `observacao: undefined`, que o Firestore rejeitaria/gravaria de
+      // forma inconsistente dependendo da configuração do SDK.
+      ...(observacao !== undefined ? { observacao } : {}),
     },
   };
 }
