@@ -415,7 +415,7 @@ a spec 021 já define, sem efeito colateral introduzido por esta extensão.
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
-- [ ] T015 [P] Validar manualmente em **Android** (iOS pendente)
+- [X] T015 [P] Validar manualmente em **Android** (iOS pendente)
       (`quickstart.md`, Cenário 7 — paridade visual): comparar as 4 capturas
       de referência de T000 (feitas **antes** de qualquer mudança de código,
       com um treino importado antes desta feature, documento sem a chave
@@ -426,10 +426,11 @@ a spec 021 já define, sem efeito colateral introduzido por esta extensão.
       toques para concluir uma série (RNF03), lista de exercícios e
       histórico idênticos. Marcar `[X]` o item correspondente em
       `docs/criterios-aceite.md` (T008). Depende de T000, T007. **Reaberta
-      em 2026-10-14**: a confirmação anterior (2026-10-09) foi dada sem
-      reabrir de fato as capturas de T000 para comparar — usuário vai
-      refazer a comparação com as imagens de `t000-referencia/` antes de
-      marcar esta task como concluída.
+      em 2026-10-14, fechada no mesmo dia**: a confirmação de 2026-10-09
+      tinha sido dada sem reabrir as capturas de T000; refeita por
+      comparação pixel a pixel (espaçamento idêntico, gap preservado) —
+      ver `docs/criterios-aceite.md` para o achado paralelo (diferença de
+      renderização de fonte, ambiental, não é regressão desta feature).
 - [X] T016 [P] Rodar `head -1 specs/023-observacao-e-imagens-bi-set/contracts/*.md`
       e `md5sum specs/023-observacao-e-imagens-bi-set/contracts/*.md | sort |
       uniq -w32 -d` — confirmar que os 3 arquivos de contrato têm títulos
@@ -443,13 +444,13 @@ a spec 021 já define, sem efeito colateral introduzido por esta extensão.
       ainda não tinha registrado o número dela quando esta spec foi escrita
       (mesma disciplina já usada pelas specs 011-021: nunca presumir o
       número antes de fechar). Depende de T009, T010, T011, T012, T013,
-      T014, T015 (toda a validação em Android concluída). **Exceção
-      registrada em 2026-10-14**: T015 foi reaberta (paridade visual ainda
-      não reverificada contra as capturas de T000) depois de T017 já ter
-      sido aplicada — usuário decidiu explicitamente manter o registro do
-      RF21 no PRD mesmo assim, em vez de desfazê-lo, dado que o item em
-      aberto é um check de regressão visual, não uma correção de
-      comportamento.
+      T014, T015 (toda a validação em Android concluída). **Nota histórica
+      (2026-10-14)**: T015 foi brevemente reaberta nesse mesmo dia (a
+      confirmação de 2026-10-09 tinha sido dada sem reabrir as capturas de
+      T000) depois de T017 já ter sido aplicada — usuário decidiu manter o
+      registro do RF21 no PRD mesmo assim, em vez de desfazê-lo, dado que o
+      item em aberto era um check de regressão visual, não uma correção de
+      comportamento. T015 foi refeita e fechada no mesmo dia.
 - [X] T018 Atualizar **só o título** da entrada já criada em T008, em
       `docs/criterios-aceite.md`, inserindo o número de RF agora confirmado
       (T017) — os itens `[X]`/`[ ]` já foram marcados incrementalmente pelas
