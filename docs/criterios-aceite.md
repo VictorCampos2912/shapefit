@@ -674,9 +674,22 @@ exercícios, +categoria "cardio") — mesmos critérios abaixo continuam válido
 sem necessidade de revalidar o que já passou; a ampliação em si é só mais dado
 curado, sem mudança de comportamento. **Imagens novas da ampliação confirmadas
 em aparelho real (Android e iOS) em 2026-10-05**, durante teste da spec 022.
+**Ampliado novamente em 2026-10-14** (35 → 48 exercícios, cobrindo o treino
+real convertido do PDF — pedido durante a spec `023-observacao-e-imagens-bi-set`,
+mas é curadoria de dados desta spec 020, não um requisito novo daquela;
+detalhamento completo em `specs/020-catalogo-exercicios/research.md`). Script
+de integridade (`scripts/verificar-catalogo.js`) passou para os 48 itens.
+**As 10 imagens novas (+ os 3 itens que reaproveitam arquivo já existente)
+confirmadas visualmente em Android em 2026-10-14**, via treino de teste
+dedicado (`docs/exemplos/treino-teste-catalogo-ampliacao.json`, 13 exercícios
+com os nomes exatos do catálogo) — equipamento correto em cada imagem (ex.:
+halteres nas que deveriam ser halteres, máquina nas que deveriam ser máquina),
+incluindo um bi-set combinando duas imagens novas (legendas corretas, texto de
+observação no lugar certo). **Nenhuma validação em iOS** ainda para esta
+ampliação (mesma situação das specs 022/023 — sem conta Apple Developer).
 
 **Critérios de aceite:**
-- [X] Catálogo (35 exercícios, 7 grupos musculares — peito, costas, pernas,
+- [X] Catálogo (48 exercícios, 7 grupos musculares — peito, costas, pernas,
       ombros, braços, core, cardio) consultável por código, com nome, grupo
       muscular e mídia completos em cada item
 - [X] Catálogo funciona normalmente com o aparelho em modo avião — nenhuma

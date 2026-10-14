@@ -1,0 +1,118 @@
+{
+  "nome": "Teste catálogo — ampliação 2026-10-14",
+  "exercicios": [
+    {
+      "id": "t1",
+      "nome": "Agachamento Búlgaro com Halteres",
+      "series": 3,
+      "reps_alvo": "10-12",
+      "carga_sugerida_kg": 12,
+      "descanso_seg": 60
+    },
+    {
+      "id": "t2",
+      "nome": "Leg Press 90°",
+      "series": 3,
+      "reps_alvo": "10-12",
+      "carga_sugerida_kg": 100,
+      "descanso_seg": 90
+    },
+    {
+      "id": "t3",
+      "nome": "Panturrilha no Leg Press",
+      "series": 3,
+      "reps_alvo": "15-20",
+      "carga_sugerida_kg": 80,
+      "descanso_seg": 45
+    },
+    {
+      "id": "t4",
+      "nome": "Pulldown braços estendidos",
+      "series": 3,
+      "reps_alvo": "12-15",
+      "carga_sugerida_kg": 20,
+      "descanso_seg": 60
+    },
+    {
+      "id": "t5",
+      "nome": "Remada Sentada pegada aberta",
+      "series": 3,
+      "reps_alvo": "10-12",
+      "carga_sugerida_kg": 40,
+      "descanso_seg": 60
+    },
+    {
+      "id": "t6",
+      "nome": "Rosca Martelo Alternada",
+      "series": 3,
+      "reps_alvo": "10-12",
+      "carga_sugerida_kg": 10,
+      "descanso_seg": 45
+    },
+    {
+      "id": "t7",
+      "nome": "Elevação de Joelhos Suspensa na Barra",
+      "series": 3,
+      "reps_alvo": "10-15",
+      "carga_sugerida_kg": 0,
+      "descanso_seg": 45
+    },
+    {
+      "id": "t8",
+      "nome": "Abdutora",
+      "series": 3,
+      "reps_alvo": "15",
+      "carga_sugerida_kg": 30,
+      "descanso_seg": 45
+    },
+    {
+      "id": "t9",
+      "nome": "Supino Inclinado com Halteres",
+      "series": 3,
+      "reps_alvo": "10-12",
+      "carga_sugerida_kg": 20,
+      "descanso_seg": 60
+    },
+    {
+      "id": "t10",
+      "nome": "Desenvolvimento Máquina ou Halteres",
+      "series": 3,
+      "reps_alvo": "10-12",
+      "carga_sugerida_kg": 20,
+      "descanso_seg": 60
+    },
+    {
+      "id": "t11",
+      "nome": "Ab Wheel / Roda Abdominal",
+      "series": 3,
+      "reps_alvo": "10-12",
+      "carga_sugerida_kg": 0,
+      "descanso_seg": 45
+    },
+    {
+      "id": "t12",
+      "nome": "Mesa Flexora - Drop Set",
+      "series": 3,
+      "reps_alvo": "12-15",
+      "carga_sugerida_kg": 25,
+      "descanso_seg": 45
+    },
+    {
+      "id": "t13",
+      "nome": "Mesa Flexora - Finalização",
+      "series": 1,
+      "reps_alvo": "falha",
+      "carga_sugerida_kg": 15,
+      "descanso_seg": 0
+    },
+    {
+      "id": "t14",
+      "nome": "Agachamento Búlgaro com Halteres + Rosca Martelo Alternada (Bi-set)",
+      "series": 3,
+      "reps_alvo": "10 + 10-12",
+      "carga_sugerida_kg": 12,
+      "descanso_seg": 60,
+      "observacao": "Teste de bi-set combinando duas imagens novas da ampliação de 2026-10-14."
+    }
+  ]
+}

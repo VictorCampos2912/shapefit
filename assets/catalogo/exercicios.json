@@ -348,5 +348,135 @@
       "arquivo": "step-jack.png"
     },
     "fonteAtribuicao": "wger project (wger.de), CC-BY-SA 4.0"
+  },
+  {
+    "id": "agachamento-bulgaro-halteres",
+    "nome": "Agachamento Búlgaro com Halteres",
+    "grupoMuscular": "pernas",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "agachamento-bulgaro-halteres.jpg"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — AlucardEvil40, CC-BY-SA 4.0"
+  },
+  {
+    "id": "leg-press-90",
+    "nome": "Leg Press 90°",
+    "grupoMuscular": "pernas",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "leg-press-90.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de), CC-BY-SA 4.0"
+  },
+  {
+    "id": "panturrilha-leg-press",
+    "nome": "Panturrilha no Leg Press",
+    "grupoMuscular": "pernas",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "panturrilha-leg-press.jpg"
+    },
+    "fonteAtribuicao": "wger project (wger.de), CC-BY-SA 4.0"
+  },
+  {
+    "id": "pulldown-bracos-estendidos",
+    "nome": "Pulldown braços estendidos",
+    "grupoMuscular": "costas",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "pulldown-bracos-estendidos.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — barry, CC-BY-SA 4.0"
+  },
+  {
+    "id": "remada-sentada-pegada-aberta",
+    "nome": "Remada Sentada pegada aberta",
+    "grupoMuscular": "costas",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "remada-sentada-pegada-aberta.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — barry, CC-BY-SA 4.0"
+  },
+  {
+    "id": "rosca-martelo-alternada",
+    "nome": "Rosca Martelo Alternada",
+    "grupoMuscular": "braços",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "rosca-martelo-alternada.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Mariano_O, CC-BY-SA 4.0"
+  },
+  {
+    "id": "elevacao-joelhos-suspensa-barra",
+    "nome": "Elevação de Joelhos Suspensa na Barra",
+    "grupoMuscular": "core",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "elevacao-joelhos-suspensa-barra.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de), CC-BY-SA 4.0"
+  },
+  {
+    "id": "abdutora-maquina",
+    "nome": "Abdutora",
+    "grupoMuscular": "pernas",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "abdutora-maquina.jpg"
+    },
+    "fonteAtribuicao": "wger project (wger.de), CC-BY-SA 4.0"
+  },
+  {
+    "id": "supino-inclinado-halteres",
+    "nome": "Supino Inclinado com Halteres",
+    "grupoMuscular": "peito",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "supino-inclinado-halteres.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Everkinetic, CC-BY-SA 3.0"
+  },
+  {
+    "id": "desenvolvimento-maquina-halteres",
+    "nome": "Desenvolvimento Máquina ou Halteres",
+    "grupoMuscular": "ombros",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "desenvolvimento-maquina-halteres.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — wger.de, CC-BY-SA 3.0"
+  },
+  {
+    "id": "ab-wheel-roda-abdominal",
+    "nome": "Ab Wheel / Roda Abdominal",
+    "grupoMuscular": "core",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "rolete-abdominal.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de), CC-BY-SA 4.0"
+  },
+  {
+    "id": "mesa-flexora-drop-set",
+    "nome": "Mesa Flexora - Drop Set",
+    "grupoMuscular": "pernas",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "mesa-flexora-deitado.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Everkinetic, CC-BY-SA 3.0"
+  },
+  {
+    "id": "mesa-flexora-finalizacao",
+    "nome": "Mesa Flexora - Finalização",
+    "grupoMuscular": "pernas",
+    "midia": {
+      "tipo": "imagem",
+      "arquivo": "mesa-flexora-deitado.png"
+    },
+    "fonteAtribuicao": "wger project (wger.de) — Everkinetic, CC-BY-SA 3.0"
   }
 ]

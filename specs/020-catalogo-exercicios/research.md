@@ -129,6 +129,37 @@ jack), mesmo padrão de atribuição por item. `ExercicioCatalogo` e `listarCata
 não mudam de formato — só mais um valor possível em `grupoMuscular` e mais itens
 no array.
 
+**Ampliação em 2026-10-14** (pedido do Victor, spec `023-observacao-e-imagens-bi-set`
+— curadoria de dados, não um requisito novo dessa spec): entrada de 34 nomes de
+exercícios do treino real convertido do PDF
+(`docs/exemplos/nomes-para-catalogo.md`), cada um buscado individualmente na API
+pública do wger (`exercise-translation` + `exerciseinfo`, mesma fonte da Decisão 1
+— a API não oferece busca textual própria nesta versão, então a correspondência foi
+feita localmente contra os ~930 exercícios com tradução em inglês) exigindo
+correspondência **exata de movimento e equipamento** (ex.: halteres ≠ barra, máquina
+≠ livre) — uma imagem de movimento parecido mas diferente foi tratada como pior que
+nenhuma imagem, critério explícito do pedido. Resultado: 2 nomes já existiam no
+catálogo (normalizados iguais a itens já curados — não duplicados); 3 nomes
+apontam para um arquivo de mídia **já existente** no catálogo, por serem o mesmo
+movimento+equipamento já ilustrado, apenas com um nome de exibição diferente (Ab
+Wheel/Roda Abdominal → mesma imagem de "Rolete abdominal"; Mesa Flexora - Drop Set
+e Mesa Flexora - Finalização → mesma imagem de "Mesa flexora (deitado)", já que
+"drop set"/"finalização" são técnicas de treino, não um equipamento ou movimento
+diferente); 10 nomes ganharam curadoria nova (imagem + atribuição); 17 nomes não
+tinham, na fonte, uma imagem que respeitasse o critério de correspondência exata
+(alguns por não terem imagem nenhuma registrada no wger para o exercício
+encontrado; outros — Hip Thrust Máquina, Elevação Lateral na Polia, Face Pull com
+Corda, Barra Fixa Assistida, Paralelas Assistidas — por só existirem no wger com um
+equipamento diferente do pedido, ex. elástico em vez de máquina/polia); 2 nomes
+(Barra Negativa, Puxada Escapular na Máquina/Pulley) não têm nenhum exercício
+correspondente no wger, com ou sem imagem. Nenhum substituto foi inventado para os
+19 sem imagem/não encontrados — ficam de fora do catálogo nesta rodada, sem
+nenhuma UI de exercício do treino quebrando por isso (RF20/RF21 já tratam ausência
+de correspondência como silêncio, não erro). Catálogo passa de 35 para 48 itens
+(45 arquivos de mídia distintos — 3 itens novos reaproveitam arquivo já existente).
+`ExercicioCatalogo`/`listarCatalogo`/`GrupoMuscular` não mudam de formato — só mais
+itens no array, mesmo padrão das ampliações anteriores.
+
 ## Decisão 4: leitura do catálogo — função pura, sem estado
 
 **Decision**:

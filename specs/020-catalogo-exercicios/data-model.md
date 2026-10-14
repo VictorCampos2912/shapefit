@@ -37,6 +37,20 @@ correspondência no catálogo original de 6 grupos) — mesmo raciocínio de
   JSON final (Edge Case já definido na spec), nunca incluídos com `midia` ausente.
 - `fonteAtribuicao` nunca vazio — exigência da licença CC-BY-SA (atribuição por
   obra), não uma preferência de produto.
+- **Adicionada em 2026-10-14**: nome normalizado (`normalizarNomeExercicio`, RF08)
+  único dentro de `exercicios.json` — invariante que já era verdade na prática
+  desde o início, agora checada explicitamente pelo script de integridade
+  (`scripts/verificar-catalogo.js`) depois que a ampliação de 2026-10-14 precisou
+  comparar nomes novos contra os já existentes antes de curar (ver `research.md`).
+
+**Ampliação em 2026-10-14**: 48 itens no total (35 → 48), cobrindo o treino real
+convertido do PDF (`docs/exemplos/nomes-para-catalogo.md`, 34 nomes buscados;
+detalhamento completo da curadoria — o que entrou, o que reaproveitou mídia já
+existente, o que ficou de fora e por quê — em `research.md`). Nenhum campo novo em
+`ExercicioCatalogo`; só mais itens no array e mais arquivos em
+`assets/catalogo/imagens/` (45 arquivos distintos para os 48 itens — 3 itens
+reaproveitam um arquivo já usado por outro item, mesmo movimento com nome de
+exibição diferente).
 
 ## Arquivo de dados: `assets/catalogo/exercicios.json`
 
