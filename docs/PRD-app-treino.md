@@ -11,9 +11,12 @@
 
 Aplicativo mobile pessoal/familiar para acompanhar desempenho na academia: registrar
 cargas, repetições e descanso durante o treino, com evolução futura para periodização
-baseada em boas práticas de treinamento físico e integração nutricional. Suporta múltiplos
-perfis locais (sem login/senha) para uso por mais de uma pessoa da família no mesmo
-aparelho. Uso multiplataforma (Android e iOS).
+baseada em boas práticas de treinamento físico e integração nutricional. ~~Suporta
+múltiplos perfis locais (sem login/senha) para uso por mais de uma pessoa da família no
+mesmo aparelho.~~ **Substituído (spec `022-autenticacao-google-firestore-treinos`, RF22,
+2026-09-29):** cada pessoa usa sua própria Conta Google (login obrigatório); mais de uma
+pessoa no mesmo aparelho exige logout + novo login, não perfis simultâneos. Uso
+multiplataforma (Android e iOS).
 
 ## 2. Problema a resolver
 
@@ -34,8 +37,14 @@ compartilhando os mesmos aparelhos:
 - Redmi Note 12 (Android)
 - iPhone 16 Plus (iOS)
 
-Cada pessoa tem um **perfil local** próprio (sem senha/autenticação) para manter treinos
-e histórico separados. Perfis não são sincronizados entre aparelhos diferentes nesta fase.
+~~Cada pessoa tem um **perfil local** próprio (sem senha/autenticação) para manter treinos
+e histórico separados. Perfis não são sincronizados entre aparelhos diferentes nesta
+fase.~~ **Substituído (spec `022-autenticacao-google-firestore-treinos`, RF22,
+2026-09-29):** cada pessoa usa sua própria Conta Google para manter treinos e histórico
+separados (dados segregados por `uid`, RF01/RF02 no Firestore). Treinos importados **são**
+sincronizados automaticamente entre aparelhos diferentes, desde que seja a mesma Conta
+Google — o não-objetivo de sincronização entre aparelhos (seção 5, "v5" da seção 12) foi
+removido pelo mesmo motivo.
 
 ## 4. Objetivos do MVP
 
@@ -43,9 +52,15 @@ e histórico separados. Perfis não são sincronizados entre aparelhos diferente
 - **O2:** Executar o treino registrando carga e reps por série, com poucos toques
 - **O3:** Cronometrar o descanso automaticamente entre séries
 - **O4:** Consultar histórico simples de evolução de carga por exercício
-- **O5:** Funcionar de forma estável nos dois aparelhos-alvo via Expo Go
-- **O6:** Permitir que mais de uma pessoa use o app no mesmo aparelho, cada uma com seu
-  próprio perfil, treinos e histórico separados
+- **O5:** Funcionar de forma estável nos dois aparelhos-alvo. ~~Via Expo Go~~
+  **Atualizado (spec `022-autenticacao-google-firestore-treinos`, 2026-09-29):** via
+  development build — Expo Go puro deixa de ser viável a partir desta spec (módulos
+  nativos do Firebase/Google Sign-In, ver seção 9)
+- **O6:** Permitir que mais de uma pessoa use o app no mesmo aparelho, cada uma com seus
+  próprios treinos e histórico separados. ~~Cada uma com seu próprio perfil~~
+  **Atualizado (spec `022-autenticacao-google-firestore-treinos`, 2026-09-29):** via
+  Contas Google diferentes (logout + novo login), não mais perfis simultâneos no mesmo
+  aparelho
 
 ## 5. Não-objetivos (explicitamente fora do MVP)
 
@@ -90,7 +105,7 @@ e histórico separados. Perfis não são sincronizados entre aparelhos diferente
 | RF11 | Importar múltiplos treinos de um único arquivo (estende o RF01) | Alta | `specs/012-importar-multiplos-treinos/` |
 | RF12 | Conclusão explícita de sessão de treino — lista permanece concluída até o usuário iniciar uma nova sessão (estende o RF07) | Alta | `specs/013-nova-sessao-treino/` |
 | RF13 | Vibração diferenciada ao fim do descanso, mais intensa que a da notificação (estende o RF06) | Média | `specs/014-vibracao-fim-descanso/` |
-| RF14 | Tela separada para trocar perfil e importar treino, acessada por ícone em cada aba (estende o RF02/RF10) | Média | `specs/015-menu-de-acoes/` |
+| RF14 | Tela separada (~~"trocar perfil"~~ **"sair da conta", spec 022, 2026-09-29**) e importar treino, acessada por ícone em cada aba (estende o RF02/RF10/RF22) | Média | `specs/015-menu-de-acoes/` |
 | RF15 | Progresso de um ciclo de 40 sessões (8 semanas) ao importar múltiplos treinos: criado automaticamente, cota distribuída por treino, indicador visual por treino em "Meus Treinos", bloqueio de nova importação enquanto o ciclo estiver em andamento e aviso ao atingir 40 sessões (estende o RF11) | Média | `specs/018-progresso-ciclo/` |
 | RF16 | Lista de treinos exibe "Finalizado em `<data>`"/"Nunca treinado" no lugar de "Importado em"; data de importação movida para dentro da tela do treino; desempate por data de importação preservado entre treinos homônimos com o mesmo texto de finalização (estende o RF02) | Média | `specs/016-finalizado-em/` |
 | RF17 | Categorias de unidade por exercício (peso/tempo/distância/repetições), campo opcional `categoria` no JSON de importação (default "peso"); telas de execução, histórico e edição (RF03/RF04/RF08/RF09a/RF09b) adaptam o campo de registro à unidade da categoria (estende o RF01/RF03/RF04/RF08/RF09a/RF09b) | Média | `specs/017-categorias-exercicio/` |
@@ -102,7 +117,9 @@ e histórico separados. Perfis não são sincronizados entre aparelhos diferente
 
 ## 7. Requisitos não funcionais
 
-- **RNF01:** Rodar via Expo Go em Android 12+ (Redmi Note 12) e iOS 17+ (iPhone 16 Plus)
+- **RNF01:** ~~Rodar via Expo Go~~ em Android 12+ (Redmi Note 12) e iOS 17+ (iPhone 16
+  Plus). **Atualizado (spec `022-autenticacao-google-firestore-treinos`, 2026-09-29):**
+  via development build, não mais Expo Go puro (ver seção 9)
 - **RNF02:** Funcionar offline (dados salvos localmente, sem dependência de internet).
   **Atualizado (spec `022-autenticacao-google-firestore-treinos`, RF22 — número
   confirmado em 2026-10-14 ao registrar na tabela da seção 6):** a única exceção é
@@ -122,7 +139,16 @@ e histórico separados. Perfis não são sincronizados entre aparelhos diferente
 
 ## 8. Modelo de dados
 
-### Perfil (novo — RF10)
+> **Substituído (spec `022-autenticacao-google-firestore-treinos`, RF22,
+> 2026-09-29):** o modelo abaixo (`perfil_id` local, sem autenticação) descreve o RF10
+> original e é mantido aqui como **registro histórico** do schema do MVP — não reflete
+> o app atual. RF01 (treino importado) e RF02 (lista) migraram para o Firestore,
+> segregados por `uid` da Conta Google autenticada, em `users/{uid}/treinos/*` (schema
+> técnico em `specs/022-autenticacao-google-firestore-treinos/data-model.md`); sessão/
+> histórico/ciclo de progresso continuam no formato abaixo, só trocando a chave
+> `perfil_id` por `uid` (mesmo valor, fonte diferente — ver seção 9).
+
+### Perfil (novo — RF10, histórico — ver nota acima)
 
 > **Nota:** o exemplo abaixo é ilustrativo do conteúdo. Na implementação, os campos internos
 > do app usam `camelCase` (ex: `pesoKg`, `alturaCm`), diferente do `snake_case` usado nos
@@ -251,11 +277,14 @@ prática, não só na teoria do contrato.
 
 ## 10. Telas do MVP
 
-1. **Seleção/criação de perfil** (novo — primeira tela ao abrir o app)
-2. Importar/selecionar treino (do perfil ativo)
+1. ~~Seleção/criação de perfil~~ (novo — primeira tela ao abrir o app). **Substituído
+   (spec `022-autenticacao-google-firestore-treinos`, 2026-09-29):** tela de login
+   (Google Sign-In) — e, no primeiro login de uma conta, formulário de dados físicos
+   (reaproveita o formulário do RF10 original)
+2. Importar/selecionar treino (da conta autenticada)
 3. Execução do treino (exercício + série + registro de carga/reps)
 4. Cronômetro de descanso
-5. Histórico de evolução por exercício (do perfil ativo)
+5. Histórico de evolução por exercício (da conta autenticada)
 
 **Pós-MVP (RF14, 2026-09-22):** trocar de perfil e importar treino saíram da tela de
 lista de treinos e viraram uma 6ª tela própria ("Ações"), acessada por um ícone
@@ -267,7 +296,11 @@ presente em todas as abas — ver `specs/015-menu-de-acoes/`.
   perder dados
 - O app é usado em pelo menos 3 sessões de treino reais consecutivas
 - Tempo de registro por série não atrapalha o ritmo do treino
-- Dois perfis diferentes no mesmo aparelho não veem dados um do outro em nenhuma tela
+- ~~Dois perfis diferentes no mesmo aparelho não veem dados um do outro em nenhuma
+  tela~~ **Atualizado (spec `022-autenticacao-google-firestore-treinos`, 2026-09-29):**
+  duas Contas Google diferentes não veem dados uma da outra em nenhuma tela (segregação
+  por `uid`, garantida também pelas regras de segurança do Firestore, não só pelo
+  cliente)
 
 ## 12. Roadmap pós-MVP
 
@@ -277,7 +310,10 @@ presente em todas as abas — ver `specs/015-menu-de-acoes/`.
   dados físicos do perfil, como idade e objetivo)
 - **v4:** módulo de nutrição (integração com base de alimentos existente, ex: Open Food
   Facts; poderá usar peso/altura do perfil para cálculos)
-- **v5:** sincronização de perfis entre aparelhos (nuvem)
+- ~~**v5:** sincronização de perfis entre aparelhos (nuvem)~~ **Entregue (spec
+  `022-autenticacao-google-firestore-treinos`, 2026-09-29):** treinos (RF01/RF02)
+  sincronizam automaticamente entre aparelhos via Firestore, para a mesma Conta Google
+  — deixou de ser item de roadmap
 
 ## 13. Riscos e restrições conhecidos
 

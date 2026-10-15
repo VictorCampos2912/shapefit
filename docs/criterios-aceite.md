@@ -184,6 +184,13 @@ continuar. Não é um requisito do MVP atual — decisão consciente de adiar, n
 
 ## RF04 — Avançar entre séries e exercícios
 
+> **Chave trocada pela spec 022**: a estrutura de sessão em andamento descrita
+> abaixo (`sessoes:<perfil_id>`) agora é chaveada por `uid` da conta, não por
+> `perfil_id` — mas **continua em AsyncStorage**, não foi migrada pro
+> Firestore (mesma situação do RF07/RF08). O bloqueio de troca de perfil do
+> RF10 mencionado abaixo também não existe mais (RF10 foi substituído por
+> login/logout, spec 022) — a menção é histórica.
+
 **Decisões:**
 - Fluxo por série: preencher carga/reps → "Concluir série" → inicia descanso automaticamente
   (ver RF05)
@@ -547,7 +554,10 @@ físico com vibração habilitada — não verificável em emulador/web.**
 ### RF14 — Tela separada para trocar perfil e importar treino
 
 **Spec**: `specs/015-menu-de-acoes/` · estende o RF02/RF10. **Validado em Android e
-iOS — confirmado pelo usuário em 2026-09-29.**
+iOS — confirmado pelo usuário em 2026-09-29.** **Nota (spec 022, 2026-09-29):** "trocar
+perfil" virou "sair da conta" nesta mesma tela (ver seção "Sair da conta" da entrada RF22
+mais abaixo) — os critérios abaixo, que usam a terminologia antiga, são **históricos**,
+da validação original desta spec.
 
 **Critérios de aceite:**
 - [X] A tela "Treinos" não mostra mais os atalhos de trocar perfil, importar treino
@@ -644,7 +654,10 @@ RF09b. **Validado em Android e iOS — confirmado pelo usuário em 2026-09-25.**
 ### RF18 — Histórico por data
 
 **Spec**: `specs/019-historico-por-data/` · estende o RF08/RF17. **Validado em
-Android e iOS — confirmado pelo usuário em 2026-09-25.**
+Android e iOS — confirmado pelo usuário em 2026-09-25.** Mesma observação do
+RF08: a chave trocou de `perfil_id` para `uid` pela spec 022, ainda em
+AsyncStorage; "perfil"/"RF10" nos critérios abaixo são terminologia histórica
+da validação original.
 
 **Critérios de aceite:**
 - [X] A visão "Por exercício" (RF08) já existente continua com comportamento e
