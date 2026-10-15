@@ -439,9 +439,11 @@ specs/009-salvar-sessao-treino/research.md (Decisões 7 e 10).
 
 RF01 a RF10 (incluindo RF09a e RF09b) concluídos e com todos os critérios de aceite
 validados em Android (Redmi Note 12) e iOS (iPhone 16 Plus) — atualizado em
-2026-09-22. RF11–RF14 (pós-MVP) implementados; RF15 (progresso de ciclo de treinos)
-e RF16 ("Finalizado em" na lista de treinos) implementados e **validados em Android
-e iOS em 2026-09-24** (ver seção "Melhorias pós-desenvolvimento" abaixo). Este
+2026-09-22. RF11 a RF22 (pós-MVP) estão cada um detalhado em sua própria seção
+abaixo, com status de validação específico por requisito. **Pendências
+conhecidas**: RF13 (intensidade de vibração igual entre 1º e 2º plano, a
+confirmar em aparelho); validação em iOS dos RF19 (ampliação de 2026-10-14),
+RF21 e RF22 (iOS bloqueado pela falta de conta Apple Developer paga). Este
 documento, junto com o PRD v1.1, está pronto para ser usado como contexto no
 `/speckit.specify` de cada requisito.
 
@@ -456,10 +458,10 @@ Os itens abaixo não fazem parte do PRD original (RF01–RF10) — foram pedidos
 usuário depois do MVP estar completo e validado. Registrados na tabela de requisitos
 do PRD (seção 6) em 2026-09-22 (RF11-RF14) e 2026-09-23/24 (RF15/RF16). **RF11, RF12,
 RF14, RF15 e RF16 têm validação real confirmada em Android e iOS** (RF11/RF12/RF14 em
-2026-09-29; RF15/RF16 em 2026-09-24). **RF13 permanece parcialmente pendente**: alguns
-critérios já confirmados pelo usuário em Android, mas 3 seguem sem confirmação
-explícita (ajuste -15s, "Finalizar treino" não vibrar, intensidade igual entre 1º/2º
-plano) — ver detalhe abaixo.
+2026-09-29; RF15/RF16 em 2026-09-24). **RF13 permanece parcialmente pendente**: 6
+dos 7 critérios já confirmados pelo usuário em Android (2026-09-29); só a
+intensidade igual entre 1º/2º plano segue sem confirmação explícita, aguardando
+build novo (bloqueado por cota EAS no momento) — ver detalhe abaixo.
 
 ---
 
@@ -737,14 +739,15 @@ Android e iOS — confirmado pelo usuário em 2026-09-29.**
 
 ---
 
-### Autenticação Google + Firestore (substitui RF10; migra RF01/RF02)
+### RF22 — Autenticação Google + Firestore (substitui RF10; migra RF01/RF02)
 
 **Spec**: `specs/022-autenticacao-google-firestore-treinos/` · substitui o RF10
 (perfil local sem autenticação); migra RF01 (importar treino) e RF02 (listar
 treinos) de AsyncStorage para Firestore; base de regras: Constitution v2.0.0,
-Princípio V (NON-NEGOTIABLE). Número de RF definitivo a confirmar na tabela da
-seção 6 do PRD só após validação (disciplina já usada pelo RF11-RF20 — nunca
-presumir o número antes de fechar). **Status da spec: em validação.**
+Princípio V (NON-NEGOTIABLE). Número confirmado na tabela da seção 6 do PRD em
+2026-10-14 (disciplina já usada pelo RF11-RF21 — nunca presumir o número antes
+de fechar). **Validado em Android; iOS pendente (sem conta Apple Developer
+paga).**
 
 **Critérios de aceite:**
 
@@ -960,9 +963,9 @@ Paridade visual (regressão geral):
       fonte do sistema/MIUI entre as duas datas) e fica fora do escopo
       desta spec — não bloqueia o fechamento.
 
-**Validado em Android**: 7 de 7 critérios confirmados (2026-10-09 a
-2026-10-14) — as 5 User Stories completas, incluindo paridade visual
-reverificada por comparação pixel a pixel com as capturas de T000.
+**Validado em Android**: 7 de 7 cenários do `quickstart.md` confirmados
+(2026-10-09 a 2026-10-14) — as 5 User Stories completas, incluindo paridade
+visual reverificada por comparação pixel a pixel com as capturas de T000.
 **Nenhuma validação em iOS** (Constitution v2.0.0, Princípio
 III exige os dois aparelhos antes de fechar a spec; iOS bloqueado pela
 falta de conta Apple Developer paga, mesma situação da spec 022).
