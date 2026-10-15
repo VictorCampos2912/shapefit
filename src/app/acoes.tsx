@@ -9,7 +9,7 @@ import { ImportarIcon, InfoIcon, PerfilIcon, VoltarIcon } from '@/components/ui/
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useContaAutenticada } from '@/hooks/use-conta-autenticada';
-import { importarTreino, importarTreinoExemplo } from '@/services/treino-storage';
+import { importarTreino } from '@/services/treino-storage';
 import type { ResultadoImportacao, ResultadoImportacaoMultipla } from '@/types/treino';
 
 function ehResultadoMultiplo(
@@ -111,17 +111,6 @@ export default function AcoesScreen() {
     }
   }
 
-  async function handleImportarTreinoExemplo() {
-    if (!uid) return;
-    setImportando(true);
-    try {
-      const resultado = await importarTreinoExemplo(uid);
-      exibirResultadoImportacao(resultado);
-    } finally {
-      setImportando(false);
-    }
-  }
-
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
@@ -141,11 +130,6 @@ export default function AcoesScreen() {
           <Pressable onPress={handleImportarTreino} disabled={importando} style={styles.linhaComIcone}>
             <ImportarIcon size={16} color={theme.accent} />
             <ThemedText type="link">Importar treino</ThemedText>
-          </Pressable>
-
-          <Pressable onPress={handleImportarTreinoExemplo} disabled={importando} style={styles.linhaComIcone}>
-            <ImportarIcon size={16} color={theme.accent} />
-            <ThemedText type="link">Importar treino de exemplo</ThemedText>
           </Pressable>
 
           <Pressable onPress={handleAbrirCreditos} style={styles.linhaComIcone}>

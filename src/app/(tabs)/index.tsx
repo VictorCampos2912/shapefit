@@ -11,7 +11,11 @@ import { TreinoListItem } from '@/components/treino/treino-list-item';
 import { Spacing } from '@/constants/theme';
 import { useContaAutenticada } from '@/hooks/use-conta-autenticada';
 import { calcularProgressoCiclo, cotaComoFracao, obterCicloAtual } from '@/services/ciclo-treino-storage';
-import { contarSessoesFinalizadas, obterDataUltimaSessaoFinalizada } from '@/services/sessao-treino-storage';
+import {
+  contarSessoesFinalizadas,
+  obterDataUltimaSessaoFinalizada,
+  obterSessao,
+} from '@/services/sessao-treino-storage';
 import { listarTreinos } from '@/services/treino-storage';
 import type { CicloTreino } from '@/types/ciclo-treino';
 import type { Treino } from '@/types/treino';
@@ -60,6 +64,7 @@ export default function TreinosScreen() {
   const [treinos, setTreinos] = useState<Treino[]>([]);
   const [contagensPorTreino, setContagensPorTreino] = useState<Record<string, number>>({});
   const [dataFinalizacaoPorTreino, setDataFinalizacaoPorTreino] = useState<Record<string, string | null>>({});
+  const [emAndamentoPorTreino, setEmAndamentoPorTreino] = useState<Record<string, boolean>>({});
   const [cicloAtual, setCicloAtual] = useState<CicloTreino | null>(null);
   const [progressoCiclo, setProgressoCiclo] = useState<{
     totalFinalizado: number;
@@ -83,6 +88,13 @@ export default function TreinosScreen() {
     setDataFinalizacaoPorTreino(Object.fromEntries(entradas));
   }
 
+  async function carregarSessoesEmAndamento(uid: string, lista: Treino[]) {
+    const entradas = await Promise.all(
+      lista.map(async (treino) => [treino.id, (await obterSessao(uid, treino.id)) !== null] as const),
+    );
+    setEmAndamentoPorTreino(Object.fromEntries(entradas));
+  }
+
   async function carregarCicloAtual(uid: string) {
     const ciclo = await obterCicloAtual(uid);
     setCicloAtual(ciclo);
@@ -96,6 +108,7 @@ export default function TreinosScreen() {
     await Promise.all([
       carregarContagens(uid, lista),
       carregarDatasFinalizacao(uid, lista),
+      carregarSessoesEmAndamento(uid, lista),
       carregarCicloAtual(uid),
     ]);
   }
@@ -113,6 +126,7 @@ export default function TreinosScreen() {
       await Promise.all([
         carregarContagens(uid, lista),
         carregarDatasFinalizacao(uid, lista),
+        carregarSessoesEmAndamento(uid, lista),
         carregarCicloAtual(uid),
       ]);
     })();
@@ -175,6 +189,7 @@ export default function TreinosScreen() {
               dataFinalizacao={dataFinalizacaoPorTreino[item.id] ?? null}
               exibirDataImportacao={colidindo.has(item.id)}
               qtdSessoesFinalizadas={contagensPorTreino[item.id] ?? 0}
+              emAndamento={emAndamentoPorTreino[item.id] ?? false}
               progressoCiclo={
                 cicloAtual?.treinoIds.includes(item.id)
                   ? cotaComoFracao(progressoCiclo?.porTreino[item.id] ?? 0, cicloAtual.cotaPorTreinoId[item.id])

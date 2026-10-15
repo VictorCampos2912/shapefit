@@ -74,7 +74,10 @@ Expo Go não serve mais para nenhum teste deste projeto).
 
 **Decisões:**
 - Importação via seleção de arquivo do sistema (`expo-document-picker`)
-- App inclui um arquivo de exemplo pré-carregado para testes
+- App inclui um arquivo de exemplo pré-carregado para testes. **Nota (spec
+  024, RF23, 2026-10-14):** removido — a ação "Importar treino de exemplo"
+  não existe mais no app; ver RF23. O texto acima permanece como registro
+  histórico da decisão original do RF01.
 - Em caso de erro parcial, o app importa o que for válido e avisa o usuário sobre o que
   falhou, sem bloquear a importação inteira
 - **Novo (v1.1):** o treino importado é vinculado ao perfil ativo no momento da importação
@@ -95,7 +98,8 @@ Expo Go não serve mais para nenhum teste deste projeto).
 - [X] Se o arquivo selecionado não for um JSON válido (erro de sintaxe, arquivo
       corrompido), o app exibe mensagem de erro clara e não importa nada
 - [X] O arquivo de exemplo pré-carregado no app importa sem erros, servindo como
-      referência de teste
+      referência de teste. **Nota (spec 024, RF23, 2026-10-14):** removido —
+      ver RF23. Critério histórico, da validação original.
 - [X] Se o campo `nome` do treino (nível raiz) estiver ausente, ou a lista `exercicios`
       estiver ausente/vazia, o arquivo é tratado como inválido (mesmo tratamento de um
       JSON malformado) — a importação inteira é rejeitada, sem criar treino algum
@@ -569,7 +573,12 @@ da validação original desta spec.
       ícone de três pontos no canto superior direito de cada aba — `AcoesIcon`,
       `src/components/ui/icons.tsx`)
 - [X] As três ações, a partir dessa tela, se comportam exatamente como antes (mesmo
-      fluxo de importação, mesma navegação de troca de perfil)
+      fluxo de importação, mesma navegação de troca de perfil). **Nota (spec
+      024, RF23, 2026-10-14):** uma das três ações originais, "Importar
+      treino de exemplo", foi removida por esta feature — a tela de Ações
+      passou a ter duas ações de ponto de entrada (sair da conta, importar
+      treino) mais os créditos (RF19/RF20). O texto acima permanece como
+      registro histórico da validação original do RF14.
 - [X] A mensagem de estado vazio da lista de treinos orienta o usuário a usar o ícone
       de ações para importar um treino
 
@@ -969,3 +978,70 @@ visual reverificada por comparação pixel a pixel com as capturas de T000.
 **Nenhuma validação em iOS** (Constitution v2.0.0, Princípio
 III exige os dois aparelhos antes de fechar a spec; iOS bloqueado pela
 falta de conta Apple Developer paga, mesma situação da spec 022).
+
+---
+
+### RF23 — Indicador de Sessão em Andamento na Lista de Treinos e Remoção do Treino de Exemplo
+
+**Spec**: `specs/024-indicador-andamento-e-menu-acoes/` · Parte 1 estende
+RF02/RF04; Parte 2 estende RF14/RF01. Número confirmado em 2026-10-14 ao
+registrar no PRD (disciplina já usada pelo RF11-RF21 — nunca presumir o
+número antes de fechar).
+
+**Critérios de aceite:**
+
+Treino em andamento aparece destacado (User Story 1):
+- [X] Ao iniciar uma sessão (completar ao menos uma série) e voltar para a
+      lista, o treino aparece com o mesmo destaque visual de cor/borda de
+      aviso já usado para "exercício em andamento", mais o texto "Em
+      andamento" — **confirmado em Android, 2026-10-14**
+- [X] O destaque persiste após fechar e reabrir o app — **confirmado em
+      Android, 2026-10-15**
+- [X] O destaque é legível em tema claro e escuro — **confirmado em
+      Android, 2026-10-15**, em todos os treinos que aparecem destacados
+- [X] Um treino sem sessão em andamento aparece exatamente como antes desta
+      feature (comparação com a captura de referência de T000) —
+      **confirmado em Android, 2026-10-15**
+
+Múltiplos treinos em andamento ao mesmo tempo (User Story 2):
+- [X] Dois ou mais treinos com sessão em andamento aparecem destacados
+      simultaneamente — **confirmado em Android, 2026-10-14**
+- [X] Finalizar a sessão de um deles remove só o destaque desse treino, sem
+      afetar os demais — **confirmado em Android, 2026-10-15**
+
+Destaque some ao finalizar, volta ao iniciar nova sessão (User Story 3):
+- [X] Finalizar a sessão remove o destaque na próxima vez que a lista ganha
+      foco — **confirmado em Android, 2026-10-14**
+- [X] Iniciar uma nova sessão do mesmo treino faz o destaque reaparecer —
+      **confirmado em Android, 2026-10-15**
+
+Menu de Ações sem "Importar treino de exemplo" (User Story 4):
+- [X] O menu de Ações passa a ter exatamente três ações (sair da conta,
+      importar treino, créditos), sem nenhum traço da ação removida —
+      **confirmado em Android, 2026-10-14**
+- [X] As três ações restantes continuam funcionando exatamente como antes —
+      **confirmado em Android, 2026-10-14/2026-10-15** ("Importar treino" e
+      "Créditos do catálogo de exercícios" em 2026-10-14; "Sair da conta" em
+      2026-10-15)
+- [X] Nenhum arquivo de `docs/exemplos/` foi alterado ou removido por esta
+      feature — **confirmado por `git diff`/`git status` em 2026-10-14**
+      (verificação de código, não depende de aparelho)
+
+Edge cases:
+- [X] Coexistência com o anel de progresso de ciclo (RF15): os dois
+      indicadores aparecem juntos, sem um esconder o outro — **confirmado em
+      Android, 2026-10-14**, incluindo o caso de um ciclo recém-iniciado sem
+      nenhuma sessão finalizada ainda (anel em 0%) coexistindo com o destaque
+- [X] Isolamento entre contas (Constitution, Princípio V): o destaque de uma
+      conta nunca aparece para outra conta no mesmo aparelho — **confirmado
+      em Android, 2026-10-14**
+- [X] Treinos homônimos (RF02/RF16): só o treino com sessão em andamento de
+      fato (por identificador interno) é destacado — **confirmado em
+      Android, 2026-10-14**
+
+**Validado em Android**: 8 de 8 cenários do `quickstart.md` confirmados
+(2026-10-14 a 2026-10-15) — as 4 User Stories completas, incluindo os três
+edge cases (coexistência com anel de progresso RF15, isolamento entre
+contas, treinos homônimos). **Nenhuma validação em iOS** (Constitution
+v2.0.0, Princípio III; iOS bloqueado pela falta de conta Apple Developer
+paga, mesma situação das specs 022/023).

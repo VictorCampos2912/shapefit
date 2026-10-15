@@ -2,7 +2,6 @@ import { collection, doc, getDocs, getFirestore, setDoc, writeBatch } from '@rea
 import * as Crypto from 'expo-crypto';
 import * as DocumentPicker from 'expo-document-picker';
 
-import treinoExemplo from '@/assets/exemplos/treino-exemplo.json';
 import { calcularProgressoCiclo, criarCiclo, obterCicloAtual } from '@/services/ciclo-treino-storage';
 import type {
   CategoriaExercicio,
@@ -304,12 +303,5 @@ export async function importarTreino(
   }
 
   const conteudo = await (await fetch(resultado.assets[0].uri)).text();
-  return processarConteudo(conteudo, uid);
-}
-
-export async function importarTreinoExemplo(
-  uid: string,
-): Promise<ResultadoImportacao | ResultadoImportacaoMultipla> {
-  const conteudo = JSON.stringify(treinoExemplo);
   return processarConteudo(conteudo, uid);
 }

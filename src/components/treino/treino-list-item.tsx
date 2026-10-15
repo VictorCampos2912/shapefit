@@ -4,6 +4,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import type { Treino } from '@/types/treino';
 
 type TreinoListItemProps = {
@@ -12,6 +13,7 @@ type TreinoListItemProps = {
   exibirDataImportacao?: boolean;
   qtdSessoesFinalizadas?: number;
   progressoCiclo?: number | null;
+  emAndamento?: boolean;
   onPress: () => void;
 };
 
@@ -25,11 +27,17 @@ export function TreinoListItem({
   exibirDataImportacao = false,
   qtdSessoesFinalizadas = 0,
   progressoCiclo = null,
+  emAndamento = false,
   onPress,
 }: TreinoListItemProps) {
+  const theme = useTheme();
+
   return (
     <Pressable onPress={onPress}>
-      <ThemedView type="backgroundElement" style={styles.container}>
+      <ThemedView
+        type={emAndamento ? 'warningBackground' : 'backgroundElement'}
+        style={[styles.container, emAndamento && { borderWidth: 2, borderColor: theme.warning }]}
+      >
         <View style={styles.linhaTitulo}>
           <ThemedText type="smallBold" style={styles.titulo}>
             {treino.nome}
@@ -56,6 +64,11 @@ export function TreinoListItem({
         {exibirDataImportacao && (
           <ThemedText type="small" themeColor="textSecondary">
             Importado em {formatarDataHora(treino.importadoEm)}
+          </ThemedText>
+        )}
+        {emAndamento && (
+          <ThemedText type="smallBold" themeColor="warning">
+            Em andamento
           </ThemedText>
         )}
       </ThemedView>
