@@ -16,6 +16,6 @@ export type DadosFisicos = {
 };
 
 export type SessaoRegistro = {
-  perfilId: string;
+  uid: string;
   finalizadaEm: string | null;
 };

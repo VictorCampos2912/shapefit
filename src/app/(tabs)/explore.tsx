@@ -276,7 +276,7 @@ export default function HistoricoScreen() {
     if (!uid) return;
 
     const sessao = await atualizarSerieDeSessaoFinalizada({
-      perfilId: uid,
+      uid,
       sessaoId: params.sessaoId,
       exercicioId: params.exercicioId,
       serie: params.serie,

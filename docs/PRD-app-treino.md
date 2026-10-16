@@ -113,8 +113,9 @@ removido pelo mesmo motivo.
 | RF19 | Catálogo interno de exercícios (nome, grupo muscular, imagem), 48 itens curados a partir do wger project (CC-BY-SA) — 35 originais + 13 da ampliação de 2026-10-14 cobrindo o treino real convertido do PDF (`specs/020-catalogo-exercicios/research.md`), 7 grupos musculares incluindo cardio, embutido no app, 100% offline; sem UI própria de navegação nesta etapa; tela de créditos/atribuição (exigência da licença) | Baixa | `specs/020-catalogo-exercicios/` |
 | RF20 | Imagem/GIF do exercício na tela de execução (RF03/RF04): busca por correspondência exata de nome (normalizado, sem aproximação) no catálogo interno (RF19) e exibe a imagem quando encontrada; nenhuma imagem nem UI de catálogo quando não há correspondência (estende o RF03/RF04/RF19) | Baixa | `specs/021-imagens-exercicios/` |
 | RF21 | Campo opcional `observacao` por exercício no JSON de importação (ausente/`null`/vazio = sem observação; presente e inválido descarta só o exercício), exibido em destaque secundário na tela de execução (RF03/RF04), nunca na lista de exercícios nem no histórico; para exercícios compostos no padrão "A + B (Bi-set)" sem correspondência de nome inteiro no catálogo (RF20), busca e exibe a imagem de cada parte encontrada (no máximo duas), ainda por igualdade exata, sem aproximação (emenda ao FR-003 da RF20) (estende o RF01/RF03/RF04/RF11/RF20) | Baixa | `specs/023-observacao-e-imagens-bi-set/` |
-| RF22 | Substitui o RF10 (perfil local sem autenticação) por login obrigatório via Google Sign-In (Firebase Authentication, Constitution v2.0.0 Princípio V, NON-NEGOTIABLE); migra RF01 (importar treino) e RF02 (listar treinos) de AsyncStorage para Firestore, segregados por `uid` da conta autenticada; RF08 (histórico) passa a ser filtrado por `uid`, mas permanece em AsyncStorage (sem migração); offline mantido para tudo exceto o próprio fluxo de login/logout (estende/substitui RF01/RF02/RF08/RF10). **Status: validado em Android; iOS pendente (sem conta Apple Developer paga)** | Alta | `specs/022-autenticacao-google-firestore-treinos/` |
+| RF22 | Substitui o RF10 (perfil local sem autenticação) por login obrigatório via Google Sign-In (Firebase Authentication, Constitution v2.0.0 Princípio V, NON-NEGOTIABLE); migra RF01 (importar treino) e RF02 (listar treinos) de AsyncStorage para Firestore, segregados por `uid` da conta autenticada; RF08 (histórico) passa a ser filtrado por `uid`, inicialmente sem migração (depois migrado para o Firestore pelo RF24); offline mantido para tudo exceto o próprio fluxo de login/logout (estende/substitui RF01/RF02/RF08/RF10). **Status: validado em Android; iOS pendente (sem conta Apple Developer paga)** | Alta | `specs/022-autenticacao-google-firestore-treinos/` |
 | RF23 | Indicador visual de sessão em andamento na lista de treinos — treino com sessão `finalizadaEm: null` ganha o mesmo destaque visual (cor/borda de aviso) já usado para "exercício em andamento", mais o texto "Em andamento"; múltiplos treinos em andamento ao mesmo tempo são todos destacados; destaque some ao finalizar a sessão (estende o RF02/RF04). Remove a ação "Importar treino de exemplo" do menu de Ações, junto com o código e o asset que ficaram sem uso (estende o RF14/RF01). **Status: validado em Android; iOS pendente (sem conta Apple Developer paga)** | Média | `specs/024-indicador-andamento-e-menu-acoes/` |
+| RF24 | Migra sessão de treino (RF04/RF07/RF12), edição de séries (RF09a/RF09b), histórico (RF08/RF18) e ciclo de progresso (RF15) de AsyncStorage para o Firestore, segregados por uid; sessão ganha snapshot de nome/exercícios e horário por série (estende RF02/RF04/RF07/RF08/RF09a/RF09b/RF12/RF15/RF16/RF18/RF23). **Status: validado em Android; iOS pendente (sem conta Apple Developer paga)** | Alta | `specs/025-migracao-sessoes-historico-ciclo/` |
 
 ## 7. Requisitos não funcionais
 
@@ -141,13 +142,16 @@ removido pelo mesmo motivo.
 ## 8. Modelo de dados
 
 > **Substituído (spec `022-autenticacao-google-firestore-treinos`, RF22,
-> 2026-09-29):** o modelo abaixo (`perfil_id` local, sem autenticação) descreve o RF10
+> 2026-09-29; e spec `025-migracao-sessoes-historico-ciclo`, RF24,
+> 2026-10-16):** o modelo abaixo (`perfil_id` local, sem autenticação) descreve o RF10
 > original e é mantido aqui como **registro histórico** do schema do MVP — não reflete
-> o app atual. RF01 (treino importado) e RF02 (lista) migraram para o Firestore,
-> segregados por `uid` da Conta Google autenticada, em `users/{uid}/treinos/*` (schema
-> técnico em `specs/022-autenticacao-google-firestore-treinos/data-model.md`); sessão/
-> histórico/ciclo de progresso continuam no formato abaixo, só trocando a chave
-> `perfil_id` por `uid` (mesmo valor, fonte diferente — ver seção 9).
+> o app atual. RF01 (treino importado) e RF02 (lista) migraram para o Firestore pelo
+> RF22, segregados por `uid` da Conta Google autenticada, em `users/{uid}/treinos/*`
+> (schema técnico em `specs/022-autenticacao-google-firestore-treinos/data-model.md`);
+> sessão, histórico e ciclo de progresso migraram para o Firestore pelo RF24, em
+> `users/{uid}/sessoes/*` e `users/{uid}/ciclos/*` (schema técnico em
+> `specs/025-migracao-sessoes-historico-ciclo/data-model.md`) — nenhum deles continua
+> no formato AsyncStorage abaixo (ver seção 9).
 
 ### Perfil (novo — RF10, histórico — ver nota acima)
 
@@ -232,9 +236,14 @@ prática, não só na teoria do contrato.
 - TypeScript
 - Armazenamento local: `AsyncStorage` no MVP (migrar para `expo-sqlite` quando o volume
   de dados justificar). **Atualizado (spec `022-autenticacao-google-firestore-treinos`,
-  em implementação):** treinos importados/listados (RF01/RF02) e os dados físicos da
-  conta migram para o Firestore, segregados por `uid`; execução, histórico e ciclo de
-  progresso continuam em `AsyncStorage` sem mudança de schema (Constitution v2.0.0)
+  RF22, 2026-09-29):** treinos importados/listados (RF01/RF02) e os dados físicos da
+  conta migram para o Firestore, segregados por `uid`. **Atualizado de novo (spec
+  `025-migracao-sessoes-historico-ciclo`, RF24, 2026-10-16):** execução (sessão),
+  histórico e ciclo de progresso também migram para o Firestore, segregados por `uid`
+  (`users/{uid}/sessoes/*`, `users/{uid}/ciclos/*`) — nenhum dado funcional do app
+  continua em `AsyncStorage` depois do RF24; as chaves antigas (`sessoes:<uid>`,
+  `ciclos:<uid>`) ficam órfãs no dispositivo, sem leitura nem escrita (Constitution
+  v2.0.0)
 - Autenticação e banco remoto: **`@react-native-firebase/app`**,
   **`@react-native-firebase/auth`**, **`@react-native-firebase/firestore`** e
   **`@react-native-google-signin/google-signin`** (adicionados na spec

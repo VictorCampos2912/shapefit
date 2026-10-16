@@ -10,7 +10,7 @@ import type {
   RegistroExercicioNoDia,
   RegistroHistorico,
 } from '@/types/historico';
-import type { CategoriaExercicio, Treino } from '@/types/treino';
+import type { CategoriaExercicio } from '@/types/treino';
 import { normalizarNomeExercicio } from '@/utils/normalizar-nome-exercicio';
 
 type RegistroBruto = {
@@ -27,29 +27,23 @@ type RegistroBruto = {
 };
 
 /**
- * Cruzamento sessão→treino→exercício, compartilhado por `obterHistoricoPorPerfil`
- * (agrupa por exercício, RF08) e `obterHistoricoPorData` (agrupa por dia+sessão) —
- * evita duplicar essa lógica, incluindo o tratamento defensivo de dado
- * inconsistente (RF08 FR-013/FR-014).
+ * Monta os registros brutos a partir do snapshot da própria sessão (spec 025,
+ * FR-010) — nome do treino e nome/categoria de cada exercício não dependem
+ * mais de cruzar com o `Treino` de origem, que pode ter sido alterado ou
+ * arquivado depois (spec 025, US6). Compartilhado por `obterHistoricoPorPerfil`
+ * (agrupa por exercício, RF08) e `obterHistoricoPorData` (agrupa por
+ * dia+sessão) — evita duplicar essa lógica, incluindo o tratamento defensivo
+ * de dado inconsistente (RF08 FR-013/FR-014).
  */
-function construirRegistrosBrutos(treinos: Treino[], sessoesFinalizadas: SessaoTreino[]): RegistroBruto[] {
-  const treinosPorId = new Map<string, Treino>(treinos.map((treino) => [treino.id, treino]));
+function construirRegistrosBrutos(sessoesFinalizadas: SessaoTreino[]): RegistroBruto[] {
   const registros: RegistroBruto[] = [];
 
   for (const sessao of sessoesFinalizadas) {
-    const treino = treinosPorId.get(sessao.treinoId);
-    if (!treino) {
-      console.warn(
-        `[historico-evolucao] Treino não encontrado ao montar histórico — treinoId=${sessao.treinoId} sessaoId=${sessao.id}`,
-      );
-      continue;
-    }
-
     for (const execucao of sessao.execucoes) {
-      const exercicio = treino.exercicios.find((item) => item.id === execucao.exercicioId);
+      const exercicio = sessao.exerciciosSnapshot.find((item) => item.id === execucao.exercicioId);
       if (!exercicio) {
         console.warn(
-          `[historico-evolucao] Exercício não encontrado ao montar histórico — treinoId=${sessao.treinoId} exercicioId=${execucao.exercicioId} sessaoId=${sessao.id}`,
+          `[historico-evolucao] Exercício não encontrado no snapshot da sessão — treinoId=${sessao.treinoId} exercicioId=${execucao.exercicioId} sessaoId=${sessao.id}`,
         );
         continue;
       }
@@ -59,7 +53,7 @@ function construirRegistrosBrutos(treinos: Treino[], sessoesFinalizadas: SessaoT
           data: sessao.finalizadaEm as string,
           sessaoId: sessao.id,
           treinoId: sessao.treinoId,
-          treinoNome: treino.nome,
+          treinoNome: sessao.treinoNomeSnapshot,
           exercicioId: execucao.exercicioId,
           exercicioNome: exercicio.nome,
           serie: serie.serie,
@@ -97,11 +91,21 @@ export async function obterHistoricoPorPerfil(perfilId: string): Promise<Histori
     }
   }
 
-  const registrosBrutos = construirRegistrosBrutos(treinos, sessoesFinalizadas);
+  const registrosBrutos = construirRegistrosBrutos(sessoesFinalizadas);
   for (const registro of registrosBrutos) {
     const chave = normalizarNomeExercicio(registro.exercicioNome);
-    // O grupo sempre existe: foi semeado a partir dos exercícios deste mesmo treino, acima.
-    const grupo = gruposPorChave.get(chave)!;
+    // O grupo pode não existir ainda: antes da spec 025, sempre existia (era
+    // semeado a partir do mesmo treino vivo que também nomeava os
+    // registros). Agora o registro usa o nome do snapshot da sessão
+    // (FR-010), que pode ter ficado diferente do treino vivo (exercício
+    // renomeado/removido depois da sessão, spec 025 US6) — nesse caso o
+    // universo semeado acima não previu essa chave; cria o grupo na hora,
+    // em vez de presumir que ele sempre existe.
+    let grupo = gruposPorChave.get(chave);
+    if (!grupo) {
+      grupo = { nomeFallback: registro.exercicioNome, itens: [] };
+      gruposPorChave.set(chave, grupo);
+    }
     grupo.itens.push(registro);
   }
 
@@ -141,16 +145,19 @@ function chaveDiaLocal(iso: string): string {
 }
 
 export async function obterHistoricoPorData(perfilId: string): Promise<HistoricoPorData> {
-  const [treinos, sessoesFinalizadas] = await Promise.all([
-    listarTreinos(perfilId),
-    listarSessoesFinalizadas(perfilId),
-  ]);
+  // Diferente de obterHistoricoPorPerfil, esta função nunca precisou de
+  // `listarTreinos` para nada além de nomear registros em
+  // construirRegistrosBrutos — agora que essa função lê o snapshot da
+  // própria sessão (spec 025, FR-010), a leitura de treinos aqui deixou de
+  // ser necessária (não há "universo de exercícios nunca registrados" na
+  // visão "Por data", RF18 — só sessões que de fato aconteceram).
+  const sessoesFinalizadas = await listarSessoesFinalizadas(perfilId);
 
   if (sessoesFinalizadas.length === 0) {
     return { temSessoesFinalizadas: false };
   }
 
-  const registrosBrutos = construirRegistrosBrutos(treinos, sessoesFinalizadas);
+  const registrosBrutos = construirRegistrosBrutos(sessoesFinalizadas);
 
   // Agrupa por sessaoId -> BlocoSessao (exercícios por exercicioId, série ordenada).
   const blocosPorSessao = new Map<

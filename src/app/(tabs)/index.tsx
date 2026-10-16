@@ -11,11 +11,7 @@ import { TreinoListItem } from '@/components/treino/treino-list-item';
 import { Spacing } from '@/constants/theme';
 import { useContaAutenticada } from '@/hooks/use-conta-autenticada';
 import { calcularProgressoCiclo, cotaComoFracao, obterCicloAtual } from '@/services/ciclo-treino-storage';
-import {
-  contarSessoesFinalizadas,
-  obterDataUltimaSessaoFinalizada,
-  obterSessao,
-} from '@/services/sessao-treino-storage';
+import { listarSessoes } from '@/services/sessao-treino-storage';
 import { listarTreinos } from '@/services/treino-storage';
 import type { CicloTreino } from '@/types/ciclo-treino';
 import type { Treino } from '@/types/treino';
@@ -72,45 +68,58 @@ export default function TreinosScreen() {
   } | null>(null);
   const [carregando, setCarregando] = useState(true);
 
-  async function carregarContagens(uid: string, lista: Treino[]) {
-    const entradas = await Promise.all(
-      lista.map(async (treino) => [treino.id, await contarSessoesFinalizadas(uid, treino.id)] as const),
-    );
-    setContagensPorTreino(Object.fromEntries(entradas));
-  }
+  async function carregarDadosDeSessao(uid: string, lista: Treino[]) {
+    try {
+      const sessoes = await listarSessoes(uid); // 1 leitura, não 1 por treino (spec 025, research.md Decisão 7)
 
-  async function carregarDatasFinalizacao(uid: string, lista: Treino[]) {
-    const entradas = await Promise.all(
-      lista.map(
-        async (treino) => [treino.id, await obterDataUltimaSessaoFinalizada(uid, treino.id)] as const,
-      ),
-    );
-    setDataFinalizacaoPorTreino(Object.fromEntries(entradas));
-  }
+      const contagens: Record<string, number> = {};
+      const datas: Record<string, string | null> = {};
+      const emAndamento: Record<string, boolean> = {};
 
-  async function carregarSessoesEmAndamento(uid: string, lista: Treino[]) {
-    const entradas = await Promise.all(
-      lista.map(async (treino) => [treino.id, (await obterSessao(uid, treino.id)) !== null] as const),
-    );
-    setEmAndamentoPorTreino(Object.fromEntries(entradas));
+      for (const treino of lista) {
+        const doTreino = sessoes.filter((sessao) => sessao.treinoId === treino.id);
+        const finalizadas = doTreino.filter((sessao) => sessao.finalizadaEm !== null);
+        contagens[treino.id] = finalizadas.length;
+        datas[treino.id] =
+          finalizadas.length > 0
+            ? finalizadas.reduce((maisRecente, atual) =>
+                atual.finalizadaEm! > maisRecente.finalizadaEm! ? atual : maisRecente,
+              ).finalizadaEm
+            : null;
+        emAndamento[treino.id] = doTreino.some((sessao) => sessao.finalizadaEm === null);
+      }
+
+      setContagensPorTreino(contagens);
+      setDataFinalizacaoPorTreino(datas);
+      setEmAndamentoPorTreino(emAndamento);
+    } catch (erro) {
+      // Não deixa a leitura de sessão derrubar a tela nem a lista de treinos
+      // (definida separadamente, antes desta chamada) — ex.: regras do
+      // Firestore ainda não publicadas resultam em permission-denied aqui.
+      console.error('[index] Falha ao carregar dados de sessão (contagens/datas/indicador):', erro);
+      setContagensPorTreino({});
+      setDataFinalizacaoPorTreino({});
+      setEmAndamentoPorTreino({});
+    }
   }
 
   async function carregarCicloAtual(uid: string) {
-    const ciclo = await obterCicloAtual(uid);
-    setCicloAtual(ciclo);
-    setProgressoCiclo(ciclo ? await calcularProgressoCiclo(uid, ciclo) : null);
+    try {
+      const ciclo = await obterCicloAtual(uid);
+      setCicloAtual(ciclo);
+      setProgressoCiclo(ciclo ? await calcularProgressoCiclo(uid, ciclo) : null);
+    } catch (erro) {
+      console.error('[index] Falha ao carregar ciclo de progresso:', erro);
+      setCicloAtual(null);
+      setProgressoCiclo(null);
+    }
   }
 
   async function recarregarTreinos() {
     if (!uid) return;
     const lista = await listarTreinos(uid);
     setTreinos(lista);
-    await Promise.all([
-      carregarContagens(uid, lista),
-      carregarDatasFinalizacao(uid, lista),
-      carregarSessoesEmAndamento(uid, lista),
-      carregarCicloAtual(uid),
-    ]);
+    await Promise.all([carregarDadosDeSessao(uid, lista), carregarCicloAtual(uid)]);
   }
 
   useEffect(() => {
@@ -123,12 +132,7 @@ export default function TreinosScreen() {
         setTreinos(lista);
         setCarregando(false);
       }
-      await Promise.all([
-        carregarContagens(uid, lista),
-        carregarDatasFinalizacao(uid, lista),
-        carregarSessoesEmAndamento(uid, lista),
-        carregarCicloAtual(uid),
-      ]);
+      await Promise.all([carregarDadosDeSessao(uid, lista), carregarCicloAtual(uid)]);
     })();
     return () => {
       ativo = false;

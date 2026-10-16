@@ -188,12 +188,13 @@ continuar. Não é um requisito do MVP atual — decisão consciente de adiar, n
 
 ## RF04 — Avançar entre séries e exercícios
 
-> **Chave trocada pela spec 022**: a estrutura de sessão em andamento descrita
-> abaixo (`sessoes:<perfil_id>`) agora é chaveada por `uid` da conta, não por
-> `perfil_id` — mas **continua em AsyncStorage**, não foi migrada pro
-> Firestore (mesma situação do RF07/RF08). O bloqueio de troca de perfil do
-> RF10 mencionado abaixo também não existe mais (RF10 foi substituído por
-> login/logout, spec 022) — a menção é histórica.
+> **Chave trocada pela spec 022, migrado para o Firestore pela spec 025
+> (RF24, 2026-10-16)**: a estrutura de sessão em andamento descrita abaixo
+> (`sessoes:<perfil_id>`) era chaveada por `uid` da conta desde a spec 022,
+> ainda em AsyncStorage; agora vive em `users/{uid}/sessoes/*` no Firestore
+> — ver RF24. O bloqueio de troca de perfil do RF10 mencionado abaixo também
+> não existe mais (RF10 foi substituído por login/logout, spec 022) — a
+> menção é histórica.
 
 **Decisões:**
 - Fluxo por série: preencher carga/reps → "Concluir série" → inicia descanso automaticamente
@@ -324,11 +325,12 @@ specs/008-notificacao-fim-descanso/research.md.
 
 ## RF07 — Salvar sessão de treino (completa e em andamento)
 
-> **Chave trocada pela spec 022** (FR-012): sessão agora é vinculada ao
-> `uid` da conta, não ao `perfil_id` — mas **continua em AsyncStorage**, não
-> foi migrada pro Firestore (decisão explícita de escopo). Os critérios
-> abaixo usam a terminologia antiga (perfil ativo/`perfil_id`) e são
-> **históricos**, da validação original.
+> **Chave trocada pela spec 022** (FR-012), **migrado para o Firestore pela
+> spec 025 (RF24, 2026-10-16)**: sessão era vinculada ao `uid` da conta
+> desde a spec 022, ainda em AsyncStorage; agora vive em
+> `users/{uid}/sessoes/*` no Firestore. Os critérios abaixo usam a
+> terminologia antiga (perfil ativo/`perfil_id`) e são **históricos**, da
+> validação original.
 
 **Decisões:**
 - Sessão é marcada como concluída automaticamente ao concluir o último exercício, **ou**
@@ -378,11 +380,12 @@ specs/009-salvar-sessao-treino/research.md (Decisões 7 e 10).
 
 ## RF08 — Histórico de evolução por exercício
 
-> **Chave trocada pela spec 022** (FR-012): histórico agora é filtrado por
-> `uid` da conta, não por `perfil_id` — mas **continua em AsyncStorage**,
-> não foi migrado pro Firestore (decisão explícita de escopo). Os critérios
-> abaixo usam a terminologia antiga (perfil ativo/`perfil_id`) e são
-> **históricos**, da validação original.
+> **Chave trocada pela spec 022** (FR-012), **migrado para o Firestore pela
+> spec 025 (RF24, 2026-10-16)**: histórico era filtrado por `uid` da conta
+> desde a spec 022, ainda em AsyncStorage; agora lê de
+> `users/{uid}/sessoes/*` no Firestore. Os critérios abaixo usam a
+> terminologia antiga (perfil ativo/`perfil_id`) e são **históricos**, da
+> validação original.
 
 **Decisões:**
 - Exibição em lista simples com valores por data (sem gráfico no MVP)
@@ -443,13 +446,13 @@ specs/009-salvar-sessao-treino/research.md (Decisões 7 e 10).
 
 RF01 a RF10 (incluindo RF09a e RF09b) concluídos e com todos os critérios de aceite
 validados em Android (Redmi Note 12) e iOS (iPhone 16 Plus) — atualizado em
-2026-09-22. RF11 a RF22 (pós-MVP) estão cada um detalhado em sua própria seção
+2026-09-22. RF11 a RF24 (pós-MVP) estão cada um detalhado em sua própria seção
 abaixo, com status de validação específico por requisito. **Pendências
 conhecidas**: RF13 (intensidade de vibração igual entre 1º e 2º plano, a
 confirmar em aparelho); validação em iOS dos RF19 (ampliação de 2026-10-14),
-RF21 e RF22 (iOS bloqueado pela falta de conta Apple Developer paga). Este
-documento, junto com o PRD v1.1, está pronto para ser usado como contexto no
-`/speckit.specify` de cada requisito.
+RF21, RF22, RF23 e RF24 (iOS bloqueado pela falta de conta Apple Developer
+paga em todos os quatro). Este documento, junto com o PRD v1.1, está pronto
+para ser usado como contexto no `/speckit.specify` de cada requisito.
 
 **Ordem recomendada de implementação:** RF10 → RF01 → RF02 → RF03 → RF04 → RF09a → RF05 →
 RF06 → RF07 → RF08 → RF09b.
@@ -587,7 +590,9 @@ da validação original desta spec.
 ### RF15 — Progresso de ciclo de treinos (múltiplos treinos)
 
 **Spec**: `specs/018-progresso-ciclo/` · estende o RF11. **Validado em Android e
-iOS — confirmado pelo usuário em 2026-09-24.**
+iOS — confirmado pelo usuário em 2026-09-24.** Migrado para o Firestore pela
+spec 025 (RF24, 2026-10-16) — ciclo de progresso vive em
+`users/{uid}/ciclos/*`, antes em AsyncStorage.
 
 **Critérios de aceite:**
 - [X] Ao importar um arquivo com múltiplos treinos, um ciclo de progresso começa a
@@ -666,9 +671,9 @@ RF09b. **Validado em Android e iOS — confirmado pelo usuário em 2026-09-25.**
 
 **Spec**: `specs/019-historico-por-data/` · estende o RF08/RF17. **Validado em
 Android e iOS — confirmado pelo usuário em 2026-09-25.** Mesma observação do
-RF08: a chave trocou de `perfil_id` para `uid` pela spec 022, ainda em
-AsyncStorage; "perfil"/"RF10" nos critérios abaixo são terminologia histórica
-da validação original.
+RF08: a chave trocou de `perfil_id` para `uid` pela spec 022, e foi migrado
+para o Firestore pela spec 025 (RF24, 2026-10-16); "perfil"/"RF10" nos
+critérios abaixo são terminologia histórica da validação original.
 
 **Critérios de aceite:**
 - [X] A visão "Por exercício" (RF08) já existente continua com comportamento e
@@ -859,11 +864,15 @@ Recuperação de erro (Decisão 9, `research.md`):
       é um `try`/`catch` simples já revisado — decisão do usuário em
       2026-10-08, sem forçar reprodução manual
 
-Continuidade do que não migra (FR-012):
+Continuidade do que não migra nesta spec (FR-012):
 - [X] Execução de treino, histórico e progresso de ciclo continuam
       funcionando exatamente como antes desta feature, agora chaveados por
       `uid` em vez de `perfilId` — **confirmado em Android, 2026-10-07**
-      (treino executado e finalizado em modo avião, sem travar)
+      (treino executado e finalizado em modo avião, sem travar). **Nota
+      (2026-10-16)**: sessão de treino, histórico e progresso de ciclo —
+      que ficaram em AsyncStorage nesta spec (FR-012 original) — foram
+      depois migrados para o Firestore pela spec 025 (RF24); ver as
+      seções RF04/RF07/RF08/RF15/RF18 acima e a entrada RF24 abaixo.
 
 **Validado em Android e iOS**: **Android 100% completo** em 2026-10-08 —
 todos os critérios acima confirmados, incluindo o último item (abertura a
@@ -1045,3 +1054,190 @@ edge cases (coexistência com anel de progresso RF15, isolamento entre
 contas, treinos homônimos). **Nenhuma validação em iOS** (Constitution
 v2.0.0, Princípio III; iOS bloqueado pela falta de conta Apple Developer
 paga, mesma situação das specs 022/023).
+
+---
+
+### RF24 — Migração de Sessões, Histórico e Ciclo de Progresso para o Firestore
+
+**Spec**: `specs/025-migracao-sessoes-historico-ciclo/` · migra RF04/RF07/
+RF09a/RF09b/RF12 (sessão e sua edição), RF08/RF18 (histórico), RF02/RF16/
+RF23 (indicadores derivados na lista de treinos) e RF15 (ciclo de
+progresso) de AsyncStorage para o Firestore. Número confirmado em
+2026-10-15 ao registrar no PRD (disciplina já usada pelo RF11-RF23 — nunca
+presumir o número antes de fechar).
+
+**Critérios de aceite:**
+
+Treinar normalmente, agora salvo na conta (User Story 1):
+- [X] Sessão só é criada ao concluir a primeira série (nunca ao abrir/
+      iniciar um exercício sem concluir nenhuma série) — **confirmado em
+      Android, 2026-10-15**: treino registrado sem erro no Metro, sessão
+      aparecendo no Firestore em tempo real, segregada por uid; também
+      observado funcionando offline (sem travar) e sincronizando ao
+      reconectar, nesta mesma rodada de teste — confirmação completa do
+      critério de offline do bloco "Cross-cutting" veio depois, com a
+      validação dedicada do Cenário 8 (T028, todos os fluxos)
+- [X] Progresso persiste ao fechar e reabrir o app — **confirmado em
+      Android, 2026-10-16**
+- [X] "Finalizar treino" (manual) finaliza a sessão só com as séries já
+      registradas — **confirmado em Android, 2026-10-16**, inclusive
+      offline (depois da correção do bug de `getDoc` travando — ver nota
+      em "Cross-cutting")
+- [X] Concluir todos os exercícios planejados finaliza a sessão
+      automaticamente — **confirmado em Android, 2026-10-16**
+- [X] "Nova sessão de Treino" (RF12) cria uma sessão distinta, sem nenhum
+      resquício da sessão anterior — **confirmado em Android, 2026-10-16**
+
+Histórico e indicadores continuam mostrando os mesmos dados (User Story 2):
+- [X] Histórico "Por exercício" (RF08) correto, incluindo exercícios do
+      treino nunca registrados em nenhuma sessão — **confirmado em
+      Android, 2026-10-15**
+- [X] Histórico "Por data" (RF18) correto — **confirmado em Android,
+      2026-10-15**: mostra apenas as sessões realizadas, agrupadas por data
+- [X] Contador de sessões finalizadas e "Finalizado em"/"Nunca treinado"
+      (RF02/RF16) corretos — **confirmado em Android, 2026-10-15**:
+      sessões finalizadas e em andamento coexistindo corretamente em
+      "Meus treinos"
+- [X] Indicador de sessão em andamento na lista de treinos (RF23) correto
+      — **confirmado em Android, 2026-10-15**: destaque permanece mesmo
+      com outros treinos já finalizados na mesma lista
+
+Isolamento entre contas (User Story 3):
+- [X] Trocar de conta não deixa vazar sessão, histórico nem ciclo de
+      progresso de uma conta para a outra — **confirmado em Android,
+      2026-10-16**: troca de conta real no app, sem vazamento entre as
+      contas
+- [X] Rules Playground: os 4 casos de `contracts/firestore-rules.md`
+      confirmados para `sessoes` — **confirmado em 2026-10-15** (Laboratório
+      de testes de regras, Console do Firebase; contas reais: A =
+      `oliveiracampos.victor`, uid `ebHYRKn2aOZLKWTXZXv5uepXcuu2`; B =
+      `victim.bboy`, uid `y1qZpSOrcWS4nRZQeTSUuMzCzry1`): leitura cruzada
+      negada, leitura/escrita própria permitida, sem autenticação negado,
+      gravação negada mesmo com `uid` da conta A no corpo do documento
+      enviado para o caminho da conta B
+- [X] Rules Playground: os 4 casos de `contracts/firestore-rules.md`
+      confirmados para `ciclos` — **confirmado em 2026-10-15**, mesmo
+      método e mesmas duas contas do item acima, os 4 casos com o mesmo
+      resultado
+
+Ciclo de progresso sobrevive a limpar dados e a trocar de aparelho (User Story 4):
+- [X] Criação automática do ciclo, cota por treino e anel de progresso —
+      continuam iguais a antes desta migração — **confirmado em Android,
+      2026-10-15**: anel aparece corretamente, com a cota adequada
+- [X] Bloqueio de nova importação de lote enquanto o ciclo tem menos de 40
+      sessões finalizadas — **confirmado em Android, 2026-10-15**: não
+      deixa importar antes da hora
+- [X] Aviso "Hora de trocar o treino" ao atingir 40 sessões finalizadas —
+      **confirmado em Android, 2026-10-15**, com o método corrigido
+      (sessões finalizadas de verdade, distribuídas de forma desigual
+      entre os treinos do lote — 8/9/7/... somando 40): o aviso apareceu
+      corretamente. Tentativa anterior no mesmo dia, editando
+      `cotaPorTreinoId` no Console, não tinha demonstrado o critério —
+      não era bug, só não exercitava `progressoCiclo.totalFinalizado`
+      (ver `quickstart.md`, Cenário 4); superada por este teste com dados
+      reais. Confirma também que o aviso depende só do total agregado de
+      sessões finalizadas do ciclo, não de uma distribuição igual por
+      treino (RF15) — cenário real de "faltei em um treino, mas segui com
+      os outros" soma normalmente para os 40
+- [X] Ciclo de progresso e histórico continuam corretos depois de limpar
+      os dados do app ou trocar de aparelho com a mesma conta —
+      **confirmado em Android, 2026-10-15**: dados do ciclo e do
+      histórico preservados após limpar os dados do app e abrir de novo
+      (partida a frio), lendo da conta em vez de qualquer estado local
+
+Editar séries continua funcionando (User Story 5):
+- [X] Edição de uma série de sessão em andamento (RF09a) funciona, sem
+      alterar `registradaEm` da série editada — **confirmado em Android,
+      2026-10-15/16**: edição feita a partir da tela de execução do
+      exercício, mesmo resultado da edição via histórico (abaixo);
+      usuário observou o horário (`registradaEm`) inalterado depois da
+      edição
+- [X] Edição de uma série de sessão já finalizada (RF09b) funciona, sem
+      alterar `registradaEm` da série editada — **confirmado em Android,
+      2026-10-15/16**: edição feita a partir da tela de histórico, mesmo
+      resultado da edição via execução (acima); usuário observou o
+      horário (`registradaEm`) inalterado depois da edição
+
+Histórico continua legível mesmo se o treino mudar depois (User Story 6):
+- [X] Documento da sessão no Firestore tem `treinoNomeSnapshot`/
+      `exerciciosSnapshot` preenchidos corretamente no momento da criação
+      — **confirmado em Android, 2026-10-15** (evidência comportamental:
+      ver critério abaixo — o snapshot só poderia produzir o resultado
+      observado se estivesse corretamente preenchido)
+- [X] Histórico continua mostrando o nome original do treino/exercício
+      mesmo depois de o treino de origem ser editado manualmente no
+      Firebase Console — **confirmado em Android, 2026-10-15**: ao
+      renomear um exercício no Console, o histórico "Por exercício"
+      passou a mostrar **duas entradas separadas** — o nome original
+      ("Levantamento terra romeno (RDL)"), com o histórico da sessão
+      antiga preservado, e o nome novo ("... alterado"), sem nenhum
+      registro (lido do treino ao vivo, FR-011) — confirma que o
+      histórico da sessão não acompanhou a edição. **Bug real encontrado e
+      corrigido durante este teste**: `obterHistoricoPorPerfil`
+      presumia (comentário antigo) que o nome de um registro sempre batia
+      com um grupo pré-semeado a partir do treino vivo — presunção válida
+      antes desta spec (registros vinham do mesmo treino vivo), mas
+      quebrada depois do snapshot (FR-010), causando
+      `TypeError: Cannot read property 'itens' of undefined` quando o
+      nome do snapshot não batia mais com o treino atual. Corrigido em
+      `src/services/historico-evolucao.ts`: o grupo agora é criado na
+      hora se ainda não existir, em vez de presumir que sempre existe.
+
+Cross-cutting:
+- [X] Offline (modo avião) e abertura a frio: concluir série, finalizar,
+      editar, consultar histórico e importar com ciclo continuam
+      funcionando, sincronizando ao reconectar. **Confirmado em Android,
+      2026-10-15/16**. **Bug real encontrado e
+      corrigido durante este teste**: offline, `registrarSerieConcluida`
+      ficou lento o suficiente para o usuário tocar várias vezes no botão
+      "Concluir série" sem ver nada mudar, disparando chamadas
+      concorrentes que se sobrescreviam (última vence) — produziu um
+      contador incorreto ("Série 6 de 4" com só 1 série de fato
+      persistida no servidor). Corrigido com uma trava de envio por
+      exercício em `src/app/treino/[treinoId].tsx`
+      (`exerciciosEnviandoSerie`) que desabilita o botão e mostra
+      "Salvando..." enquanto a chamada está em andamento — **confirmado
+      pelo usuário em 2026-10-15 que o bug não ocorre mais**. **Segundo
+      bug real encontrado e corrigido, 2026-10-16**: `finalizarSessao`,
+      `marcarSessaoRevisada`, `marcarExercicioConcluido` e
+      `atualizarSerieDeSessaoFinalizada` usavam `getDoc` (busca de um único
+      documento por id), que também travava indefinidamente offline (mesmo
+      sintoma do bug da query composta, formato de leitura diferente) —
+      confirmado ao finalizar uma sessão offline (tela ficou estática) e ao
+      editar uma série de uma sessão já finalizada no histórico offline.
+      Corrigido trocando as 4 funções para `listarSessoes(uid)` + busca em
+      memória, removendo `getDoc` de `sessao-treino-storage.ts` por
+      completo — **confirmado pelo usuário em 2026-10-16 que finalizar e
+      editar offline funcionam normalmente**. **Aceito pelo usuário em
+      2026-10-16**: a lentidão geral de leitura offline ao abrir a lista de
+      exercícios de um treino permanece como está (com rede, tudo é
+      rápido) — não bloqueia este critério. **Confirmado pelo usuário em
+      2026-10-16**: importação de um arquivo com múltiplos treinos offline
+      funcionou (só demorou a aparecer na tela, mesma lentidão já aceita);
+      ao reconectar, os treinos importados, a sessão finalizada e as
+      séries editadas offline apareceram corretamente
+- [X] Nenhum arquivo de `src/` ainda lê ou escreve as chaves antigas de
+      AsyncStorage `sessoes:`/`ciclos:` (confirmado por `grep`) —
+      **confirmado em 2026-10-15**: zero ocorrências de `sessoes:`/
+      `ciclos:` e zero imports de `AsyncStorage` nos dois serviços
+      migrados
+
+**Validado em Android**: 8 de 8 cenários do `quickstart.md` confirmados
+(2026-10-15 a 2026-10-16) — as 6 User Stories completas, incluindo
+isolamento entre contas (Rules Playground + troca de conta real) e o
+cenário offline/abertura a frio completo (concluir série, finalizar,
+editar, consultar histórico e importar lote de treinos, todos em modo
+avião, sincronizando ao reconectar). 4 bugs reais encontrados e corrigidos
+durante a validação: (1) query composta (`where`+`where`+`limit`) travando
+indefinidamente offline; (2) leituras sequenciais redundantes de
+`listarSessoes` deixando a abertura de um treino mais lenta que o
+necessário; (3) corrida de toques duplicados em "Concluir série" offline
+causando contador incorreto e perda de dado (corrigida com trava de envio
+por exercício); (4) `getDoc` de documento único também travando
+indefinidamente offline (mesmo sintoma do bug 1, em `finalizarSessao`,
+`marcarSessaoRevisada`, `marcarExercicioConcluido` e
+`atualizarSerieDeSessaoFinalizada`) — ver detalhes em T028. Lentidão geral
+de leitura offline (não um travamento, só mais devagar que com rede)
+aceita como está pelo usuário, sem correção adicional. **Nenhuma
+validação em iOS** (Constitution v2.0.0, Princípio III; iOS bloqueado pela
+falta de conta Apple Developer paga, mesma situação das specs 022-024).

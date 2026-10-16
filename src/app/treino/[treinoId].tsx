@@ -26,11 +26,12 @@ import { useTheme } from '@/hooks/use-theme';
 import { useContaAutenticada } from '@/hooks/use-conta-autenticada';
 import {
   atualizarSerieRealizada,
+  encontrarSessaoEmAndamento,
+  encontrarUltimaSessaoConcluidaNaoRevisada,
   finalizarSessao,
+  listarSessoes,
   marcarExercicioConcluido,
   marcarSessaoRevisada,
-  obterSessao,
-  obterUltimaSessaoConcluidaNaoRevisada,
   registrarSerieConcluida,
 } from '@/services/sessao-treino-storage';
 import {
@@ -113,6 +114,15 @@ export default function ExecucaoTreinoScreen() {
   } | null>(null);
   const [tick, setTick] = useState(0);
   const voltouDeSegundoPlanoRef = useRef(false);
+  // Trava contra toques duplicados em "Concluir série" (T028, 2026-10-15):
+  // offline, registrarSerieConcluida pode demorar o suficiente pro usuário
+  // tocar de novo sem ver nenhuma mudança na tela — sem essa trava, cada
+  // toque dispara uma chamada concorrente, cada uma lendo um estado desatualizado
+  // da sessão e sobrescrevendo a escrita das outras (última vence), enquanto o
+  // contador local (serieAtual) incrementa uma vez por toque, dessincronizando
+  // da sessão real salva. Precisa ser state (não ref) para o botão desabilitar
+  // de verdade na tela enquanto o envio está em andamento.
+  const [exerciciosEnviandoSerie, setExerciciosEnviandoSerie] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!uid) return;
@@ -126,11 +136,15 @@ export default function ExecucaoTreinoScreen() {
       setTreino(encontrado);
 
       if (encontrado) {
-        let sessao = await obterSessao(uid, encontrado.id);
+        // 1 leitura só de sessões, reaproveitada pelos dois usos abaixo (T028,
+        // 2026-10-15) — antes eram até 2 chamadas sequenciais, cada uma com
+        // sua própria leitura, perceptível offline.
+        const sessoes = await listarSessoes(uid);
+        let sessao = encontrarSessaoEmAndamento(sessoes, encontrado.id);
         let jaFinalizada = false;
         if (!sessao) {
-          sessao = await obterUltimaSessaoConcluidaNaoRevisada(
-            uid,
+          sessao = encontrarUltimaSessaoConcluidaNaoRevisada(
+            sessoes,
             encontrado.id,
             encontrado.exercicios.length,
           );
@@ -202,45 +216,55 @@ export default function ExecucaoTreinoScreen() {
     setExercicioSelecionadoId(null);
   }
 
-  async function handleConcluirSerie(exercicioId: string, serie: SerieRealizada) {
+  async function handleConcluirSerie(exercicioId: string, serie: Omit<SerieRealizada, 'registradaEm'>) {
     if (!uid || !treino) return;
+    if (exerciciosEnviandoSerie[exercicioId]) return;
     const exercicio = treino.exercicios.find((item) => item.id === exercicioId);
     if (!exercicio) return;
 
-    const sessao = await registrarSerieConcluida({
-      perfilId: uid,
-      treinoId: treino.id,
-      exercicioId,
-      serie,
-      totalSeriesDoExercicio: exercicio.series,
-    });
-    const execucao = sessao.execucoes.find((item) => item.exercicioId === exercicioId);
-    if (!execucao) return;
-
-    setSessaoAtualId(sessao.id);
-
-    setEstadosPorExercicio((atual) => {
-      const estadoAtual = atual[exercicioId] ?? criarEstadoExecucaoInicial(exercicioId);
-      const concluido = execucao.status === 'concluido';
-      return {
-        ...atual,
-        [exercicioId]: {
-          ...estadoAtual,
-          seriesConcluidas: execucao.seriesRealizadas,
-          concluido,
-          serieAtual: concluido ? estadoAtual.serieAtual : estadoAtual.serieAtual + 1,
-          cargaKg: concluido ? estadoAtual.cargaKg : String(serie.cargaKg),
-          repsFeitas: '',
+    setExerciciosEnviandoSerie((atual) => ({ ...atual, [exercicioId]: true }));
+    try {
+      const sessao = await registrarSerieConcluida({
+        uid,
+        treinoId: treino.id,
+        exercicioId,
+        serie,
+        totalSeriesDoExercicio: exercicio.series,
+        treinoSnapshot: {
+          nome: treino.nome,
+          exercicios: treino.exercicios.map(({ id, nome, categoria }) => ({ id, nome, categoria })),
         },
-      };
-    });
+      });
+      const execucao = sessao.execucoes.find((item) => item.exercicioId === exercicioId);
+      if (!execucao) return;
+
+      setSessaoAtualId(sessao.id);
+
+      setEstadosPorExercicio((atual) => {
+        const estadoAtual = atual[exercicioId] ?? criarEstadoExecucaoInicial(exercicioId);
+        const concluido = execucao.status === 'concluido';
+        return {
+          ...atual,
+          [exercicioId]: {
+            ...estadoAtual,
+            seriesConcluidas: execucao.seriesRealizadas,
+            concluido,
+            serieAtual: concluido ? estadoAtual.serieAtual : estadoAtual.serieAtual + 1,
+            cargaKg: concluido ? estadoAtual.cargaKg : String(serie.cargaKg),
+            repsFeitas: '',
+          },
+        };
+      });
+    } finally {
+      setExerciciosEnviandoSerie((atual) => ({ ...atual, [exercicioId]: false }));
+    }
   }
 
-  async function handleEditarSerie(exercicioId: string, serieEditada: SerieRealizada) {
+  async function handleEditarSerie(exercicioId: string, serieEditada: Omit<SerieRealizada, 'registradaEm'>) {
     if (!uid || !treino) return;
 
     const sessao = await atualizarSerieRealizada({
-      perfilId: uid,
+      uid,
       treinoId: treino.id,
       exercicioId,
       serie: serieEditada.serie,
@@ -264,7 +288,7 @@ export default function ExecucaoTreinoScreen() {
 
   async function handleConcluirExercicio(exercicioId: string) {
     if (!uid || !sessaoAtualId) return;
-    await marcarExercicioConcluido({ perfilId: uid, sessaoId: sessaoAtualId, exercicioId });
+    await marcarExercicioConcluido({ uid, sessaoId: sessaoAtualId, exercicioId });
     setExercicioSelecionadoId(null);
   }
 
@@ -415,6 +439,7 @@ export default function ExecucaoTreinoScreen() {
                 onEditarSerie={(serie) => handleEditarSerie(exercicioSelecionado.id, serie)}
                 onIniciarDescanso={handleIniciarDescanso}
                 emDescanso={descansoAtivo?.exercicioId === exercicioSelecionado.id}
+                enviandoSerie={exerciciosEnviandoSerie[exercicioSelecionado.id] ?? false}
                 jaEstavaConcluidoAoAbrir={reaberturaJaConcluida}
               />
             </ScrollView>

@@ -1,25 +1,32 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { collection, doc, getDocs, getFirestore, setDoc } from '@react-native-firebase/firestore';
 import * as Crypto from 'expo-crypto';
 
-import { contarSessoesFinalizadas } from '@/services/sessao-treino-storage';
+import { listarSessoes } from '@/services/sessao-treino-storage';
 import type { CicloTreino } from '@/types/ciclo-treino';
 
 const TOTAL_ESPERADO_CICLO = 40;
 
-function ciclosKey(perfilId: string): string {
-  return `ciclos:${perfilId}`;
+function ciclosCollection(uid: string) {
+  return collection(getFirestore(), 'users', uid, 'ciclos');
 }
 
-async function getCiclos(perfilId: string): Promise<CicloTreino[]> {
-  const raw = await AsyncStorage.getItem(ciclosKey(perfilId));
-  if (!raw) {
-    return [];
-  }
-  return JSON.parse(raw) as CicloTreino[];
+// Sem await de propósito (spec 025, FR-021) — mesmo padrão de setDocSessao em
+// sessao-treino-storage.ts.
+function setDocCiclo(uid: string, ciclo: CicloTreino): void {
+  setDoc(doc(ciclosCollection(uid), ciclo.id), ciclo).catch((erro) => {
+    console.error('[ciclo-treino-storage] Falha ao confirmar ciclo no servidor (já salvo no cache local):', erro);
+  });
 }
 
-async function setCiclos(perfilId: string, ciclos: CicloTreino[]): Promise<void> {
-  await AsyncStorage.setItem(ciclosKey(perfilId), JSON.stringify(ciclos));
+async function listarCiclos(uid: string): Promise<CicloTreino[]> {
+  const snapshot = await getDocs(ciclosCollection(uid));
+  const ciclos = snapshot.docs.map((documento) => documento.data() as CicloTreino);
+  return ciclos.sort((a, b) => {
+    if (a.criadoEm !== b.criadoEm) {
+      return a.criadoEm < b.criadoEm ? -1 : 1;
+    }
+    return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+  });
 }
 
 /**
@@ -37,35 +44,39 @@ function calcularCotaPorTreino(treinoIds: string[]): Record<string, number> {
   return cota;
 }
 
-/** Cria e persiste um novo ciclo (append-only) para o lote de treinos informado. */
-export async function criarCiclo(perfilId: string, treinoIds: string[]): Promise<CicloTreino> {
+/** Cria e persiste um novo ciclo para o lote de treinos informado. */
+export async function criarCiclo(uid: string, treinoIds: string[]): Promise<CicloTreino> {
   const ciclo: CicloTreino = {
     id: Crypto.randomUUID(),
-    perfilId,
+    uid,
     treinoIds,
     cotaPorTreinoId: calcularCotaPorTreino(treinoIds),
     criadoEm: new Date().toISOString(),
   };
-  const ciclos = await getCiclos(perfilId);
-  await setCiclos(perfilId, [...ciclos, ciclo]);
+  setDocCiclo(uid, ciclo);
   return ciclo;
 }
 
-/** Último ciclo criado para o perfil (o "ciclo atual"), ou `null` se nenhum. */
-export async function obterCicloAtual(perfilId: string): Promise<CicloTreino | null> {
-  const ciclos = await getCiclos(perfilId);
+/** Último ciclo criado para a conta (o "ciclo atual"), ou `null` se nenhum. */
+export async function obterCicloAtual(uid: string): Promise<CicloTreino | null> {
+  const ciclos = await listarCiclos(uid);
   return ciclos.length > 0 ? ciclos[ciclos.length - 1] : null;
 }
 
 /** Progresso do ciclo, derivado das sessões finalizadas já persistidas — nunca em cache. */
 export async function calcularProgressoCiclo(
-  perfilId: string,
+  uid: string,
   ciclo: CicloTreino,
 ): Promise<{ totalFinalizado: number; porTreino: Record<string, number> }> {
+  // 1 leitura da coleção inteira de sessões, não 1 por treino do ciclo
+  // (spec 025, research.md Decisão 7).
+  const sessoes = await listarSessoes(uid);
   const porTreino: Record<string, number> = {};
   let totalFinalizado = 0;
   for (const treinoId of ciclo.treinoIds) {
-    const contagem = await contarSessoesFinalizadas(perfilId, treinoId);
+    const contagem = sessoes.filter(
+      (sessao) => sessao.treinoId === treinoId && sessao.finalizadaEm !== null,
+    ).length;
     porTreino[treinoId] = contagem;
     totalFinalizado += contagem;
   }

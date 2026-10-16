@@ -1,41 +1,89 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { collection, doc, getDocs, getFirestore, setDoc } from '@react-native-firebase/firestore';
 import * as Crypto from 'expo-crypto';
 
+import type { CategoriaExercicio } from '@/types/treino';
 import type { SerieRealizada, SessaoTreino } from '@/types/execucao-treino';
 
-function sessoesKey(perfilId: string): string {
-  return `sessoes:${perfilId}`;
+function sessoesCollection(uid: string) {
+  return collection(getFirestore(), 'users', uid, 'sessoes');
 }
 
-async function getSessoes(perfilId: string): Promise<SessaoTreino[]> {
-  const raw = await AsyncStorage.getItem(sessoesKey(perfilId));
-  if (!raw) {
-    return [];
-  }
-  return JSON.parse(raw) as SessaoTreino[];
-}
-
-async function setSessoes(perfilId: string, sessoes: SessaoTreino[]): Promise<void> {
-  await AsyncStorage.setItem(sessoesKey(perfilId), JSON.stringify(sessoes));
-}
-
-export async function obterSessao(perfilId: string, treinoId: string): Promise<SessaoTreino | null> {
-  const sessoes = await getSessoes(perfilId);
-  return sessoes.find((sessao) => sessao.treinoId === treinoId && sessao.finalizadaEm === null) ?? null;
+// Sem await de propósito (spec 025, FR-021; mesmo padrão de setDocTreino em
+// treino-storage.ts) — a escrita já fica aplicada no cache local offline
+// imediatamente; esperar a confirmação do servidor travaria a UI.
+function setDocSessao(uid: string, sessao: SessaoTreino): void {
+  setDoc(doc(sessoesCollection(uid), sessao.id), sessao).catch((erro) => {
+    console.error('[sessao-treino-storage] Falha ao confirmar sessão no servidor (já salva no cache local):', erro);
+  });
 }
 
 /**
- * Sessão mais recente do treino que terminou com todos os exercícios concluídos,
- * mas cujo usuário ainda não apertou "Nova sessão de Treino" (spec 013) — usada
- * para a tela de execução continuar mostrando o treino como concluído mesmo
- * depois de o usuário sair da tela e voltar, sem resetar sozinha.
+ * Único ponto de leitura da coleção inteira de sessões da conta — usado por
+ * praticamente todas as funções deste arquivo, pela lista de treinos, pelo
+ * histórico e pelo cálculo de progresso do ciclo (spec 025, research.md
+ * Decisão 7).
+ *
+ * Nota de implementação (T028, 2026-10-15): `obterSessao`/
+ * `registrarSerieConcluida` chegaram a usar uma query filtrada
+ * (`where('treinoId','==',...)` + `where('finalizadaEm','==',null)` +
+ * `limit(1)`) em vez desta função, para evitar buscar a coleção inteira no
+ * caminho mais quente da tela de execução. Essa query **travava
+ * indefinidamente** (sem erro, sem rejeitar) ao abrir um treino com o
+ * aparelho totalmente offline (modo avião + Wi-Fi desligado,
+ * confirmado em aparelho real) — provável limitação do SDK nativo do
+ * Firestore em resolver uma query composta nunca antes executada contra o
+ * cache local sem tentar o servidor primeiro. Revertido para usar esta
+ * função (leitura simples da coleção inteira + filtro em memória), o mesmo
+ * padrão já comprovadamente confiável offline em todo o resto do app — a
+ * confiabilidade offline (FR-019/FR-020, Constitution) tem prioridade sobre
+ * a otimização de leitura que a query tentava trazer.
+ *
+ * Nota de implementação (T028, 2026-10-16): o mesmo travamento indefinido
+ * offline foi confirmado também em getDoc(doc(...)) — busca de um único
+ * documento por id (usado antes em finalizarSessao, marcarSessaoRevisada,
+ * marcarExercicioConcluido e atualizarSerieDeSessaoFinalizada) —, não só em
+ * queries compostas. Todas as funções deste arquivo usam exclusivamente
+ * esta função (listarSessoes + filtro/busca em memória), nunca getDoc nem
+ * queries com where/limit, para o mesmo caminho de leitura ficar confiável
+ * offline em todo o arquivo.
  */
-export async function obterUltimaSessaoConcluidaNaoRevisada(
-  perfilId: string,
+export async function listarSessoes(uid: string): Promise<SessaoTreino[]> {
+  const snapshot = await getDocs(sessoesCollection(uid));
+  const sessoes = snapshot.docs.map((documento) => documento.data() as SessaoTreino);
+  return sessoes.sort((a, b) => {
+    if (a.iniciadaEm !== b.iniciadaEm) {
+      return a.iniciadaEm < b.iniciadaEm ? -1 : 1;
+    }
+    return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+  });
+}
+
+/**
+ * Versão pura/síncrona de `obterSessao`, sobre um array de sessões já
+ * carregado — usada pela tela de execução (`[treinoId].tsx`) para não
+ * repetir `listarSessoes` quando já precisa chamar também
+ * `encontrarUltimaSessaoConcluidaNaoRevisada` logo em seguida (T028,
+ * 2026-10-15: duas leituras sequenciais nessa tela deixavam a abertura do
+ * treino perceptivelmente mais lenta offline).
+ */
+export function encontrarSessaoEmAndamento(sessoes: SessaoTreino[], treinoId: string): SessaoTreino | null {
+  return sessoes.find((sessao) => sessao.treinoId === treinoId && sessao.finalizadaEm === null) ?? null;
+}
+
+export async function obterSessao(uid: string, treinoId: string): Promise<SessaoTreino | null> {
+  const sessoes = await listarSessoes(uid);
+  return encontrarSessaoEmAndamento(sessoes, treinoId);
+}
+
+/**
+ * Versão pura/síncrona de `obterUltimaSessaoConcluidaNaoRevisada`, sobre um
+ * array de sessões já carregado — mesmo motivo de `encontrarSessaoEmAndamento`.
+ */
+export function encontrarUltimaSessaoConcluidaNaoRevisada(
+  sessoes: SessaoTreino[],
   treinoId: string,
   totalExercicios: number,
-): Promise<SessaoTreino | null> {
-  const sessoes = await getSessoes(perfilId);
+): SessaoTreino | null {
   const candidatas = sessoes.filter(
     (sessao) =>
       sessao.treinoId === treinoId &&
@@ -52,37 +100,69 @@ export async function obterUltimaSessaoConcluidaNaoRevisada(
   );
 }
 
+/**
+ * Sessão mais recente do treino que terminou com todos os exercícios concluídos,
+ * mas cujo usuário ainda não apertou "Nova sessão de Treino" (spec 013) — usada
+ * para a tela de execução continuar mostrando o treino como concluído mesmo
+ * depois de o usuário sair da tela e voltar, sem resetar sozinha.
+ */
+export async function obterUltimaSessaoConcluidaNaoRevisada(
+  uid: string,
+  treinoId: string,
+  totalExercicios: number,
+): Promise<SessaoTreino | null> {
+  const sessoes = await listarSessoes(uid);
+  return encontrarUltimaSessaoConcluidaNaoRevisada(sessoes, treinoId, totalExercicios);
+}
+
 /** Marca que o usuário já reconheceu a conclusão da sessão (apertou "Nova sessão de Treino"). */
-export async function marcarSessaoRevisada(perfilId: string, sessaoId: string): Promise<void> {
-  const sessoes = await getSessoes(perfilId);
+export async function marcarSessaoRevisada(uid: string, sessaoId: string): Promise<void> {
+  const sessoes = await listarSessoes(uid);
   const sessao = sessoes.find((item) => item.id === sessaoId);
   if (!sessao) return;
   sessao.revisadaPeloUsuario = true;
-  await setSessoes(perfilId, sessoes);
+  setDocSessao(uid, sessao);
 }
 
 export async function registrarSerieConcluida(params: {
-  perfilId: string;
+  uid: string;
   treinoId: string;
   exercicioId: string;
-  serie: SerieRealizada;
+  serie: Omit<SerieRealizada, 'registradaEm'>;
   totalSeriesDoExercicio: number;
+  /**
+   * Usado só quando a sessão ainda não existe (criação) — ignorado em
+   * chamadas subsequentes da mesma sessão. Confirmado na implementação
+   * (spec 025, T005): nenhum destes campos pode chegar `undefined` aqui —
+   * `treino.nome` e `exercicio.id`/`nome` são obrigatórios e validados na
+   * importação (`treino-storage.ts`, `validarEstruturaTreino`/
+   * `validarExercicio`), e `exercicio.categoria` já vem sempre normalizada
+   * (`listarTreinos`, `categoria: exercicio.categoria ?? 'peso'`) antes de
+   * chegar a `[treinoId].tsx`, de onde este parâmetro é montado. Nenhuma
+   * normalização ou omissão condicional é necessária — `setDoc` nunca recebe
+   * `undefined` nestes campos.
+   */
+  treinoSnapshot: {
+    nome: string;
+    exercicios: { id: string; nome: string; categoria: CategoriaExercicio }[];
+  };
 }): Promise<SessaoTreino> {
-  const { perfilId, treinoId, exercicioId, serie, totalSeriesDoExercicio } = params;
-  const sessoes = await getSessoes(perfilId);
+  const { uid, treinoId, exercicioId, serie, totalSeriesDoExercicio, treinoSnapshot } = params;
+  const sessoes = await listarSessoes(uid);
 
   let sessao = sessoes.find((item) => item.treinoId === treinoId && item.finalizadaEm === null);
   if (!sessao) {
     sessao = {
       id: Crypto.randomUUID(),
-      perfilId,
+      uid,
       treinoId,
       iniciadaEm: new Date().toISOString(),
       finalizadaEm: null,
       execucoes: [],
       revisadaPeloUsuario: false,
+      treinoNomeSnapshot: treinoSnapshot.nome,
+      exerciciosSnapshot: treinoSnapshot.exercicios,
     };
-    sessoes.push(sessao);
   }
 
   let execucao = sessao.execucoes.find((item) => item.exercicioId === exercicioId);
@@ -91,24 +171,23 @@ export async function registrarSerieConcluida(params: {
     sessao.execucoes.push(execucao);
   }
 
-  execucao.seriesRealizadas.push(serie);
+  execucao.seriesRealizadas.push({ ...serie, registradaEm: new Date().toISOString() });
   execucao.status = execucao.seriesRealizadas.length === totalSeriesDoExercicio ? 'concluido' : 'em_andamento';
 
-  await setSessoes(perfilId, sessoes);
+  setDocSessao(uid, sessao);
   return sessao;
 }
 
 export async function marcarExercicioConcluido(params: {
-  perfilId: string;
+  uid: string;
   sessaoId: string;
   exercicioId: string;
 }): Promise<SessaoTreino> {
-  const { perfilId, sessaoId, exercicioId } = params;
-  const sessoes = await getSessoes(perfilId);
-
+  const { uid, sessaoId, exercicioId } = params;
+  const sessoes = await listarSessoes(uid);
   const sessao = sessoes.find((item) => item.id === sessaoId);
   if (!sessao) {
-    throw new Error(`Nenhuma sessão encontrada com id ${sessaoId} para o perfil ${perfilId}`);
+    throw new Error(`Nenhuma sessão encontrada com id ${sessaoId} para a conta ${uid}`);
   }
 
   const execucao = sessao.execucoes.find((item) => item.exercicioId === exercicioId);
@@ -118,24 +197,24 @@ export async function marcarExercicioConcluido(params: {
 
   execucao.status = 'concluido';
 
-  await setSessoes(perfilId, sessoes);
+  setDocSessao(uid, sessao);
   return sessao;
 }
 
 export async function atualizarSerieRealizada(params: {
-  perfilId: string;
+  uid: string;
   treinoId: string;
   exercicioId: string;
   serie: number;
   novaCargaKg: number;
   novosReps: number;
 }): Promise<SessaoTreino> {
-  const { perfilId, treinoId, exercicioId, serie, novaCargaKg, novosReps } = params;
-  const sessoes = await getSessoes(perfilId);
+  const { uid, treinoId, exercicioId, serie, novaCargaKg, novosReps } = params;
+  const sessoes = await listarSessoes(uid);
 
   const sessao = sessoes.find((item) => item.treinoId === treinoId && item.finalizadaEm === null);
   if (!sessao) {
-    throw new Error(`Nenhuma sessão em andamento encontrada para o treino ${treinoId} do perfil ${perfilId}`);
+    throw new Error(`Nenhuma sessão em andamento encontrada para o treino ${treinoId} da conta ${uid}`);
   }
 
   const execucao = sessao.execucoes.find((item) => item.exercicioId === exercicioId);
@@ -151,21 +230,21 @@ export async function atualizarSerieRealizada(params: {
   serieRealizada.cargaKg = novaCargaKg;
   serieRealizada.reps = novosReps;
 
-  await setSessoes(perfilId, sessoes);
+  setDocSessao(uid, sessao);
   return sessao;
 }
 
-export async function contarSessoesFinalizadas(perfilId: string, treinoId: string): Promise<number> {
-  const sessoes = await getSessoes(perfilId);
+export async function contarSessoesFinalizadas(uid: string, treinoId: string): Promise<number> {
+  const sessoes = await listarSessoes(uid);
   return sessoes.filter((sessao) => sessao.treinoId === treinoId && sessao.finalizadaEm !== null).length;
 }
 
 /** Data (ISO 8601) da sessão finalizada mais recente do treino, ou `null` se nenhuma. */
 export async function obterDataUltimaSessaoFinalizada(
-  perfilId: string,
+  uid: string,
   treinoId: string,
 ): Promise<string | null> {
-  const sessoes = await getSessoes(perfilId);
+  const sessoes = await listarSessoes(uid);
   const finalizadas = sessoes.filter(
     (sessao) => sessao.treinoId === treinoId && sessao.finalizadaEm !== null,
   );
@@ -177,20 +256,20 @@ export async function obterDataUltimaSessaoFinalizada(
   ).finalizadaEm;
 }
 
-export async function listarSessoesFinalizadas(perfilId: string): Promise<SessaoTreino[]> {
-  const sessoes = await getSessoes(perfilId);
+export async function listarSessoesFinalizadas(uid: string): Promise<SessaoTreino[]> {
+  const sessoes = await listarSessoes(uid);
   return sessoes.filter((sessao) => sessao.finalizadaEm !== null);
 }
 
 export async function atualizarSerieDeSessaoFinalizada(params: {
-  perfilId: string;
+  uid: string;
   sessaoId: string;
   exercicioId: string;
   serie: number;
   novaCargaKg: number;
   novosReps: number;
 }): Promise<SessaoTreino> {
-  const { perfilId, sessaoId, exercicioId, serie, novaCargaKg, novosReps } = params;
+  const { uid, sessaoId, exercicioId, serie, novaCargaKg, novosReps } = params;
 
   if (!Number.isFinite(novaCargaKg) || !Number.isFinite(novosReps)) {
     throw new Error(
@@ -198,11 +277,10 @@ export async function atualizarSerieDeSessaoFinalizada(params: {
     );
   }
 
-  const sessoes = await getSessoes(perfilId);
-
+  const sessoes = await listarSessoes(uid);
   const sessao = sessoes.find((item) => item.id === sessaoId);
   if (!sessao) {
-    throw new Error(`Nenhuma sessão encontrada com id ${sessaoId} para o perfil ${perfilId}`);
+    throw new Error(`Nenhuma sessão encontrada com id ${sessaoId} para a conta ${uid}`);
   }
 
   if (sessao.finalizadaEm === null) {
@@ -224,16 +302,15 @@ export async function atualizarSerieDeSessaoFinalizada(params: {
   serieRealizada.cargaKg = novaCargaKg;
   serieRealizada.reps = novosReps;
 
-  await setSessoes(perfilId, sessoes);
+  setDocSessao(uid, sessao);
   return sessao;
 }
 
-export async function finalizarSessao(perfilId: string, sessaoId: string): Promise<SessaoTreino> {
-  const sessoes = await getSessoes(perfilId);
-
+export async function finalizarSessao(uid: string, sessaoId: string): Promise<SessaoTreino> {
+  const sessoes = await listarSessoes(uid);
   const sessao = sessoes.find((item) => item.id === sessaoId);
   if (!sessao) {
-    throw new Error(`Nenhuma sessão encontrada com id ${sessaoId} para o perfil ${perfilId}`);
+    throw new Error(`Nenhuma sessão encontrada com id ${sessaoId} para a conta ${uid}`);
   }
 
   if (sessao.finalizadaEm !== null) {
@@ -242,6 +319,6 @@ export async function finalizarSessao(perfilId: string, sessaoId: string): Promi
 
   sessao.finalizadaEm = new Date().toISOString();
 
-  await setSessoes(perfilId, sessoes);
+  setDocSessao(uid, sessao);
   return sessao;
 }

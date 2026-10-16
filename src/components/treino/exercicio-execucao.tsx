@@ -19,11 +19,12 @@ type ExercicioExecucaoProps = {
   exercicio: ExercicioPlanejado;
   estado: EstadoExecucaoExercicio;
   onAtualizarEstado: (novoEstado: EstadoExecucaoExercicio) => void;
-  onConcluirSerie: (serie: SerieRealizada) => void;
+  onConcluirSerie: (serie: Omit<SerieRealizada, 'registradaEm'>) => void;
   onConcluirExercicio: () => void;
-  onEditarSerie: (serieEditada: SerieRealizada) => Promise<void>;
+  onEditarSerie: (serieEditada: Omit<SerieRealizada, 'registradaEm'>) => Promise<void>;
   onIniciarDescanso?: (info: { exercicioId: string; descansoSeg: number }) => void;
   emDescanso?: boolean;
+  enviandoSerie?: boolean;
   jaEstavaConcluidoAoAbrir?: boolean;
 };
 
@@ -42,6 +43,7 @@ export function ExercicioExecucao({
   onEditarSerie,
   onIniciarDescanso,
   emDescanso = false,
+  enviandoSerie = false,
   jaEstavaConcluidoAoAbrir = false,
 }: ExercicioExecucaoProps) {
   const theme = useTheme();
@@ -112,6 +114,7 @@ export function ExercicioExecucao({
   }
 
   function handleConcluirSerie() {
+    if (enviandoSerie) return;
     Keyboard.dismiss();
     const cargaKg = Number(estado.cargaKg);
     const reps = Number(estado.repsFeitas);
@@ -124,6 +127,7 @@ export function ExercicioExecucao({
   }
 
   const podeConcluirSerie =
+    !enviandoSerie &&
     (!exibeCampoPrincipal(exercicio.categoria) || estado.cargaKg.trim().length > 0) &&
     estado.repsFeitas.trim().length > 0;
   const podeSalvarEdicao =
@@ -328,7 +332,7 @@ export function ExercicioExecucao({
             icon={<ConcluirIcon size={16} color={theme.background} />}
             style={styles.botaoIniciar}
           >
-            Concluir série
+            {enviandoSerie ? 'Salvando...' : 'Concluir série'}
           </Button>
 
           {renderSeriesConcluidas()}
