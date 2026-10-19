@@ -1,4 +1,5 @@
-import { collection, doc, getDocs, getFirestore, setDoc } from '@react-native-firebase/firestore';
+import { collection, doc, getDocs, getFirestore, setDoc, updateDoc } from '@react-native-firebase/firestore';
+import type { WriteBatch } from '@react-native-firebase/firestore';
 import * as Crypto from 'expo-crypto';
 
 import type { CategoriaExercicio } from '@/types/treino';
@@ -321,4 +322,34 @@ export async function finalizarSessao(uid: string, sessaoId: string): Promise<Se
 
   setDocSessao(uid, sessao);
   return sessao;
+}
+
+/**
+ * Finaliza uma sessão pelo id, SEM ler nada antes (spec 026, FR-010/FR-011)
+ * — diferente de `finalizarSessao` acima, que lê a coleção inteira só para
+ * mutar e regravar um único campo. Inspeção de `finalizarSessao` confirma
+ * que `finalizadaEm` é o único campo que ela toca antes de `setDocSessao`
+ * (nenhum outro campo da sessão é alterado) — esta função grava exatamente
+ * esse mesmo campo, por `updateDoc`/`WriteBatch.update`, sem precisar do
+ * objeto `SessaoTreino` inteiro em memória.
+ *
+ * Reaproveitada por `arquivarTreino` (treino-storage.ts, passando `lote`
+ * para entrar no mesmo `writeBatch` atômico que arquiva o treino) e pela
+ * ação de "finalizar sessão em andamento" em `index.tsx` (sem `lote` —
+ * escreve e trata o próprio erro aqui mesmo).
+ *
+ * Sem guarda de idempotência (não checa se `finalizadaEm` já estava
+ * preenchido) — os dois chamadores só invocam esta função quando já sabem,
+ * pelo próprio estado local, que a sessão está em andamento.
+ */
+export function finalizarSessaoPorId(uid: string, sessaoId: string, lote?: WriteBatch): void {
+  const dados = { finalizadaEm: new Date().toISOString() };
+  const referencia = doc(sessoesCollection(uid), sessaoId);
+  if (lote) {
+    lote.update(referencia, dados);
+    return;
+  }
+  updateDoc(referencia, dados).catch((erro) => {
+    console.error('[sessao-treino-storage] Falha ao confirmar finalização no servidor (já salva no cache local):', erro);
+  });
 }

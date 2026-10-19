@@ -16,6 +16,7 @@ export type Treino = {
   nome: string;
   exercicios: ExercicioPlanejado[];
   importadoEm: string;
+  arquivadoEm: string | null;
 };
 
 export type ExercicioIgnorado = {

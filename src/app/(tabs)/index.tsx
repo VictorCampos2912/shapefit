@@ -1,6 +1,6 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { Alert, FlatList, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -11,8 +11,8 @@ import { TreinoListItem } from '@/components/treino/treino-list-item';
 import { Spacing } from '@/constants/theme';
 import { useContaAutenticada } from '@/hooks/use-conta-autenticada';
 import { calcularProgressoCiclo, cotaComoFracao, obterCicloAtual } from '@/services/ciclo-treino-storage';
-import { listarSessoes } from '@/services/sessao-treino-storage';
-import { listarTreinos } from '@/services/treino-storage';
+import { finalizarSessaoPorId, listarSessoes } from '@/services/sessao-treino-storage';
+import { arquivarTreino, filtrarTreinosAtivos, listarTreinos } from '@/services/treino-storage';
 import type { CicloTreino } from '@/types/ciclo-treino';
 import type { Treino } from '@/types/treino';
 
@@ -61,6 +61,7 @@ export default function TreinosScreen() {
   const [contagensPorTreino, setContagensPorTreino] = useState<Record<string, number>>({});
   const [dataFinalizacaoPorTreino, setDataFinalizacaoPorTreino] = useState<Record<string, string | null>>({});
   const [emAndamentoPorTreino, setEmAndamentoPorTreino] = useState<Record<string, boolean>>({});
+  const [sessaoEmAndamentoIdPorTreino, setSessaoEmAndamentoIdPorTreino] = useState<Record<string, string>>({});
   const [cicloAtual, setCicloAtual] = useState<CicloTreino | null>(null);
   const [progressoCiclo, setProgressoCiclo] = useState<{
     totalFinalizado: number;
@@ -75,10 +76,13 @@ export default function TreinosScreen() {
       const contagens: Record<string, number> = {};
       const datas: Record<string, string | null> = {};
       const emAndamento: Record<string, boolean> = {};
+      const sessaoEmAndamentoId: Record<string, string> = {};
 
       for (const treino of lista) {
         const doTreino = sessoes.filter((sessao) => sessao.treinoId === treino.id);
         const finalizadas = doTreino.filter((sessao) => sessao.finalizadaEm !== null);
+        const emAndamentoDoTreino = doTreino.find((sessao) => sessao.finalizadaEm === null);
+
         contagens[treino.id] = finalizadas.length;
         datas[treino.id] =
           finalizadas.length > 0
@@ -86,12 +90,18 @@ export default function TreinosScreen() {
                 atual.finalizadaEm! > maisRecente.finalizadaEm! ? atual : maisRecente,
               ).finalizadaEm
             : null;
-        emAndamento[treino.id] = doTreino.some((sessao) => sessao.finalizadaEm === null);
+        emAndamento[treino.id] = emAndamentoDoTreino !== undefined;
+        if (emAndamentoDoTreino) {
+          // Reaproveitado por handleArquivarTreino (spec 026, FR-010) — arquivarTreino
+          // não lê nada antes de escrever, precisa receber esse id já pronto.
+          sessaoEmAndamentoId[treino.id] = emAndamentoDoTreino.id;
+        }
       }
 
       setContagensPorTreino(contagens);
       setDataFinalizacaoPorTreino(datas);
       setEmAndamentoPorTreino(emAndamento);
+      setSessaoEmAndamentoIdPorTreino(sessaoEmAndamentoId);
     } catch (erro) {
       // Não deixa a leitura de sessão derrubar a tela nem a lista de treinos
       // (definida separadamente, antes desta chamada) — ex.: regras do
@@ -100,6 +110,7 @@ export default function TreinosScreen() {
       setContagensPorTreino({});
       setDataFinalizacaoPorTreino({});
       setEmAndamentoPorTreino({});
+      setSessaoEmAndamentoIdPorTreino({});
     }
   }
 
@@ -117,7 +128,7 @@ export default function TreinosScreen() {
 
   async function recarregarTreinos() {
     if (!uid) return;
-    const lista = await listarTreinos(uid);
+    const lista = filtrarTreinosAtivos(await listarTreinos(uid));
     setTreinos(lista);
     await Promise.all([carregarDadosDeSessao(uid, lista), carregarCicloAtual(uid)]);
   }
@@ -127,7 +138,7 @@ export default function TreinosScreen() {
     let ativo = true;
     (async () => {
       setCarregando(true);
-      const lista = await listarTreinos(uid);
+      const lista = filtrarTreinosAtivos(await listarTreinos(uid));
       if (ativo) {
         setTreinos(lista);
         setCarregando(false);
@@ -148,6 +159,77 @@ export default function TreinosScreen() {
 
   function handleSelecionarTreino(treino: Treino) {
     router.push({ pathname: '/treino/[treinoId]', params: { treinoId: treino.id } });
+  }
+
+  function handleArquivarTreino(treino: Treino) {
+    if (!uid) return;
+    const sessaoEmAndamentoId = sessaoEmAndamentoIdPorTreino[treino.id] ?? null;
+    Alert.alert(
+      'Arquivar treino',
+      sessaoEmAndamentoId !== null
+        ? 'Este treino tem uma sessão em andamento. Arquivar também vai finalizá-la, mantendo as séries já registradas. Continuar?'
+        : 'O treino sai de "Meus treinos", mas todo o histórico já registrado continua disponível. Continuar?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Arquivar',
+          style: 'destructive',
+          onPress: () => {
+            // Atualização otimista — remove da lista local no mesmo toque de
+            // confirmação, sem esperar nada (arquivarTreino não lê nada antes
+            // de escrever, spec 026 research.md Decisão 4).
+            setTreinos((atual) => atual.filter((item) => item.id !== treino.id));
+            arquivarTreino(uid, treino.id, sessaoEmAndamentoId);
+            recarregarTreinos().catch(console.error); // reconcilia contadores/ciclo em segundo plano
+          },
+        },
+      ],
+    );
+  }
+
+  function handleFinalizarSessaoAbandonada(treino: Treino) {
+    if (!uid) return;
+    // Captura o id ANTES de zerar o estado otimista abaixo — se não houver
+    // sessão em andamento registrada para este treino, não faz nada.
+    const sessaoId = sessaoEmAndamentoIdPorTreino[treino.id];
+    if (!sessaoId) return;
+    Alert.alert(
+      'Finalizar sessão',
+      'As séries já registradas serão mantidas — a sessão passa a contar como concluída nos contadores de sessões e no ciclo de progresso, igual a "Finalizar treino" manual. Continuar?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Finalizar',
+          onPress: () => {
+            // Atualização otimista — some com o destaque "Em andamento" e
+            // remove o id da sessão no mesmo toque de confirmação, antes de
+            // qualquer escrita.
+            setEmAndamentoPorTreino((atual) => ({ ...atual, [treino.id]: false }));
+            setSessaoEmAndamentoIdPorTreino((atual) => {
+              const copia = { ...atual };
+              delete copia[treino.id];
+              return copia;
+            });
+            finalizarSessaoPorId(uid, sessaoId); // sem lote, sem .catch no call site — já trata o próprio erro
+            recarregarTreinos().catch(console.error); // reconcilia contadores/ciclo em segundo plano
+          },
+        },
+      ],
+    );
+  }
+
+  // Android permite no máximo 3 botões num Alert.alert (positivo/negativo/
+  // neutro do AlertDialog nativo) — "Cancelar" + "Arquivar" sempre, mais
+  // "Finalizar sessão em andamento" só quando há uma sessão em andamento
+  // para este treino (spec 026, FR-011).
+  function handleAbrirMenuDoTreino(treino: Treino) {
+    Alert.alert(treino.nome, undefined, [
+      { text: 'Cancelar', style: 'cancel' },
+      ...(emAndamentoPorTreino[treino.id]
+        ? [{ text: 'Finalizar sessão em andamento', onPress: () => handleFinalizarSessaoAbandonada(treino) }]
+        : []),
+      { text: 'Arquivar', style: 'destructive', onPress: () => handleArquivarTreino(treino) },
+    ]);
   }
 
   const colidindo = calcularChavesColidindo(treinos, dataFinalizacaoPorTreino);
@@ -200,6 +282,7 @@ export default function TreinosScreen() {
                   : null
               }
               onPress={() => handleSelecionarTreino(item)}
+              onAbrirMenu={() => handleAbrirMenuDoTreino(item)}
             />
           )}
         />

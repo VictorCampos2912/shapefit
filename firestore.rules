@@ -5,15 +5,15 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == uid;
 
       match /treinos/{treinoId} {
-        allow read, write: if request.auth != null && request.auth.uid == uid;
+        allow read, create, update: if request.auth != null && request.auth.uid == uid;
       }
 
       match /sessoes/{sessaoId} {
-        allow read, write: if request.auth != null && request.auth.uid == uid;
+        allow read, create, update: if request.auth != null && request.auth.uid == uid;
       }
 
       match /ciclos/{cicloId} {
-        allow read, write: if request.auth != null && request.auth.uid == uid;
+        allow read, create, update: if request.auth != null && request.auth.uid == uid;
       }
     }
   }

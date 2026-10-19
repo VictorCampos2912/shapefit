@@ -1,8 +1,9 @@
-import { collection, doc, getDocs, getFirestore, setDoc, writeBatch } from '@react-native-firebase/firestore';
+import { collection, doc, getDocs, getFirestore, setDoc, updateDoc, writeBatch } from '@react-native-firebase/firestore';
 import * as Crypto from 'expo-crypto';
 import * as DocumentPicker from 'expo-document-picker';
 
 import { calcularProgressoCiclo, criarCiclo, obterCicloAtual } from '@/services/ciclo-treino-storage';
+import { finalizarSessaoPorId } from '@/services/sessao-treino-storage';
 import type {
   CategoriaExercicio,
   ExercicioIgnorado,
@@ -35,11 +36,14 @@ export async function listarTreinos(uid: string): Promise<Treino[]> {
   const snapshot = await getDocs(treinosCollection(uid));
   // Treinos importados antes da RF17 (categorias) não têm `categoria` persistida —
   // normaliza para o mesmo default já aplicado na importação ('peso'), sem exigir
-  // migração de dados nem reescrever o storage.
+  // migração de dados nem reescrever o storage. Mesmo raciocínio para
+  // `arquivadoEm` (spec 026): treinos anteriores a esta spec não têm o campo —
+  // normaliza para `null` (ativo).
   const treinos = snapshot.docs.map((documento) => {
     const treino = documento.data() as Treino;
     return {
       ...treino,
+      arquivadoEm: treino.arquivadoEm ?? null,
       exercicios: treino.exercicios.map((exercicio) => ({
         ...exercicio,
         categoria: exercicio.categoria ?? 'peso',
@@ -56,6 +60,39 @@ export async function listarTreinos(uid: string): Promise<Treino[]> {
       return a.importadoEm < b.importadoEm ? -1 : 1;
     }
     return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+  });
+}
+
+/**
+ * Arquiva um treino (spec 026, FR-001/FR-002) — SEM nenhuma leitura: o
+ * chamador já passa `treinoId` e `sessaoEmAndamentoId` (ou `null`) com o
+ * que já tem em memória. `batch.update` de um único campo (`arquivadoEm`)
+ * no treino e, se houver sessão em andamento, `finalizarSessaoPorId` no
+ * MESMO lote (nunca duas escritas separadas) — garante que nunca existe,
+ * nem no cache offline, um estado com o treino já arquivado e a sessão
+ * ainda em andamento (research.md, Decisão 4). Síncrona, sem retorno;
+ * `.catch` só loga, nunca propaga para quem chamou.
+ */
+export function arquivarTreino(uid: string, treinoId: string, sessaoEmAndamentoId: string | null): void {
+  const lote = writeBatch(getFirestore());
+  lote.update(doc(treinosCollection(uid), treinoId), { arquivadoEm: new Date().toISOString() });
+  if (sessaoEmAndamentoId) {
+    finalizarSessaoPorId(uid, sessaoEmAndamentoId, lote);
+  }
+  lote.commit().catch((erro) => {
+    console.error('[treino-storage] Falha ao confirmar arquivamento no servidor (já salvo no cache local):', erro);
+  });
+}
+
+/**
+ * Restaura um treino arquivado (spec 026, FR-006) — SEM nenhuma leitura: o
+ * chamador já passa `treinoId`. `updateDoc` de um único campo
+ * (`arquivadoEm: null`) — nunca tem efeito colateral em sessão nenhuma
+ * (diferente de arquivar). Síncrona, sem retorno; `.catch` só loga.
+ */
+export function restaurarTreino(uid: string, treinoId: string): void {
+  updateDoc(doc(treinosCollection(uid), treinoId), { arquivadoEm: null }).catch((erro) => {
+    console.error('[treino-storage] Falha ao confirmar restauração no servidor (já salva no cache local):', erro);
   });
 }
 
@@ -186,9 +223,20 @@ function montarTreinoValido(bruto: unknown): ResultadoMontagemTreino {
     nome: estrutura.nome,
     exercicios,
     importadoEm: new Date().toISOString(),
+    arquivadoEm: null,
   };
 
   return { ok: true, treino, exerciciosIgnorados };
+}
+
+/** Treinos visíveis em "Meus treinos" e executáveis — exclui arquivados (spec 026, FR-003). */
+export function filtrarTreinosAtivos(treinos: Treino[]): Treino[] {
+  return treinos.filter((treino) => treino.arquivadoEm === null);
+}
+
+/** Treinos arquivados — usado pela tela "Treinos arquivados" (spec 026, FR-006). */
+export function filtrarTreinosArquivados(treinos: Treino[]): Treino[] {
+  return treinos.filter((treino) => treino.arquivadoEm !== null);
 }
 
 async function processarConteudoObjeto(bruto: unknown, uid: string): Promise<ResultadoImportacao> {
@@ -220,7 +268,7 @@ async function processarConteudoArray(bruto: unknown[], uid: string): Promise<Re
           treinos: [],
           treinosIgnorados: [],
           erro:
-            'Já existe um ciclo de treinos em andamento. Finalize as 40 sessões esperadas antes de importar um novo lote de múltiplos treinos.',
+            'Já existe um ciclo de treinos em andamento. Finalize as 40 sessões esperadas antes de importar um novo lote de múltiplos treinos. Para liberar agora, use Ações → Encerrar ciclo.',
         };
       }
     }

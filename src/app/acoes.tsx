@@ -1,15 +1,17 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { ImportarIcon, InfoIcon, PerfilIcon, VoltarIcon } from '@/components/ui/icons';
+import { ArquivarIcon, EncerrarCicloIcon, ImportarIcon, InfoIcon, PerfilIcon, VoltarIcon } from '@/components/ui/icons';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useContaAutenticada } from '@/hooks/use-conta-autenticada';
+import { encerrarCiclo, obterCicloAtual } from '@/services/ciclo-treino-storage';
 import { importarTreino } from '@/services/treino-storage';
+import type { CicloTreino } from '@/types/ciclo-treino';
 import type { ResultadoImportacao, ResultadoImportacaoMultipla } from '@/types/treino';
 
 function ehResultadoMultiplo(
@@ -91,6 +93,53 @@ export default function AcoesScreen() {
   const { uid, contaAutenticada, sairDaConta } = useContaAutenticada();
   const theme = useTheme();
   const [importando, setImportando] = useState(false);
+  const [cicloAtual, setCicloAtual] = useState<CicloTreino | null>(null);
+
+  useEffect(() => {
+    if (!uid) return;
+    let ativo = true;
+    obterCicloAtual(uid)
+      .then((ciclo) => {
+        if (ativo) {
+          setCicloAtual(ciclo);
+        }
+      })
+      .catch((erro) => {
+        // Falha ao checar o ciclo nunca trava esta tela nem impede o
+        // resto das ações — trata como "sem ciclo ativo" (link "Encerrar
+        // ciclo" simplesmente não aparece), mesmo espírito do resto do app.
+        console.error('[acoes] Falha ao carregar ciclo atual:', erro);
+        if (ativo) {
+          setCicloAtual(null);
+        }
+      });
+    return () => {
+      ativo = false;
+    };
+  }, [uid]);
+
+  function handleEncerrarCiclo() {
+    if (!uid || !cicloAtual) return;
+    const cicloId = cicloAtual.id; // captura antes do onPress, já que setCicloAtual(null) roda primeiro
+    Alert.alert(
+      'Encerrar ciclo',
+      'O ciclo de progresso atual será encerrado — os anéis de progresso somem e a importação de um novo lote de treinos volta a funcionar. Nenhuma sessão é apagada. Continuar?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Encerrar',
+          style: 'destructive',
+          onPress: () => {
+            // Atualização otimista — esconde a ação e já reflete "sem
+            // ciclo ativo" no mesmo toque de confirmação, sem esperar
+            // nada (encerrarCiclo não lê nada antes de escrever).
+            setCicloAtual(null);
+            encerrarCiclo(uid, cicloId);
+          },
+        },
+      ],
+    );
+  }
 
   // Sem navegação manual aqui de propósito: signOut() dispara
   // onAuthStateChanged, que atualiza contaAutenticada=null no contexto — o
@@ -131,6 +180,18 @@ export default function AcoesScreen() {
             <ImportarIcon size={16} color={theme.accent} />
             <ThemedText type="link">Importar treino</ThemedText>
           </Pressable>
+
+          <Pressable onPress={() => router.push('/treinos-arquivados')} style={styles.linhaComIcone}>
+            <ArquivarIcon size={16} color={theme.accent} />
+            <ThemedText type="link">Treinos arquivados</ThemedText>
+          </Pressable>
+
+          {cicloAtual && (
+            <Pressable onPress={handleEncerrarCiclo} style={styles.linhaComIcone}>
+              <EncerrarCicloIcon size={16} color={theme.accent} />
+              <ThemedText type="link">Encerrar ciclo</ThemedText>
+            </Pressable>
+          )}
 
           <Pressable onPress={handleAbrirCreditos} style={styles.linhaComIcone}>
             <InfoIcon size={16} color={theme.accent} />

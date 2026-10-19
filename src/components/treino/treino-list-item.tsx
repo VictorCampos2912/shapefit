@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { AcoesIcon } from '@/components/ui/icons';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -15,6 +16,8 @@ type TreinoListItemProps = {
   progressoCiclo?: number | null;
   emAndamento?: boolean;
   onPress: () => void;
+  /** Abre o menu "mais opções" (arquivar / finalizar sessão abandonada, spec 026) — omitido = sem botão. */
+  onAbrirMenu?: () => void;
 };
 
 function formatarDataHora(iso: string): string {
@@ -29,6 +32,7 @@ export function TreinoListItem({
   progressoCiclo = null,
   emAndamento = false,
   onPress,
+  onAbrirMenu,
 }: TreinoListItemProps) {
   const theme = useTheme();
 
@@ -56,6 +60,11 @@ export function TreinoListItem({
                 {qtdSessoesFinalizadas}
               </ThemedText>
             )
+          )}
+          {onAbrirMenu && (
+            <Pressable onPress={onAbrirMenu} hitSlop={8} accessibilityLabel="Mais opções" accessibilityRole="button">
+              <AcoesIcon size={18} color={theme.textSecondary} />
+            </Pressable>
           )}
         </View>
         <ThemedText type="small" themeColor="textSecondary">

@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, getFirestore, setDoc } from '@react-native-firebase/firestore';
+import { collection, doc, getDocs, getFirestore, setDoc, updateDoc } from '@react-native-firebase/firestore';
 import * as Crypto from 'expo-crypto';
 
 import { listarSessoes } from '@/services/sessao-treino-storage';
@@ -20,7 +20,13 @@ function setDocCiclo(uid: string, ciclo: CicloTreino): void {
 
 async function listarCiclos(uid: string): Promise<CicloTreino[]> {
   const snapshot = await getDocs(ciclosCollection(uid));
-  const ciclos = snapshot.docs.map((documento) => documento.data() as CicloTreino);
+  // Ciclos criados antes desta spec (026) não têm `encerradoEm` persistido —
+  // normaliza para `null` (ativo), mesmo raciocínio de `categoria`/`arquivadoEm`
+  // em treino-storage.ts.
+  const ciclos = snapshot.docs.map((documento) => {
+    const ciclo = documento.data() as CicloTreino;
+    return { ...ciclo, encerradoEm: ciclo.encerradoEm ?? null };
+  });
   return ciclos.sort((a, b) => {
     if (a.criadoEm !== b.criadoEm) {
       return a.criadoEm < b.criadoEm ? -1 : 1;
@@ -52,15 +58,35 @@ export async function criarCiclo(uid: string, treinoIds: string[]): Promise<Cicl
     treinoIds,
     cotaPorTreinoId: calcularCotaPorTreino(treinoIds),
     criadoEm: new Date().toISOString(),
+    encerradoEm: null,
   };
   setDocCiclo(uid, ciclo);
   return ciclo;
 }
 
-/** Último ciclo criado para a conta (o "ciclo atual"), ou `null` se nenhum. */
+/**
+ * Último ciclo criado para a conta — e só esse — se ainda não foi
+ * encerrado manualmente (o "ciclo atual"); `null` se não houver ciclo
+ * nenhum ou se o último já estiver encerrado. Mesma assinatura e retorno
+ * de antes; mudança só interna.
+ *
+ * NUNCA cai para um ciclo anterior: filtrar todos os ciclos com
+ * `encerradoEm === null` e pegar o último desses (desenho anterior, bug
+ * encontrado antes de implementar a US3) reabriria como "atual" um ciclo
+ * antigo que já tinha chegado a 40 sessões mas nunca foi marcado como
+ * encerrado (não existe encerramento automático ao bater 40 — "Encerrar
+ * ciclo" é sempre manual) — no momento em que o ciclo mais novo fosse
+ * encerrado, o mais antigo "ainda aberto" voltaria a ser considerado
+ * atual. Correto: olhar só o último criado; se ele estiver encerrado, não
+ * há ciclo atual, ponto final.
+ */
 export async function obterCicloAtual(uid: string): Promise<CicloTreino | null> {
   const ciclos = await listarCiclos(uid);
-  return ciclos.length > 0 ? ciclos[ciclos.length - 1] : null;
+  if (ciclos.length === 0) {
+    return null;
+  }
+  const ultimo = ciclos[ciclos.length - 1];
+  return ultimo.encerradoEm === null ? ultimo : null;
 }
 
 /** Progresso do ciclo, derivado das sessões finalizadas já persistidas — nunca em cache. */
@@ -81,6 +107,18 @@ export async function calcularProgressoCiclo(
     totalFinalizado += contagem;
   }
   return { totalFinalizado, porTreino };
+}
+
+/**
+ * Encerra manualmente o ciclo atual (spec 026, FR-007/FR-008/FR-009) —
+ * SEM leitura: o chamador já passa `cicloId` (já tem `cicloAtual.id` em
+ * memória). `updateDoc` de um único campo (`encerradoEm`) — nenhuma
+ * sessão é tocada. Síncrona, sem retorno; `.catch` só loga.
+ */
+export function encerrarCiclo(uid: string, cicloId: string): void {
+  updateDoc(doc(ciclosCollection(uid), cicloId), { encerradoEm: new Date().toISOString() }).catch((erro) => {
+    console.error('[ciclo-treino-storage] Falha ao confirmar encerramento no servidor (já salvo no cache local):', erro);
+  });
 }
 
 /** Fração 0-1 para o `ProgressRing` — satura em 1 quando a cota já foi ultrapassada. */

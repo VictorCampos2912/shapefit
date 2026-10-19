@@ -4,4 +4,5 @@ export type CicloTreino = {
   treinoIds: string[];
   cotaPorTreinoId: Record<string, number>;
   criadoEm: string;
+  encerradoEm: string | null;
 };

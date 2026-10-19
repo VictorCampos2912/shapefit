@@ -1241,3 +1241,104 @@ de leitura offline (não um travamento, só mais devagar que com rede)
 aceita como está pelo usuário, sem correção adicional. **Nenhuma
 validação em iOS** (Constitution v2.0.0, Princípio III; iOS bloqueado pela
 falta de conta Apple Developer paga, mesma situação das specs 022-024).
+
+### RF25 — Arquivamento Lógico de Treinos, "Encerrar Ciclo" e Tratamento de Sessões Abandonadas
+
+**Spec**: `specs/026-arquivamento-treinos-ciclo/` · estende RF02 (lista de
+treinos), RF08 (histórico por exercício), RF15 (ciclo de progresso), RF18
+(histórico por data) e RF24 (armazenamento no Firestore). **RF novo**, não
+emenda — mesmo precedente do RF23/RF24. Número confirmado em 2026-10-16
+ao consultar a tabela do PRD (última entrada existente era RF24).
+
+**Critérios de aceite:**
+
+Arquivar um treino sem perder histórico (User Story 1):
+- [X] Arquivar a partir da lista "Meus treinos" ou da tela do treino, com
+      confirmação, faz o treino sumir imediatamente da lista, sem
+      precisar fechar/reabrir o app — **confirmado em Android,
+      2026-10-18**
+- [X] Histórico ("Por exercício" e "Por data") continua mostrando as
+      sessões do treino arquivado normalmente, via snapshot (RF24) —
+      **confirmado em Android, 2026-10-18**
+- [X] Tentar abrir a execução de um treino arquivado (navegação direta ou
+      retorno do segundo plano com a tela já aberta) é bloqueado com
+      mensagem explícita — **confirmado em Android, 2026-10-18**, só pelo
+      caminho do retorno do segundo plano (treino arquivado via edição
+      direta no Console enquanto a tela já estava aberta em segundo
+      plano); a navegação direta a um treino já arquivado se mostrou não
+      reproduzível pela UI normal — arquivar já remove o treino por
+      completo da lista, não sobra nenhum caminho no app para tentar
+      entrar nele de novo (o próprio critério acima já demonstra essa
+      garantia por outro ângulo, não é uma lacuna — ver `quickstart.md`,
+      Cenário 3)
+- [ ] Treino arquivado dentro de um ciclo ativo: nenhum anel de progresso
+      dele aparece (o item inteiro não aparece), mas as sessões já
+      finalizadas continuam contando no total de 40 do ciclo — **ainda
+      não testado**, nenhum dos cenários validados até aqui envolvia um
+      ciclo ativo
+- [X] Arquivar um treino que tem uma sessão em andamento finaliza essa
+      sessão automaticamente, preservando as séries já registradas, num
+      único commit atômico — **confirmado em Android, 2026-10-18**
+
+Ver e restaurar treinos arquivados (User Story 2):
+- [X] A lista "Treinos arquivados" (menu de Ações) mostra todos os
+      treinos arquivados da conta — **confirmado em Android, 2026-10-18**
+- [X] Restaurar um treino arquivado faz ele voltar a aparecer em "Meus
+      treinos" imediatamente, com histórico, contadores e indicador de
+      ciclo (se aplicável) intactos — **confirmado em Android,
+      2026-10-18**, incluindo o histórico "Por exercício" (exercício
+      nunca-registrado volta a aparecer, com a contagem correta) — sem
+      alteração de dados em nenhum dos dois sentidos (arquivar/restaurar)
+
+Encerrar um ciclo de progresso manualmente (User Story 3):
+- [X] "Encerrar ciclo" (menu de Ações), com confirmação, encerra o ciclo
+      atual a qualquer momento, mesmo com menos de 40 sessões finalizadas
+      — **confirmado em Android, 2026-10-18**
+- [X] Depois de encerrado, os anéis de progresso e o aviso de "Hora de
+      trocar o treino" somem de "Meus treinos"; histórico e contadores
+      dos treinos que faziam parte do ciclo continuam intactos —
+      **confirmado em Android, 2026-10-18**, incluindo o caso de
+      regressão de um ciclo anterior ainda não encerrado (o da spec 025):
+      encerrar o ciclo mais novo não reabre o antigo, sem resquício,
+      nenhum anel nem aviso dele reaparece — confirma a correção da T009
+      (`research.md`, Decisão 7)
+- [X] Importação de um novo lote de múltiplos treinos volta a funcionar
+      imediatamente depois de encerrar o ciclo — **confirmado em Android,
+      2026-10-18**
+- [X] "Encerrar ciclo" só aparece/fica habilitado quando existe um ciclo
+      ativo (não encerrado) — **confirmado em Android, 2026-10-18**: a
+      opção não aparece em Ações sem ciclo ativo
+- [X] A mensagem de bloqueio de importação (com ciclo ativo) orienta
+      explicitamente "Ações → Encerrar ciclo" — **confirmado em Android,
+      2026-10-18**: mensagem aparece com a orientação, importação negada
+
+Tratar uma sessão iniciada e nunca finalizada (User Story 4):
+- [X] Uma ação direta em "Meus treinos" finaliza uma sessão "Em
+      andamento", com confirmação, sem precisar abrir a tela de execução
+      do treino — **confirmado em Android, 2026-10-18**
+- [X] A sessão finalizada por essa ação conta nos contadores de sessões
+      finalizadas e no total do ciclo de progresso exatamente como
+      "Finalizar treino" manual — **confirmado em Android, 2026-10-18**
+
+Cross-cutting:
+- [X] Isolamento entre contas: arquivar, restaurar, encerrar ciclo e
+      finalizar sessão abandonada de uma conta nunca aparecem nem afetam
+      outra conta (trocar de conta de verdade no app) — **confirmado em
+      Android, 2026-10-18**
+- [X] Rules Playground: `delete` negado em `treinos`, `sessoes` e
+      `ciclos` (3 verificações novas), somado aos 4 casos já validados
+      pelas specs 022/025 — **confirmado em 2026-10-18**: as 3
+      simulações de `delete` negadas, mesmo autenticado como dono do
+      caminho
+- [ ] Offline (modo avião + Wi-Fi desligado): arquivar, restaurar,
+      encerrar ciclo e finalizar sessão abandonada funcionam sem travar a
+      interface, e a escrita (`updateDoc`/`batch.update`, formato ainda
+      não validado offline neste projeto antes desta spec) persiste de
+      verdade — confirmado reabrindo o app ainda offline depois de cada
+      ação; tudo sincroniza ao reconectar
+- [ ] Nenhum código do app usa `delete`/`deleteDoc`/`batch.delete` em
+      `treinos`, `sessoes` ou `ciclos` (confirmado por `grep`)
+
+**Validado em Android**: [preencher ao final da validação]. **Nenhuma
+validação em iOS** (Constitution v2.0.0, Princípio III; iOS bloqueado pela
+falta de conta Apple Developer paga, mesma situação das specs 022-025).

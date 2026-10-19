@@ -1,5 +1,5 @@
 import { listarSessoesFinalizadas } from '@/services/sessao-treino-storage';
-import { listarTreinos } from '@/services/treino-storage';
+import { filtrarTreinosAtivos, listarTreinos } from '@/services/treino-storage';
 import type { SessaoTreino } from '@/types/execucao-treino';
 import type {
   BlocoSessao,
@@ -80,9 +80,13 @@ export async function obterHistoricoPorPerfil(perfilId: string): Promise<Histori
 
   const gruposPorChave = new Map<string, { nomeFallback: string; itens: RegistroBruto[] }>();
 
-  // Universo de exercícios: todos os exercícios de todos os treinos do perfil,
-  // mesmo os que nunca foram registrados em nenhuma sessão (FR-009).
-  for (const treino of treinos) {
+  // Universo de exercícios: todos os exercícios de todos os treinos ATIVOS do
+  // perfil (spec 026, FR-005 — treinos arquivados não entram mais aqui), mesmo
+  // os que nunca foram registrados em nenhuma sessão (FR-009 original). Os
+  // registros de sessões já feitas (abaixo) continuam vindo de TODOS os
+  // treinos, ativos ou arquivados, via snapshot — não dependem deste filtro.
+  const treinosAtivos = filtrarTreinosAtivos(treinos);
+  for (const treino of treinosAtivos) {
     for (const exercicio of treino.exercicios) {
       const chave = normalizarNomeExercicio(exercicio.nome);
       if (!gruposPorChave.has(chave)) {

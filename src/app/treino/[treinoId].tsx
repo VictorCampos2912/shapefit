@@ -1,6 +1,7 @@
-import { useLocalSearchParams } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  Alert,
   AppState,
   FlatList,
   KeyboardAvoidingView,
@@ -18,7 +19,7 @@ import { CronometroDescanso } from '@/components/treino/cronometro-descanso';
 import { ExercicioExecucao } from '@/components/treino/exercicio-execucao';
 import { ExercicioListItem, type EstadoVisualExercicio } from '@/components/treino/exercicio-list-item';
 import { Button } from '@/components/ui/button';
-import { FinalizarIcon, VoltarIcon } from '@/components/ui/icons';
+import { ArquivarIcon, FinalizarIcon, VoltarIcon } from '@/components/ui/icons';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { Spacing } from '@/constants/theme';
 import { PADRAO_VIBRACAO_FIM_DESCANSO } from '@/constants/vibracao';
@@ -38,7 +39,7 @@ import {
   agendarNotificacaoDescanso,
   cancelarNotificacaoDescanso,
 } from '@/services/notificacao-descanso';
-import { listarTreinos } from '@/services/treino-storage';
+import { arquivarTreino, listarTreinos } from '@/services/treino-storage';
 import {
   criarEstadoExecucaoInicial,
   type DescansoAtivo,
@@ -101,6 +102,7 @@ export default function ExecucaoTreinoScreen() {
   const theme = useTheme();
 
   const [treino, setTreino] = useState<Treino | null>(null);
+  const [treinoArquivado, setTreinoArquivado] = useState(false);
   const [carregando, setCarregando] = useState(true);
   const [exercicioSelecionadoId, setExercicioSelecionadoId] = useState<string | null>(null);
   const [estadosPorExercicio, setEstadosPorExercicio] = useState<Record<string, EstadoExecucaoExercicio>>({});
@@ -123,6 +125,13 @@ export default function ExecucaoTreinoScreen() {
   // da sessão real salva. Precisa ser state (não ref) para o botão desabilitar
   // de verdade na tela enquanto o envio está em andamento.
   const [exerciciosEnviandoSerie, setExerciciosEnviandoSerie] = useState<Record<string, boolean>>({});
+  // Spec 026: "Arquivar treino" e "Finalizar treino" ficam bloqueados enquanto
+  // qualquer série ainda está em voo — sem isso, uma leitura-depois-escrita de
+  // registrarSerieConcluida iniciada antes de arquivar/finalizar, mas que só
+  // resolve depois, regravaria a sessão inteira com finalizadaEm desatualizado
+  // (null), desfazendo a finalização silenciosamente (mesma categoria de corrida
+  // do bug "série 6 de 4" da spec 025, aqui com consequência mais séria).
+  const temSerieEmVoo = Object.values(exerciciosEnviandoSerie).some(Boolean);
 
   useEffect(() => {
     if (!uid) return;
@@ -134,6 +143,15 @@ export default function ExecucaoTreinoScreen() {
       if (!ativo) return;
 
       setTreino(encontrado);
+
+      if (encontrado && encontrado.arquivadoEm !== null) {
+        // Treino existe mas está arquivado (spec 026, FR-003) — não busca
+        // sessões, não monta estado de execução, só sinaliza o bloqueio.
+        setTreinoArquivado(true);
+        setCarregando(false);
+        return;
+      }
+      setTreinoArquivado(false);
 
       if (encontrado) {
         // 1 leitura só de sessões, reaproveitada pelos dois usos abaixo (T028,
@@ -177,16 +195,66 @@ export default function ExecucaoTreinoScreen() {
   }, [descansoAtivo]);
 
   useEffect(() => {
+    let ativo = true;
     const subscription = AppState.addEventListener('change', (novoEstado) => {
       if (novoEstado === 'active') {
         voltouDeSegundoPlanoRef.current = true;
         setTick((atual) => atual + 1);
+
+        // Reconfirma que o treino continua ativo — cobre o caso de ter sido
+        // arquivado por outro aparelho/sessão da mesma conta enquanto esta
+        // tela ficou aberta em segundo plano (spec 026, FR-003; é também o
+        // caminho real da notificação de fim de descanso do RF06, que hoje
+        // só traz o app de volta ao primeiro plano, sem navegação
+        // programática). Leitura leve, só neste momento, não contínua.
+        if (uid && treino && treino.arquivadoEm === null) {
+          listarTreinos(uid)
+            .then((treinos) => {
+              if (!ativo) return;
+              const atualizado = treinos.find((item) => item.id === treinoId);
+              if (atualizado && atualizado.arquivadoEm !== null) {
+                setTreinoArquivado(true);
+              }
+            })
+            .catch((erro) => {
+              console.error('[treinoId] Falha ao reconferir arquivamento no retorno do segundo plano:', erro);
+            });
+        }
       }
     });
     return () => {
+      ativo = false;
       subscription.remove();
     };
-  }, []);
+  }, [uid, treino, treinoId]);
+
+  // Reforço de baixo custo (spec 026, FR-003) além da checagem do AppState
+  // acima: cobre qualquer caminho de navegação futuro que deixe esta tela
+  // montada sem passar pelo retorno do segundo plano — investigação
+  // confirmou que, hoje, [treinoId] não tem _layout.tsx próprio e o
+  // native-stack padrão desmonta a tela ao voltar, então na prática esta
+  // checagem é redundante com a de cima, mas intencionalmente mantida.
+  useFocusEffect(
+    useCallback(() => {
+      let ativo = true;
+      if (uid && treino && treino.arquivadoEm === null) {
+        listarTreinos(uid)
+          .then((treinos) => {
+            if (!ativo) return;
+            const atualizado = treinos.find((item) => item.id === treinoId);
+            if (atualizado && atualizado.arquivadoEm !== null) {
+              setTreinoArquivado(true);
+            }
+          })
+          .catch((erro) => {
+            console.error('[treinoId] Falha ao reconferir arquivamento ao ganhar foco:', erro);
+          });
+      }
+      return () => {
+        ativo = false;
+      };
+    }, [uid, treino, treinoId]),
+  );
 
   const segundosRestantes = descansoAtivo ? calcularSegundosRestantes(descansoAtivo.fimEm) : 0;
 
@@ -356,7 +424,7 @@ export default function ExecucaoTreinoScreen() {
   }
 
   async function handleFinalizarTreino() {
-    if (!uid || !sessaoAtualId) return;
+    if (!uid || !sessaoAtualId || temSerieEmVoo) return;
 
     // false: finalizar o treino manualmente não é "o descanso terminou" (RF13) —
     // só limpa o cronômetro ativo, se houver, sem disparar a vibração do RF13.
@@ -368,6 +436,51 @@ export default function ExecucaoTreinoScreen() {
     setEstadosPorExercicio({});
     setExercicioSelecionadoId(null);
     setSessaoFinalizadaAutomaticamente(false);
+  }
+
+  function handleArquivarTreino() {
+    if (!uid || !treino || temSerieEmVoo) return;
+    // sessaoAtualId pode apontar para uma sessão JÁ FINALIZADA, não em
+    // andamento — acontece tanto no carregamento inicial (sessão concluída,
+    // ainda não "revisada" pelo usuário, via encontrarUltimaSessaoConcluidaNaoRevisada)
+    // quanto depois de concluir o último exercício (o efeito que chama
+    // finalizarSessao não zera sessaoAtualId, só marca
+    // sessaoFinalizadaAutomaticamente). Esse flag é exatamente o que já
+    // distingue os dois casos — só passar sessaoAtualId adiante quando ele
+    // for false evita que arquivarTreino->finalizarSessaoPorId sobrescreva
+    // finalizadaEm de uma sessão que já estava finalizada.
+    const sessaoEmAndamentoId =
+      sessaoAtualId !== null && !sessaoFinalizadaAutomaticamente ? sessaoAtualId : null;
+    Alert.alert(
+      'Arquivar treino',
+      sessaoEmAndamentoId !== null
+        ? 'Este treino tem uma sessão em andamento. Arquivar também vai finalizá-la, mantendo as séries já registradas. Continuar?'
+        : 'O treino sai de "Meus treinos", mas todo o histórico já registrado continua disponível. Continuar?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Arquivar',
+          style: 'destructive',
+          onPress: () => {
+            // Mesma limpeza que "Finalizar treino" já faz — cancela o
+            // cronômetro de descanso em tela e a notificação agendada, sem a
+            // vibração do RF13 (deveVibrar=false).
+            handleDescansoConcluido(false);
+            // Volta para "Meus treinos", que já recarrega de verdade ao
+            // ganhar foco (useFocusEffect, spec 024) — reflete o treino
+            // arquivado assim que o cache local atualizar. canGoBack() evita
+            // back() falhar silenciosamente se esta tela foi aberta sem
+            // nada antes dela na pilha (ex.: deep link direto).
+            if (router.canGoBack()) {
+              router.back();
+            } else {
+              router.replace('/');
+            }
+            arquivarTreino(uid, treino.id, sessaoEmAndamentoId);
+          },
+        },
+      ],
+    );
   }
 
   async function handleNovaSessaoDeTreino() {
@@ -406,6 +519,16 @@ export default function ExecucaoTreinoScreen() {
       <ThemedView style={styles.container}>
         <SafeAreaView style={styles.safeArea}>
           <ThemedText type="smallBold">Treino não encontrado</ThemedText>
+        </SafeAreaView>
+      </ThemedView>
+    );
+  }
+
+  if (treinoArquivado) {
+    return (
+      <ThemedView style={styles.container}>
+        <SafeAreaView style={styles.safeArea}>
+          <ThemedText type="smallBold">Este treino foi arquivado.</ThemedText>
         </SafeAreaView>
       </ThemedView>
     );
@@ -450,6 +573,12 @@ export default function ExecucaoTreinoScreen() {
             <ThemedText type="small" themeColor="textSecondary">
               Importado em {formatarDataHora(treino.importadoEm)}
             </ThemedText>
+            <Pressable onPress={handleArquivarTreino} disabled={temSerieEmVoo} style={styles.linhaComIcone}>
+              <ArquivarIcon size={16} color={temSerieEmVoo ? theme.textSecondary : theme.accent} />
+              <ThemedText type="link" themeColor={temSerieEmVoo ? 'textSecondary' : undefined}>
+                Arquivar treino
+              </ThemedText>
+            </Pressable>
             <FlatList
               data={treino.exercicios}
               keyExtractor={(exercicio) => exercicio.id}
@@ -470,8 +599,15 @@ export default function ExecucaoTreinoScreen() {
               </ThemedView>
             )}
             {sessaoAtualId && !todosConcluidos && (
-              <Pressable onPress={handleFinalizarTreino}>
-                <ThemedView type="warningBackground" style={[styles.botaoFinalizarTreino, styles.linhaComIconeCentralizada]}>
+              <Pressable onPress={handleFinalizarTreino} disabled={temSerieEmVoo}>
+                <ThemedView
+                  type="warningBackground"
+                  style={[
+                    styles.botaoFinalizarTreino,
+                    styles.linhaComIconeCentralizada,
+                    temSerieEmVoo && styles.desabilitado,
+                  ]}
+                >
                   <FinalizarIcon size={18} color={theme.warning} />
                   <ThemedText type="smallBold" themeColor="warning" style={styles.textoCentralizado}>
                     Finalizar treino
@@ -525,6 +661,9 @@ const styles = StyleSheet.create({
   botaoFinalizarTreino: {
     borderRadius: Spacing.two,
     padding: Spacing.three,
+  },
+  desabilitado: {
+    opacity: 0.6,
   },
   textoCentralizado: {
     textAlign: 'center',
